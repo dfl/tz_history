@@ -141,6 +141,26 @@ class TzHistoryTest < Minitest::Test
     assert_match(/town-by-town/i, note)
   end
 
+  # --- Atlanta local DST 1937-1940 (Shanks GA #21), an exclusion guard ---
+  # The city of Atlanta observed summer DST 1937-1940 (EDT), which IANA models
+  # correctly but the statewide Georgia EST no-DST override would flatten. A note-less
+  # guard over Fulton + DeKalb blocks the override for 1937-1940 so they defer to IANA.
+
+  def test_atlanta_1938_summer_defers_to_iana_for_its_local_dst
+    # Fulton Co.: without the guard the statewide no-DST override wins; with it, defer.
+    assert_nil TzHistory.for(lat: 33.749, lon: -84.388, date: "1938-07-15")
+  end
+
+  def test_dekalb_1939_summer_defers_to_iana_for_its_local_dst
+    assert_nil TzHistory.for(lat: 33.7748, lon: -84.2963, date: "1939-07-15") # Decatur
+  end
+
+  def test_atlanta_guard_only_covers_the_dst_years
+    # Outside 1937-1940 the guard does not apply (Savannah stays on the EST override).
+    tz = TzHistory.for(lat: 32.0809, lon: -81.0912, date: "1938-07-15") # Savannah, EST override
+    assert_equal "Etc/GMT+5", tz.identifier
+  end
+
   # --- non-matches ---
 
   def test_returns_nil_outside_any_polygon
