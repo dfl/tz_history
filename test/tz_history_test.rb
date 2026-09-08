@@ -232,6 +232,39 @@ class TzHistoryTest < Minitest::Test
     assert_match(/straddle/i, note)
   end
 
+  # --- downstate Illinois: CST where IANA/Chicago bakes in continuous Chicago DST ---
+  # Illinois law required birth times recorded in CST until 1959-07-01, and downstate
+  # clocks kept CST, but IANA America/Chicago applies Chicago's continuous summer DST.
+
+  def test_downstate_illinois_summer_1930_is_fixed_cst_not_iana_cdt
+    # Springfield (Sangamon Co.): flat Etc/GMT+6 corrects IANA's spurious CDT.
+    tz = TzHistory.for(lat: 39.7817, lon: -89.6501, date: "1930-07-15")
+    assert_equal "Etc/GMT+6", tz.identifier
+    assert_equal(-6 * 3600, offset_of(tz, "1930-07-15")) # CST, not CDT
+  end
+
+  def test_downstate_illinois_postwar_summer_1950_is_fixed_cst
+    # Peoria: still CST after the war, before the 1959 state-law change.
+    tz = TzHistory.for(lat: 40.6936, lon: -89.5890, date: "1950-07-15")
+    assert_equal "Etc/GMT+6", tz.identifier
+  end
+
+  def test_downstate_illinois_wartime_defers_to_iana
+    # 1943 is inside the WWII CWT window (IANA models it), between the two CST windows.
+    assert_nil TzHistory.for(lat: 39.7817, lon: -89.6501, date: "1943-07-15")
+  end
+
+  def test_downstate_illinois_after_1959_law_change_defers_to_iana
+    # From 1959-07-01 downstate adopted daylight time (matching IANA), so defer.
+    assert_nil TzHistory.for(lat: 39.7817, lon: -89.6501, date: "1960-07-15")
+  end
+
+  def test_chicago_metro_defers_to_iana_via_exclusion_guard
+    # Cook Co. (Chicago) observed the continuous DST IANA models -- the metro
+    # exclusion guard keeps it on IANA rather than the downstate CST override.
+    assert_nil TzHistory.for(lat: 41.8781, lon: -87.6298, date: "1930-07-15")
+  end
+
   # --- non-matches ---
 
   def test_returns_nil_outside_any_polygon

@@ -24,7 +24,7 @@ by locating the state in the atlas (alphabetical) on first touch.
 | Florida | 90 | ✓ | flat EST/CST | **done** | Dominant no-DST overrides already ship + crop-verified (FL#1 panhandle CST, FL#5 peninsula EST); resolve correctly vs IANA's summer DST. Two residuals logged & deferred (see fallback log): pre-1919 peninsula-Central, minority post-war local-DST counties. |
 | Georgia | 104 | ✓ | flat EST + CST-west | **done*** | Atlanta local DST **1937–1940** (Shanks GA #21, EDT — 4 yrs, not 3) fixed via exclusion guard over Fulton+DeKalb → defer to IANA. Dominant EST/Central overrides already ship. ***Uncovered a pre-existing bug (see fallback log): Fulton is wrongly in the Western-GA Central set → Atlanta mis-zoned Central 1919–41 outside the guard; flagged for a dedicated geometry fix.** |
 | Idaho | 122 | – | flat PST (N) + flat MST (SE) | **done** | 18 tables (ID #1–#18); two-zone state, resolved with a city→county→table majority map (44 counties, `tools/map_counties.rb`, visual-verified). **Shipped (2 overrides + 1 warn):** (1) flat Etc/GMT+8 over the 10 north panhandle Pacific counties for 1945-09-30..1964-04-26 — dominant table ID #2 kept PST (no DST) 1946–1963 while IANA America/Los_Angeles applies California summer DST 1948 & 1950–1963. (2) flat Etc/GMT+7 over 13 eastern/central Mountain counties for 1919-10-26..1923-05-13 — they went Mountain in 1919 (ID #13–16) but IANA America/Boise stays Pacific until the official 1923-05-13 move. (3) warn over Custer + Power (genuine 1919/1923 straddle). Western/SW counties (Ada/Boise etc., ID #17/#18) match Boise exactly → defer. Residual minorities logged & deferred (see fallback log). |
-| Illinois | 116 | ✓ | warn (downstate) | pending | Chicago continuous DST; downstate warn only |
+| Illinois | 128 | ✓ | flat CST (downstate) | **done** | 100+ tables; resolved via a city→county→table majority map (`tools/map_counties.rb` over PDF 131–149, 102-county legend). **Shipped:** flat Etc/GMT+6 over the 95 downstate counties for two windows (1919-10-26..1942-02-09 and 1945-09-30..1959-07-01) — downstate kept CST (state law required CST birth records until 1959-07-01; dominant table IL #4 = pure CST 1919–1959) while IANA America/Chicago bakes in Chicago's continuous summer DST (CDT every year 1920–1966). Replaced the old coarse downstate "ambiguity" warn with the actual correction. The 7 Chicago-metro counties (Cook, DuPage, Kane, Kendall, Lake, McHenry, Will) defer to IANA via the pre-existing metro exclusion guard (they observed the DST). Town-by-town DST-adoption minorities logged & deferred (see fallback log). |
 | Indiana | ? | – | IANA? | pending | notoriously patchy — expect real work |
 | Iowa | 171 | ✓ | flat CST | pending | |
 | Kansas | 192 | ✓ | flat CST + far-west warn | pending | |
@@ -136,6 +136,33 @@ Deferred minorities (logged, not shipped):
   Jan–Oct 1919 (the switch itself + that summer's national daylight, MWT) is left to
   IANA. A fraction of one year, tiny volume; would need a transition zone, not a flat
   override. Deferred.
+
+**Illinois:** (100+ tables; a Central state where the residual is Chicago's continuous
+DST baked into the whole-state IANA zone. Resolved with a city→county→table majority
+map, `tools/map_counties.rb` over PDF 131–149; 102-county legend on PDF 132. Shanks'
+intro: birth times were legally recorded in CST until 1959-07-01.)
+- `override` Etc/GMT+6 (CST, no DST) two windows — 1919-10-26..1942-02-09 and
+  1945-09-30..1959-07-01 — over the **95 downstate counties** (all but the 7 Chicago-
+  metro counties below). Dominant downstate table is IL #4 (pure CST 1919→1959 US#2).
+  IANA America/Chicago applies Chicago's continuous summer CDT (verified: −5 every Jul
+  1918–1966), so downstate summer births read 1h fast; the flat CST override corrects
+  them. War years (1942–1945 CWT) are left to IANA (both observed CWT), hence the split.
+- `warn`/exclusion guard (pre-existing, kept): the 7 Chicago-metro counties — Cook
+  (17031), DuPage (17043), Kane (17089), Kendall (17093), Lake (17097), McHenry (17111),
+  Will (17197) — defer to IANA (they observed the continuous DST IANA models). This
+  note-less guard is priority 0, so it wins over the downstate override for any overlap.
+- **Replaced**: the old coarse single-polygon "Illinois downstate DST ambiguous — verify"
+  warn (which merely flagged and deferred the whole downstate) with the actual CST
+  correction above.
+- **Deferred minorities (logged)**: DST adoption downstate was genuinely town-by-town —
+  some larger towns observed local CDT in the 1930s (IL #14 etc.), some adopted DST in
+  1946 (IL #7) or scattered across the 1950s (IL #8/#50/#55…), ahead of the 1959 law
+  change. The flat CST override (majority vote: dominant IL #4 kept CST to 1959)
+  over-corrects those specific town-summers to CST. Also LaSalle County (Ottawa, ~15%
+  Chicago-DST cities) is included in the downstate override by majority vote. These are
+  accepted majority-vote minorities; a birth in a known early-DST downstate town in a
+  summer should be spot-verified. Note also: even where clocks ran CDT, Illinois birth
+  *records* used CST until 1959 by law, which limits the real-world harm.
 
 **Florida:** (dominant no-DST overrides already shipped from the prior audit; verified)
 - Deferred residual 1 — **pre-1919 peninsula was Central**: the FL peninsula ran CST
