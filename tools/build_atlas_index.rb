@@ -44,6 +44,16 @@ plan = entries.each_with_index.map do |(st, tt), i|
 end
 plan.select! { |p| only.include?(p[:st]) } if only
 
+# Resumable: skip a state whose index already exists (unless --force), so a re-run after
+# an interruption is cheap and doesn't re-render 300-dpi pages it already has.
+index_root = File.expand_path("../research/index", __dir__)
+unless flags["force"]
+  before = plan.size
+  plan.reject! { |p| File.exist?(File.join(index_root, p[:st], "cities.json")) }
+  skipped = before - plan.size
+  puts "skipping #{skipped} already-built state(s) (use --force to rebuild)" if skipped.positive?
+end
+
 puts "atlas index plan (#{plan.size} states, #{jobs}-wide):"
 plan.each { |p| puts format("  %-3s tt=%-4d cities=%d-%d", p[:st], p[:tt], p[:cities].first, p[:cities].last) }
 exit 0 if flags["dry-run"]

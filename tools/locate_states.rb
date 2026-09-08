@@ -52,12 +52,19 @@ def header_caps(img, frac)
   txt.upcase
 end
 
+# Render the WHOLE range in ONE pdftoppm call: opening/parsing the ~1 GB atlas is
+# expensive, so batching amortises it (per-page invocations re-open the PDF every time,
+# and running several in parallel just thrashes IO on the one big file -- serial batch
+# wins). pdftoppm zero-pads the page number to the width of `last`.
+FileUtils.mkdir_p(scratch)
+prefix = File.join(scratch, "loc")
+system("pdftoppm", "-f", first.to_s, "-l", last.to_s, "-r", dpi.to_s, "-png", "-gray",
+       ATLAS_PDF, prefix, err: File::NULL)
+
 first_page = {}
 (first..last).each do |pg|
-  prefix = File.join(scratch, "loc#{pg}")
-  system("pdftoppm", "-f", pg.to_s, "-l", pg.to_s, "-r", dpi.to_s, "-png", "-gray",
-         ATLAS_PDF, prefix, err: File::NULL)
-  img = Dir["#{prefix}-*.png"].first or (warn "  pg#{pg}: no render"; next)
+  img = Dir[format("%s-*%d.png", prefix, pg)].find { |f| f[/-0*(\d+)\.png\z/, 1].to_i == pg }
+  (warn "  pg#{pg}: no render"; next) unless img
   caps = header_caps(img, frac)
   File.delete(img)
 
