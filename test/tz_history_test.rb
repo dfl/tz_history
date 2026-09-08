@@ -265,6 +265,27 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 41.8781, lon: -87.6298, date: "1930-07-15")
   end
 
+  # --- Indiana: pre-1970 Central/Eastern + DST chaos, flagged not corrected ---
+  # Shanks calls Indiana "very complex ... contradictory ... not documented"; IANA's
+  # eight America/Indiana/* sub-zones are best-guesses. We flag (warn) and defer rather
+  # than assert a clock offset we cannot verify.
+
+  def test_indiana_pre1970_defers_to_iana_with_a_verify_warning
+    # Indianapolis (Marion Co.): no override, but a note prompts verification.
+    assert_nil TzHistory.for(lat: 39.7684, lon: -86.1581, date: "1950-07-15")
+    note = TzHistory.note(lat: 39.7684, lon: -86.1581, date: "1950-07-15")
+    assert_match(/complex|contradictory|verify/i, note)
+  end
+
+  def test_indiana_after_1970_has_no_warning
+    assert_nil TzHistory.note(lat: 39.7684, lon: -86.1581, date: "1975-07-15")
+  end
+
+  def test_indiana_chicago_corner_is_not_flagged
+    # Gary (Lake Co.): the clean NW Chicago corner (America/Chicago) is excluded.
+    assert_nil TzHistory.note(lat: 41.5934, lon: -87.3464, date: "1935-07-15")
+  end
+
   # --- non-matches ---
 
   def test_returns_nil_outside_any_polygon

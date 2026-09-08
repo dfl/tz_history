@@ -24,6 +24,7 @@ subset of towns/years · `bug` = a shipped feature is wrong and needs a fix ·
 | 8 | Idaho (S) | **1919 daylight sliver**: Mountain-from-1919 override starts 1919-10-26, so Jan–Oct 1919 (the switch + that summer's national daylight, MWT) is left to IANA. | sliver | very low | Transition zone for 1919; fraction of one year. |
 | 9 | Illinois | **Town-by-town DST adoption downstate**: larger towns had 1930s CDT (IL #14 etc.); some adopted DST 1946 (IL #7) or across the 1950s (IL #8/#50/#55…) before the 1959 law change. Flat CST override (majority IL #4) over-corrects those town-summers. | minority | medium (many towns, decades) | Per-county/per-table windows from the county map; sizeable but tractable with the existing IL map. |
 | 10 | Illinois | **LaSalle County** (Ottawa, ~15% Chicago-DST cities) folded into the downstate CST override by majority vote; its DST towns are over-corrected. | minority | low | Split LaSalle into a warn or town-level treatment. |
+| 11 | Indiana | **The whole state, pre-1970.** Central portions observed summer DST, Eastern portions did not, and counties switched Central↔Eastern at poorly-documented dates 1940s–60s. Shanks tables adopt CDT at scattered years (1920/1925/1929/1930/1946/1955…) and diverge from IANA's 8 `America/Indiana/*` sub-zones (which model CDT summers Indianapolis 1948–60, Vincennes 1954–64) **in both directions**. Only a statewide `warn` shipped — no offsets asserted. | **transition / large** | **high** (whole state, ~50 yrs) but **hard** | A dedicated pass: build the IN city→county→table map (`tools/map_counties.rb` over PDF 150–~163), map each county to its IANA sub-zone, and author synthetic zic zones for the EST-year-round and early-CDT patterns where they beat IANA. This is a multi-day research project of its own; Shanks himself flags the data as contradictory, so some counties may stay `warn`. |
 
 ## Also parked (from earlier states, lower detail)
 
@@ -37,7 +38,9 @@ subset of towns/years · `bug` = a shipped feature is wrong and needs a fix ·
 ## How to work this backlog
 
 Sort by Impact. Item 1 (Georgia Fulton bug) is the only **bug** and the highest-value
-single fix. Item 9 (Illinois town-by-town) is the largest *residual* but is tractable
-because the IL city→county→table map already exists in a session scratchpad. Everything
-else is low-volume minority/sliver work — batch it, or address opportunistically when a
-specific birth record surfaces the need.
+single fix. Item 11 (Indiana) is the largest and highest-impact *residual* but also the
+hardest — a dedicated multi-day pass in its own right (and Shanks flags the data as
+contradictory, so it may only partly resolve). Item 9 (Illinois town-by-town) is the next
+largest residual but is tractable because the IL city→county→table map already exists in a
+session scratchpad. Everything else is low-volume minority/sliver work — batch it, or
+address opportunistically when a specific birth record surfaces the need.
