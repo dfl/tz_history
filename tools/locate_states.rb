@@ -62,18 +62,30 @@ system("pdftoppm", "-f", first.to_s, "-l", last.to_s, "-r", dpi.to_s, "-png", "-
        ATLAS_PDF, prefix, err: File::NULL)
 
 first_page = {}
+all_pages = {}
 (first..last).each do |pg|
   img = Dir[format("%s-*%d.png", prefix, pg)].find { |f| f[/-0*(\d+)\.png\z/, 1].to_i == pg }
   (warn "  pg#{pg}: no render"; next) unless img
   caps = header_caps(img, frac)
   File.delete(img)
 
-  found = MULTI.select { |s| caps.include?(s) } +
-          STATES.select { |s| caps.include?(s) && MULTI.none? { |m| m.include?(s) } }
-  found.uniq.each { |s| first_page[s] ||= pg }
+  # Word-boundary match so ARKANSAS doesn't match KANSAS, VIRGINIA doesn't match inside
+  # WEST VIRGINIA, etc. (a caps letter on either side blocks the match).
+  wb = ->(s) { caps =~ /(?<![A-Z])#{Regexp.escape(s)}(?![A-Z])/ }
+  found = MULTI.select { |s| wb.call(s) } +
+          STATES.select { |s| wb.call(s) && MULTI.none? { |m| m.include?(s) } }
+  # Record EVERY page a state's header appears on; reconciliation picks the right one by
+  # alphabetical order (a running header / cross-reference can echo a name off-section).
+  found.uniq.each { |s| (all_pages[s] ||= []) << pg; first_page[s] ||= pg }
   tag = found.empty? ? "" : "  <- #{found.uniq.join(', ')}"
   puts format("  pg %-4d %s%s", pg, caps.split("\n").first.to_s.strip[0, 40], tag)
 end
 
 puts "\nstate -> first PDF page (in range #{first}..#{last}):"
 first_page.sort_by { |_, p| p }.each { |s, p| puts format("  %-22s %d (printed %d)", s, p, p - 12) }
+
+# All pages each header appeared on -- use this to reconcile against alphabetical order
+# (the atlas is strictly alphabetical, so true first-pages increase monotonically; a
+# lone off-section hit is a running header or cross-reference, not the section start).
+puts "\nall header hits per state (for alphabetical reconciliation):"
+all_pages.sort_by { |_, ps| ps.min }.each { |s, ps| puts format("  %-22s %s", s, ps.join(" ")) }
