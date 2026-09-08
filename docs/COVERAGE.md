@@ -16,11 +16,11 @@ by locating the state in the atlas (alphabetical) on first touch.
 |-------|------:|:---:|-------------|--------|-----------------------|
 | Alabama | 13 | ✓ | flat CST + AL#7 warn | **done** | **Shanks AL_1**: statewide 1941 summer DST (Jul 21–Oct 1, CDT) over 64 counties; flat CST windows + Georgia-line warn (Chambers/Lee/Russell) unchanged. Minority city-DST tables left flat (see fallback log). |
 | Arizona | ? | – | IANA? | pending | |
-| Arkansas | 40 | ✓ | flat CST | pending | |
-| California | ? | – | IANA? | pending | |
-| Colorado | ? | – | IANA? | pending | |
-| Connecticut | ? | – | IANA? | pending | |
-| Delaware | ? | – | IANA? | pending | |
+| Arkansas | 40 | ✓ | flat CST | **done** | Single statewide table; crop-verified clean CST (only WWI/war/uniform, all IANA-modeled). No residual — flat/IANA sufficient. |
+| California | 52 | – | IANA? | **done** | Single statewide table; crop-verified. IANA America/Los_Angeles matches (1948 DST season + no pre-war DST). Flat/IANA sufficient. |
+| Colorado | 72 | – | IANA? | pending | **Residual found**: CO#1 (most counties) has NO 1920 DST, but IANA America/Denver applies a spurious 1920 Denver DST → rural-CO summer-1920 births read 1h fast. Needs county map (Denver-metro on CO#2 = IANA-ok). |
+| Connecticut | 79 | – | IANA? | pending | **Residual found**: CT#1 has NO DST 1920–1925, but IANA America/New_York applies continuous NYC DST → non-metro CT summer 1920–1925 births read 1h fast. Fixable via flat Etc/GMT+5. Needs county map (Fairfield/NYC-metro = IANA-ok). |
+| Delaware | 84 | – | IANA? | pending | Many tables (Philadelphia-metro early DST); needs analysis + county map. |
 | Florida | 90 | ✓ | flat EST/CST | pending | peninsula/panhandle split (fl_dst_history.md) |
 | Georgia | 104 | ✓ | flat EST + CST-west | pending | **Atlanta 1937-39 residual** (canonical case) |
 | Idaho | ? | – | IANA? | pending | |
