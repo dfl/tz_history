@@ -70,6 +70,10 @@ Alaska / Hawaii: out of scope for now (single modern zones; add only if a birth-
 Record majority-vote counties and genuinely-split (`warn`) counties here as they come
 up, so partial coverage is never mistaken for complete coverage.
 
+> **Deferred residuals / known limitations are indexed in [`docs/DEFERRED.md`](DEFERRED.md)** —
+> a cross-state backlog (minorities, transitions, the Georgia Fulton bug) for a second pass.
+> When you defer something here, add a row there too.
+
 **Georgia:**
 - `warn`/exclusion guard (note-less, priority 0) over Fulton (13121) + DeKalb (13089)
   for 1937-01-01..1941-01-01: the city of Atlanta observed local summer DST 1937–1940
