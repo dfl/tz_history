@@ -20,7 +20,7 @@ by locating the state in the atlas (alphabetical) on first touch.
 | California | 52 | – | IANA? | **done** | Single statewide table; crop-verified. IANA America/Los_Angeles matches (1948 DST season + no pre-war DST). Flat/IANA sufficient. |
 | Colorado | 72 | – | IANA? | **done** | Flat Etc/GMT+7 over 58 rural counties for 1919-10-26..1921-05-22, correcting IANA's spurious Denver 1920/1921 DST. Denver+Arapahoe → IANA-ok (had the DST). Adams/Douglas/Jefferson (+modern Broomfield) → warn. County map by majority vote. |
 | Connecticut | 79 | – | IANA? | **done** | Flat Etc/GMT+5 over rural counties (Litchfield/Middlesex/Tolland/Windham) for 1919-10-26..1926-04-25, correcting IANA's spurious NYC 1920–25 summer DST. Urban counties (Fairfield/Hartford/New Haven/New London) → warn (city-by-city split). County map by majority vote (tools/map_counties.rb). |
-| Delaware | 84 | – | IANA? | pending | Many tables (Philadelphia-metro early DST); needs analysis + county map. |
+| Delaware | 84 | – | IANA? | **done** | Town-by-town DST chaos. Sussex (rural south) → flat Etc/GMT+5 for 1919-10-26..1942-02-09 (no DST 1920–41 vs IANA's continuous EDT). Kent → warn (~50/50 split). New Castle (Wilmington metro) → IANA-ok (continuous DST). |
 | Florida | 90 | ✓ | flat EST/CST | pending | peninsula/panhandle split (fl_dst_history.md) |
 | Georgia | 104 | ✓ | flat EST + CST-west | pending | **Atlanta 1937-39 residual** (canonical case) |
 | Idaho | ? | – | IANA? | pending | |
@@ -69,6 +69,14 @@ Alaska / Hawaii: out of scope for now (single modern zones; add only if a birth-
 
 Record majority-vote counties and genuinely-split (`warn`) counties here as they come
 up, so partial coverage is never mistaken for complete coverage.
+
+**Delaware:**
+- `override` Etc/GMT+5 (no DST 1920–41): Sussex (10005).
+- `warn` (~50/50 town split): Kent (10001).
+- `IANA-ok`: New Castle (10003) — Wilmington metro, continuous DST from 1920. Its
+  ~29% rural no-DST towns are an accepted minority limitation (majority vote).
+- Table taxonomy: DE #1 = continuous DST 1920–41 (IANA-ok); DE #2–16 = no DST 1920–41
+  (rural variants differing only in when they later adopted DST, ~1946–53).
 
 **Colorado:**
 - `override` Etc/GMT+7 (majority table CO #1, no DST 1920–21): 58 rural/mountain

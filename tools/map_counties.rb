@@ -28,7 +28,9 @@ cols = (opts["cols"] || 6).to_i
 split_thresh = (opts["split"] || 0.75).to_f
 min_votes = (opts["min"] || 3).to_i
 
-pages = Dir[File.join(dir, "*.png")].sort
+# Exclude our own transient column crops (named <page>.col<N>.png) so a re-run after
+# an interrupted pass doesn't mistake leftover crops for pages.
+pages = Dir[File.join(dir, "*.png")].reject { |f| f =~ /\.col\d+\.png\z/ }.sort
 abort "no page PNGs in #{dir}" if pages.empty?
 
 def column_ocr(img, cols)

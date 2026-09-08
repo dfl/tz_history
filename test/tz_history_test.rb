@@ -123,6 +123,24 @@ class TzHistoryTest < Minitest::Test
     assert_match(/Denver metro/i, note)
   end
 
+  # --- rural Delaware: EST 1920-1941 where IANA applies continuous Philly/NYC DST ---
+
+  def test_rural_sussex_delaware_summer_1925_is_fixed_est
+    tz = TzHistory.for(lat: 38.6901, lon: -75.3855, date: "1925-07-15") # Georgetown
+    assert_equal "Etc/GMT+5", tz.identifier
+    assert_equal(-5 * 3600, offset_of(tz, "1925-07-15")) # EST, not EDT
+  end
+
+  def test_rural_sussex_delaware_after_war_defers_to_iana
+    assert_nil TzHistory.for(lat: 38.6901, lon: -75.3855, date: "1948-07-15")
+  end
+
+  def test_kent_delaware_is_a_town_by_town_warn_split
+    assert_nil TzHistory.for(lat: 39.1582, lon: -75.5244, date: "1925-07-15") # Dover
+    note = TzHistory.note(lat: 39.1582, lon: -75.5244, date: "1925-07-15")
+    assert_match(/town-by-town/i, note)
+  end
+
   # --- non-matches ---
 
   def test_returns_nil_outside_any_polygon
