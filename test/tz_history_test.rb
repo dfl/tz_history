@@ -96,6 +96,33 @@ class TzHistoryTest < Minitest::Test
     assert_match(/larger cities/i, note)
   end
 
+  # --- flat MST override where IANA over-applies early-1920s Denver daylight ---
+  # Rural/mountain Colorado kept MST year-round in 1920-1921, but IANA America/Denver
+  # applies Denver-metro summer DST (1920, spring 1921) statewide.
+
+  def test_rural_colorado_summer_1920_is_fixed_mst_not_iana_mdt
+    # Grand Junction (Mesa Co.): flat Etc/GMT+7 corrects IANA's spurious MDT.
+    tz = TzHistory.for(lat: 39.0639, lon: -108.5506, date: "1920-07-15")
+    assert_equal "Etc/GMT+7", tz.identifier
+    assert_equal(-7 * 3600, offset_of(tz, "1920-07-15")) # MST, not MDT
+  end
+
+  def test_rural_colorado_after_1921_defers_to_iana
+    assert_nil TzHistory.for(lat: 39.0639, lon: -108.5506, date: "1922-07-15")
+  end
+
+  def test_denver_kept_its_1920_dst_and_defers_to_iana
+    # Denver Co. observed the 1920 DST IANA models, so we defer rather than override.
+    assert_nil TzHistory.for(lat: 39.7392, lon: -104.9903, date: "1920-07-15")
+  end
+
+  def test_denver_metro_split_county_is_a_warn
+    # Adams Co.: Denver suburbs on DST, outlying towns on MST -- a straddle, so warn.
+    assert_nil TzHistory.for(lat: 39.9853, lon: -104.8206, date: "1920-07-15")
+    note = TzHistory.note(lat: 39.9853, lon: -104.8206, date: "1920-07-15")
+    assert_match(/Denver metro/i, note)
+  end
+
   # --- non-matches ---
 
   def test_returns_nil_outside_any_polygon

@@ -18,7 +18,7 @@ by locating the state in the atlas (alphabetical) on first touch.
 | Arizona | ? | – | IANA? | pending | |
 | Arkansas | 40 | ✓ | flat CST | **done** | Single statewide table; crop-verified clean CST (only WWI/war/uniform, all IANA-modeled). No residual — flat/IANA sufficient. |
 | California | 52 | – | IANA? | **done** | Single statewide table; crop-verified. IANA America/Los_Angeles matches (1948 DST season + no pre-war DST). Flat/IANA sufficient. |
-| Colorado | 72 | – | IANA? | pending | **Residual found**: CO#1 (most counties) has NO 1920 DST, but IANA America/Denver applies a spurious 1920 Denver DST → rural-CO summer-1920 births read 1h fast. Needs county map (Denver-metro on CO#2 = IANA-ok). |
+| Colorado | 72 | – | IANA? | **done** | Flat Etc/GMT+7 over 58 rural counties for 1919-10-26..1921-05-22, correcting IANA's spurious Denver 1920/1921 DST. Denver+Arapahoe → IANA-ok (had the DST). Adams/Douglas/Jefferson (+modern Broomfield) → warn. County map by majority vote. |
 | Connecticut | 79 | – | IANA? | **done** | Flat Etc/GMT+5 over rural counties (Litchfield/Middlesex/Tolland/Windham) for 1919-10-26..1926-04-25, correcting IANA's spurious NYC 1920–25 summer DST. Urban counties (Fairfield/Hartford/New Haven/New London) → warn (city-by-city split). County map by majority vote (tools/map_counties.rb). |
 | Delaware | 84 | – | IANA? | pending | Many tables (Philadelphia-metro early DST); needs analysis + county map. |
 | Florida | 90 | ✓ | flat EST/CST | pending | peninsula/panhandle split (fl_dst_history.md) |
@@ -69,6 +69,16 @@ Alaska / Hawaii: out of scope for now (single modern zones; add only if a birth-
 
 Record majority-vote counties and genuinely-split (`warn`) counties here as they come
 up, so partial coverage is never mistaken for complete coverage.
+
+**Colorado:**
+- `override` Etc/GMT+7 (majority table CO #1, no DST 1920–21): 58 rural/mountain
+  counties.
+- `warn` (Denver-metro straddle): Adams (08001), Douglas (08035), Jefferson (08059),
+  plus modern Broomfield (08014, carved 2001 from these + Boulder/Weld).
+- `IANA-ok` (had the 1920 DST, no feature): Arapahoe (08005), Denver (08031).
+- **Gotcha logged**: Colorado has 64 modern counties but Shanks has 63 — Broomfield
+  (08014) was created in 2001. Map Shanks county# → county by NAME (Shanks numbers
+  alphabetically), never by modern FIPS index, or the metro counties shift by one.
 
 **Connecticut:**
 - `override` Etc/GMT+5 (majority table CT #1, no DST 1920–25): Litchfield (09005),
