@@ -21,7 +21,7 @@ by locating the state in the atlas (alphabetical) on first touch.
 | Colorado | 72 | – | IANA? | **done** | Flat Etc/GMT+7 over 58 rural counties for 1919-10-26..1921-05-22, correcting IANA's spurious Denver 1920/1921 DST. Denver+Arapahoe → IANA-ok (had the DST). Adams/Douglas/Jefferson (+modern Broomfield) → warn. County map by majority vote. |
 | Connecticut | 79 | – | IANA? | **done** | Flat Etc/GMT+5 over rural counties (Litchfield/Middlesex/Tolland/Windham) for 1919-10-26..1926-04-25, correcting IANA's spurious NYC 1920–25 summer DST. Urban counties (Fairfield/Hartford/New Haven/New London) → warn (city-by-city split). County map by majority vote (tools/map_counties.rb). |
 | Delaware | 84 | – | IANA? | **done** | Town-by-town DST chaos. Sussex (rural south) → flat Etc/GMT+5 for 1919-10-26..1942-02-09 (no DST 1920–41 vs IANA's continuous EDT). Kent → warn (~50/50 split). New Castle (Wilmington metro) → IANA-ok (continuous DST). |
-| Florida | 90 | ✓ | flat EST/CST | pending | peninsula/panhandle split (fl_dst_history.md) |
+| Florida | 90 | ✓ | flat EST/CST | **done** | Dominant no-DST overrides already ship + crop-verified (FL#1 panhandle CST, FL#5 peninsula EST); resolve correctly vs IANA's summer DST. Two residuals logged & deferred (see fallback log): pre-1919 peninsula-Central, minority post-war local-DST counties. |
 | Georgia | 104 | ✓ | flat EST + CST-west | pending | **Atlanta 1937-39 residual** (canonical case) |
 | Idaho | ? | – | IANA? | pending | |
 | Illinois | 116 | ✓ | warn (downstate) | pending | Chicago continuous DST; downstate warn only |
@@ -69,6 +69,19 @@ Alaska / Hawaii: out of scope for now (single modern zones; add only if a birth-
 
 Record majority-vote counties and genuinely-split (`warn`) counties here as they come
 up, so partial coverage is never mistaken for complete coverage.
+
+**Florida:** (dominant no-DST overrides already shipped from the prior audit; verified)
+- Deferred residual 1 — **pre-1919 peninsula was Central**: the FL peninsula ran CST
+  until it switched to Eastern on 1919-01-01, but IANA models it as America/New_York
+  (Eastern) back to 1883, so pre-1919 peninsula births read 1h fast. NOT a clean flat
+  fix: the peninsula observed WWI 1918 daylight as CWT (−05) before the switch, so a
+  correct fix needs a transition zone, not a flat Etc/GMT+6. Deferred (low pre-1919
+  volume); revisit if a pre-1919 FL birth needs it.
+- Deferred residual 2 — **minority post-war local-DST counties**: FL #2/#3/#4 (Central)
+  observed CDT in scattered 1931/1941/1946–65 summers and FL #6 (Eastern) EDT in 1946;
+  the dominant flat override over-corrects those specific county-summers to standard.
+  Standing summer-DST limitation (scattered, low-impact); dominant no-DST matches
+  FL #1/#5.
 
 **Delaware:**
 - `override` Etc/GMT+5 (no DST 1920–41): Sussex (10005).
