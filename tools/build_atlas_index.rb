@@ -24,7 +24,11 @@ require "open3"
 flags = ARGV.grep(/\A--/).to_h { |a| k, v = a.sub("--", "").split("=", 2); [k, v || true] }
 manifest = flags["manifest"] || File.expand_path("atlas_pages.tsv", __dir__)
 jobs = (flags["jobs"] || 3).to_i
-max_city = (flags["max-city-pages"] || 8).to_i
+# Cap a derived city range only as a runaway guard. A real section can be large (PA runs
+# ~46 pages, NY ~35), so keep this well above the biggest true section, NOT a tight cap
+# (a tight cap silently truncates a state's city listings -- the first-pass bug).
+max_city = (flags["max-city-pages"] || 50).to_i
+last_page = (flags["last-page"] || 636).to_i # atlas page count; clamp the final state
 only = flags["only"] ? flags["only"].split(",").map(&:upcase) : nil
 tools = __dir__
 
@@ -40,6 +44,7 @@ plan = entries.each_with_index.map do |(st, tt), i|
   first_city = tt + 1
   last_city = next_tt ? next_tt - 1 : tt + max_city
   last_city = [last_city, first_city + max_city - 1].min # cap runaway gaps
+  last_city = [last_city, last_page].min                 # never past the atlas end
   { st: st, tt: tt, cities: (first_city..last_city) }
 end
 plan.select! { |p| only.include?(p[:st]) } if only

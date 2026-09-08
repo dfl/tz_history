@@ -1,39 +1,56 @@
-# Seed manifest: state -> PDF page of its TIME TABLES (the state's first atlas page).
-# Verified pages from docs/COVERAGE.md + the memory's "verified page index" (the ledger's
-# printed-page column drifts -- Georgia's 159-county listing pushes later states several
-# PDF pages, so these are the CONFIRMED PDF pages, header-checked).
-# City-listing page ranges are DERIVED by tools/build_atlas_index.rb from the sorted tt
-# pages (a state's city pages run from tt+1 up to the next state's tt-1).
-# Fill an unknown state with:  ruby tools/locate_states.rb <first> <last>
+# Authoritative state -> PDF TIME-TABLES page for all 48 CONUS states.
+# HEADER-VERIFIED via tools/locate_states.rb (word-boundary match + consecutive-run
+# reconciliation) over the full atlas, 2026-09. Supersedes the docs/COVERAGE.md "TT pg"
+# ledger column, which held drifted printed-page numbers for the PENDING states (proven:
+# ledger LA=207 was Kentucky's city listings; true LA=219). Done states (13-200) agree
+# with their crop-verified pages. AZ=31 and VA=566 visually header-verified.
+# City-listing ranges are DERIVED by build_atlas_index.rb (tt+1 .. next_tt-1).
 # Columns: <ST>\t<tt_pdf_page>
 AL	13
+AZ	31
 AR	40
 CA	52
 CO	72
 CT	79
 DE	84
-DC	89
 FL	90
 GA	104
-HI	119
 ID	122
 IL	128
 IN	150
 IA	183
 KS	192
 KY	200
-LA	207
-MS	280
+LA	219
+ME	229
+MD	239
+MA	254
+MI	263
+MN	281
+MS	292
 MO	300
+MT	314
 NE	319
+NV	325
+NH	328
+NJ	333
+NM	345
+NY	352
 NC	387
-ND	393
-OH	410
+ND	405
+OH	409
 OK	432
+OR	439
+PA	448
+RI	494
 SC	496
 SD	505
 TN	510
-TX	519
+TX	531
+UT	556
+VT	560
 VA	566
-WV	604
-WI	605
+WA	592
+WV	603
+WI	617
+WY	627
