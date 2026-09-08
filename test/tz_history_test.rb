@@ -286,6 +286,30 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.note(lat: 41.5934, lon: -87.3464, date: "1935-07-15")
   end
 
+  # --- Iowa: CST through 1953 where IANA/Chicago bakes in continuous DST ---
+  # Iowa is entirely Central and kept CST (no DST) until the mid-1950s adoption scatter
+  # (earliest Shanks postwar DST is IA #8, 1954). Pre-war + 1946-1953 are universal CST.
+
+  def test_iowa_postwar_1950_is_fixed_cst_not_iana_cdt
+    tz = TzHistory.for(lat: 41.5868, lon: -93.6250, date: "1950-07-15") # Des Moines
+    assert_equal "Etc/GMT+6", tz.identifier
+    assert_equal(-6 * 3600, offset_of(tz, "1950-07-15")) # CST, not CDT
+  end
+
+  def test_iowa_1953_still_fixed_cst_before_the_1954_scatter
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 41.5868, lon: -93.6250, date: "1953-07-15").identifier
+  end
+
+  def test_iowa_from_1954_is_a_patchy_warn_not_an_override
+    # From 1954 observance is town-by-town, so we defer to IANA with a verify note.
+    assert_nil TzHistory.for(lat: 41.5868, lon: -93.6250, date: "1958-07-15")
+    assert_match(/patchy|diversity|verify/i, TzHistory.note(lat: 41.5868, lon: -93.6250, date: "1958-07-15"))
+  end
+
+  def test_iowa_wartime_defers_to_iana
+    assert_nil TzHistory.for(lat: 41.5868, lon: -93.6250, date: "1943-07-15")
+  end
+
   # --- non-matches ---
 
   def test_returns_nil_outside_any_polygon
