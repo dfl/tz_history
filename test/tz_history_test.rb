@@ -42,6 +42,36 @@ class TzHistoryTest < Minitest::Test
     assert_equal(-5 * 3600, offset_of(TzHistory.for(lat: 39.0837, lon: -84.5086, date: "1930-07-15"), "1930-07-15"))
   end
 
+  # --- Shanks transition-list zone (Alabama 1941 summer DST, table AL #1) ---
+
+  def test_alabama_summer_1941_is_shanks_cdt_not_flattened_cst
+    # Birmingham (Jefferson Co.): Jul 21 - Oct 1 1941 Alabama observed CDT, which the
+    # flat Etc/GMT+6 override skips and IANA America/Chicago (no 1941 DST) also misses.
+    tz = TzHistory.for(lat: 33.5207, lon: -86.8025, date: "1941-08-15")
+    assert_equal "Shanks/AL_1", tz.identifier
+    assert_equal(-5 * 3600, offset_of(tz, "1941-08-15")) # CDT
+  end
+
+  def test_alabama_before_the_1941_dst_window_is_the_flat_cst_override
+    # A June 1941 birth is before Jul 21, so the flat CST override still applies.
+    tz = TzHistory.for(lat: 33.5207, lon: -86.8025, date: "1941-06-15")
+    assert_equal "Etc/GMT+6", tz.identifier
+  end
+
+  def test_alabama_after_the_1941_dst_window_defers_to_iana
+    # After the Oct 1 fallback the state is back on plain CST, which IANA models
+    # correctly, so we defer (return nil) rather than substitute.
+    assert_nil TzHistory.for(lat: 33.5207, lon: -86.8025, date: "1941-11-15")
+  end
+
+  def test_alabama_georgia_line_county_keeps_its_warn_in_summer_1941
+    # Auburn (Lee Co.) is one of the east-Alabama Georgia-line counties that keep
+    # Eastern de facto -- it stays a warn (defers to IANA), NOT forced onto AL_1.
+    assert_nil TzHistory.for(lat: 32.6099, lon: -85.4808, date: "1941-08-15")
+    note = TzHistory.note(lat: 32.6099, lon: -85.4808, date: "1941-08-15")
+    assert_match(/Georgia line/i, note)
+  end
+
   # --- non-matches ---
 
   def test_returns_nil_outside_any_polygon

@@ -1,0 +1,16 @@
+# Shanks American Atlas TIME TABLE, Alabama statewide (Shanks table AL #1, the dominant table) -- Central Standard, with WWI (1918-19) and WWII war-time (1942-45) daylight, plus a REAL 1941 summer DST season (Jul 21 00:01 - Oct 1 00:01) that neither a flat CST override nor IANA America/Chicago models.
+# Atlas printed p.1 (PDF p.13), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: visual-verified only -- no IANA twin (America/Chicago omits the 1941 Alabama summer DST); the 1941 CDT season is asserted by hand in test/.
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/AL_1 -5:45:12 -    LMT  1883 Nov 18 12:00
+                 -6:00    -    CST  1918 Mar 31  2:00
+                 -6:00    1:00 CDT  1918 Oct 27  2:00
+                 -6:00    -    CST  1919 Mar 30  2:00
+                 -6:00    1:00 CDT  1919 Oct 26  2:00
+                 -6:00    -    CST  1941 Jul 21  0:01
+                 -6:00    1:00 CDT  1941 Oct  1  0:01
+                 -6:00    -    CST  1942 Feb  9  2:00
+                 -6:00    1:00 CWT  1945 Sep 30  2:00
+                 -6:00    -    CST  1967 Apr 30  2:00
+                 -6:00    -    CST

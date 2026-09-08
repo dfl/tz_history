@@ -14,7 +14,7 @@ by locating the state in the atlas (alphabetical) on first touch.
 
 | State | TT pg | OCR | Ships today | Status | Shanks tables / notes |
 |-------|------:|:---:|-------------|--------|-----------------------|
-| Alabama | 13 | ✓ | flat CST | **pending** | Check the real 1941 summer-DST episode (audit: al_dst_history.md). **← START HERE** |
+| Alabama | 13 | ✓ | flat CST + AL#7 warn | **done** | **Shanks AL_1**: statewide 1941 summer DST (Jul 21–Oct 1, CDT) over 64 counties; flat CST windows + Georgia-line warn (Chambers/Lee/Russell) unchanged. Minority city-DST tables left flat (see fallback log). |
 | Arizona | ? | – | IANA? | pending | |
 | Arkansas | 40 | ✓ | flat CST | pending | |
 | California | ? | – | IANA? | pending | |
@@ -70,4 +70,12 @@ Alaska / Hawaii: out of scope for now (single modern zones; add only if a birth-
 Record majority-vote counties and genuinely-split (`warn`) counties here as they come
 up, so partial coverage is never mistaken for complete coverage.
 
-_(none yet)_
+**Alabama:**
+- `warn` (split, defer to IANA): Chambers (01017), Lee (01081), Russell (01113) —
+  the east-Alabama Georgia-line counties that keep Eastern de facto (pre-existing
+  warns; AL_1 deliberately excludes them, so they are NOT asserted as CDT in 1941).
+- Left flat (NOT covered — standing summer-DST limitation): minority-table city DST
+  that the statewide AL_1 does not model — AL #2 (summers 1958–1960) and AL #4 (1935,
+  1940), likely Birmingham/Mobile metro one-off local DST. A birth in those specific
+  city-years is under-corrected (reads CST where the city briefly observed CDT); not
+  worth a per-county carve-out. AL_1 covers only the real *statewide* 1941 episode.
