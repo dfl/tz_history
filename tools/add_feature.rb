@@ -71,6 +71,10 @@ props = {
   "until_date" => spec.fetch("until_date"),
   "note" => spec["note"]
 }
+# A "split" feature embeds the Shanks CITY LISTINGS points so the engine can snap a
+# birth coordinate to the nearest documented town (see Lookup#resolve_split). Each
+# city is {name, lon, lat, zone} where zone is the override to apply or null to defer.
+props["cities"] = spec["cities"] if spec["cities"]
 
 # Render the feature the way the file already formats KY: pretty properties, COMPACT
 # geometry on a single line.

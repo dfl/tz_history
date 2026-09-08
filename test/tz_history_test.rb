@@ -225,11 +225,40 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 43.615, lon: -116.2023, date: "1921-07-15")
   end
 
-  def test_custer_county_is_a_pacific_mountain_straddle_warn
-    # Custer Co.: some towns went Mountain in 1919, others kept Pacific until 1923.
-    assert_nil TzHistory.for(lat: 43.9115, lon: -113.6103, date: "1921-07-15") # Mackay
-    note = TzHistory.note(lat: 43.9115, lon: -113.6103, date: "1921-07-15")
-    assert_match(/straddle/i, note)
+  # --- town-by-town straddle counties resolved by nearest documented Shanks town ---
+  # Custer + Power straddle the eastern Mountain-from-1919 bloc and the western
+  # Boise-match region. A "split" feature embeds the Shanks CITY LISTINGS points and
+  # snaps the birth coordinate to the nearest town, so each sub-region gets its own
+  # answer instead of a whole-county warn.
+
+  def test_custer_east_lost_river_resolves_to_mountain_override
+    # Mackay (eastern Custer): nearest documented town is Mountain-from-1919 -> Etc/GMT+7.
+    tz = TzHistory.for(lat: 43.9115, lon: -113.6103, date: "1921-07-15")
+    assert_equal "Etc/GMT+7", tz.identifier
+    assert_equal(-7 * 3600, offset_of(tz, "1921-07-15"))
+    assert_match(/nearest documented town/i, TzHistory.note(lat: 43.9115, lon: -113.6103, date: "1921-07-15"))
+  end
+
+  def test_custer_west_salmon_basin_defers_to_iana
+    # Challis / Stanley (western Custer): nearest town matched Boise (Pacific until 1923).
+    assert_nil TzHistory.for(lat: 44.2163, lon: -114.9361, date: "1921-07-15") # Stanley
+    assert_match(/straddle/i, TzHistory.note(lat: 44.2163, lon: -114.9361, date: "1921-07-15"))
+  end
+
+  def test_power_northeast_resolves_to_mountain_override
+    # Michaud (NE Power, by American Falls): Mountain-from-1919 -> Etc/GMT+7.
+    tz = TzHistory.for(lat: 42.8900, lon: -112.6140, date: "1921-07-15")
+    assert_equal "Etc/GMT+7", tz.identifier
+  end
+
+  def test_power_arbon_valley_defers_to_iana
+    assert_nil TzHistory.for(lat: 42.4560, lon: -112.5680, date: "1921-07-15") # Arbon
+  end
+
+  def test_split_county_is_inert_outside_its_window
+    # Before 1919-10-26 and after the 1923-05-13 Boise switch, no correction applies.
+    assert_nil TzHistory.for(lat: 43.9115, lon: -113.6103, date: "1918-07-15")
+    assert_nil TzHistory.for(lat: 43.9115, lon: -113.6103, date: "1924-07-15")
   end
 
   # --- downstate Illinois: CST where IANA/Chicago bakes in continuous Chicago DST ---
@@ -308,6 +337,24 @@ class TzHistoryTest < Minitest::Test
 
   def test_iowa_wartime_defers_to_iana
     assert_nil TzHistory.for(lat: 41.5868, lon: -93.6250, date: "1943-07-15")
+  end
+
+  # --- Kansas: dominant Central kept CST 1920-1966; far-west Mountain deferred ---
+  # KS #1 (bulk of the state) is straight CST with no local DST until the 1967 Uniform
+  # Time Act, while IANA America/Chicago applies continuous summer CDT.
+
+  def test_central_kansas_summer_1950_is_fixed_cst_not_iana_cdt
+    tz = TzHistory.for(lat: 37.6872, lon: -97.3301, date: "1950-07-15") # Wichita
+    assert_equal "Etc/GMT+6", tz.identifier
+    assert_equal(-6 * 3600, offset_of(tz, "1950-07-15")) # CST, not CDT
+  end
+
+  def test_central_kansas_prewar_1930_is_fixed_cst
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 37.6872, lon: -97.3301, date: "1930-07-15").identifier
+  end
+
+  def test_kansas_after_1967_uniform_defers_to_iana
+    assert_nil TzHistory.for(lat: 37.6872, lon: -97.3301, date: "1968-07-15")
   end
 
   # --- non-matches ---

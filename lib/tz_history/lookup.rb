@@ -36,10 +36,36 @@ module TzHistory
         iso = date.is_a?(String) ? date : date.strftime("%Y-%m-%d")
         lon = lon.to_f
         lat = lat.to_f
-        features.select do |f|
-          (f[:from_date].nil? || iso >= f[:from_date]) && iso < f[:until_date] &&
-            f[:bbox].cover?(lon, lat) && point_in_geometry?(lon, lat, f[:geometry])
-        end.min_by { |f| f[:priority] }
+        f = features.select do |feat|
+          (feat[:from_date].nil? || iso >= feat[:from_date]) && iso < feat[:until_date] &&
+            feat[:bbox].cover?(lon, lat) && point_in_geometry?(lon, lat, feat[:geometry])
+        end.min_by { |feat| feat[:priority] }
+        f && f[:kind] == "split" ? resolve_split(f, lon, lat) : f
+      end
+
+      # A "split" feature covers a county whose towns disagree town-by-town but along
+      # a resolvable geographic line (e.g. eastern Custer went Mountain in 1919, the
+      # western Salmon-River basin stayed Pacific until Boise's 1923 switch). It embeds
+      # the Shanks CITY LISTINGS points; we snap the birth coordinate to the nearest
+      # documented town and apply that town's verdict -- an `override` zone, or a
+      # `warn` (defer to IANA, keeping the straddle note) when the town matched IANA.
+      # This is strictly finer than a whole-county warn and never coarser.
+      def resolve_split(f, lon, lat)
+        c = nearest_city(f[:cities], lon, lat)
+        common = f.merge(kind: nil, zone: nil, shanks: nil, city: c && c[:name])
+        if c && c[:zone]
+          common.merge(kind: "override", zone: c[:zone])
+        else
+          common.merge(kind: "warn") # nearest town matched IANA -> defer, keep the note
+        end
+      end
+
+      # Nearest by equirectangular distance (cos-lat corrected); fine at county scale.
+      def nearest_city(cities, lon, lat)
+        return nil unless cities&.any?
+
+        k = Math.cos(lat * Math::PI / 180)
+        cities.min_by { |c| ((lat - c[:lat])**2) + (((lon - c[:lon]) * k)**2) }
       end
 
       # A human-readable verify prompt for the matched region, or nil.
@@ -62,7 +88,8 @@ module TzHistory
                    "does not encode (it uses the modern zone). Applied the historical zone -- " \
                    "verify the birth record."
                end
-        f[:note] && !f[:note].empty? ? "#{base} #{f[:note]}" : base
+        base = "#{base} #{f[:note]}" if f[:note] && !f[:note].empty?
+        f[:city] ? "#{base} (Resolved via the nearest documented town, #{f[:city]}.)" : base
       end
 
       # An exclusion guard is a `warn` with no note: it exists only to block an
@@ -89,6 +116,9 @@ module TzHistory
             note: props["note"],
             from_date: props["from_date"],
             until_date: props["until_date"],
+            cities: (props["cities"] || []).map do |c|
+              { name: c["name"], lon: c["lon"].to_f, lat: c["lat"].to_f, zone: c["zone"] }
+            end,
             geometry: polygons,
             bbox: BoundingBox.new(polygons),
             priority: priority(props["kind"], props["note"])
