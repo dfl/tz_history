@@ -1,0 +1,33 @@
+# Shanks American Atlas TIME TABLE, Kentucky table #71 -- Campbell Co. (Newport)
+# and Kenton Co. (Covington), the northern-KY / Cincinnati-metro cities.
+# A dated transition list re-expressed as a zic source. This is the table the
+# old fixed-offset model could NOT represent: northern KY ran CENTRAL time with
+# daylight-saving SUMMERS 1920-1926 (CDT), then switched to EASTERN standard on
+# 1926 Aug 5 (no daylight) -- so a summer 1920-1926 birth is CDT (-05), which a
+# flat Etc/GMT+6 (CST) override reads one hour wrong.
+#
+# IANA models these counties as America/New_York (their modern zone), which is
+# wrong for this pre-1942 sub-state history, so there is no IANA cross-check here;
+# the transitions are read directly from the atlas page (visual-verified).
+# Rebuild the compiled TZif with:
+#   ruby research/historical_zones/build_shanks_zoneinfo.rb
+Zone Shanks/KY_71 -5:38:02 -    LMT 1883 Nov 18 12:00
+                  -6:00    -    CST 1918 Mar 31  2:00
+                  -6:00    1:00 CDT 1918 Oct 27  2:00
+                  -6:00    -    CST 1919 Mar 30  2:00
+                  -6:00    1:00 CDT 1919 Oct 26  2:00
+                  -6:00    -    CST 1920 Mar 28  2:00
+                  -6:00    1:00 CDT 1920 Oct 31  2:00
+                  -6:00    -    CST 1921 Apr  2  2:00
+                  -6:00    1:00 CDT 1921 Sep 25  2:00
+                  -6:00    -    CST 1922 Apr 30  2:00
+                  -6:00    1:00 CDT 1922 Sep 24  2:00
+                  -6:00    -    CST 1923 Apr 29  2:00
+                  -6:00    1:00 CDT 1923 Sep 30  2:00
+                  -6:00    -    CST 1924 Apr 27  2:00
+                  -6:00    1:00 CDT 1924 Sep 28  2:00
+                  -6:00    -    CST 1925 Apr 26  2:00
+                  -6:00    1:00 CDT 1925 Sep 27  2:00
+                  -6:00    -    CST 1926 Apr 25  2:00
+                  -6:00    1:00 CDT 1926 Aug  5  2:00
+                  -5:00    -    EST

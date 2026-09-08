@@ -1,0 +1,41 @@
+AllCops:
+  TargetRubyVersion: 3.2
+  NewCops: enable
+  SuggestExtensions: false
+
+# Data files and generated blobs are not Ruby style concerns.
+  Exclude:
+    - "data/**/*"
+    - "vendor/**/*"
+
+# The point-in-polygon and offset math read best as-is; don't force extraction.
+Metrics:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+# Match the parent project's convention (extracted from harmonic-explorer).
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Style/StringLiteralsInInterpolation:
+  EnforcedStyle: double_quotes
+
+Layout/LineLength:
+  Max: 120
+
+# Geometry code reads best with short coordinate names (x, y, i, j) and the
+# select-then-min_by resolution chain; year-based test names (ky69, 1884) are clear.
+Naming/MethodParameterName:
+  MinNameLength: 1
+  AllowedNames: [x, y, i, j]
+
+Naming/VariableNumber:
+  Enabled: false
+
+Style/MultilineBlockChain:
+  Enabled: false
+
+Style/OneClassPerFile:
+  Enabled: false

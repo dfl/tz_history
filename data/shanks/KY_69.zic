@@ -1,0 +1,52 @@
+# Shanks American Atlas TIME TABLE, Kentucky table #69 -- Louisville (Jefferson Co.).
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Facts from the Shanks atlas cross-checked transition-by-
+# transition against the public-domain IANA zone America/Kentucky/Louisville
+# (see test/services/shanks/zone_test.rb, the gold-standard equivalence test).
+#
+# Shanks labels the 1918/1919 and war-time daylight seasons CWT/CPT where IANA
+# uses CDT; the UTC offset (-05, daylight) is identical, so the label differs but
+# the resolution does not. Rebuild the compiled TZif with:
+#   ruby research/historical_zones/build_shanks_zoneinfo.rb
+Zone Shanks/KY_69 -5:43:02 -    LMT 1883 Nov 18 12:00
+                  -6:00    -    CST 1918 Mar 31  2:00
+                  -6:00    1:00 CDT 1918 Oct 27  2:00
+                  -6:00    -    CST 1919 Mar 30  2:00
+                  -6:00    1:00 CDT 1919 Oct 26  2:00
+                  -6:00    -    CST 1921 May  1  2:00
+                  -6:00    1:00 CDT 1921 Sep  1  2:00
+                  -6:00    -    CST 1941 Apr 27  2:00
+                  -6:00    1:00 CDT 1941 Sep 28  2:00
+                  -6:00    -    CST 1942 Feb  9  2:00
+                  -6:00    1:00 CWT 1945 Sep 30  2:00
+                  -6:00    -    CST 1946 Apr 28  2:00
+                  -6:00    1:00 CDT 1946 Jun  2  2:00
+                  -6:00    -    CST 1950 Apr 30  2:00
+                  -6:00    1:00 CDT 1950 Sep 24  2:00
+                  -6:00    -    CST 1951 Apr 29  2:00
+                  -6:00    1:00 CDT 1951 Sep 30  2:00
+                  -6:00    -    CST 1952 Apr 27  2:00
+                  -6:00    1:00 CDT 1952 Sep 28  2:00
+                  -6:00    -    CST 1953 Apr 26  2:00
+                  -6:00    1:00 CDT 1953 Sep 27  2:00
+                  -6:00    -    CST 1954 Apr 25  2:00
+                  -6:00    1:00 CDT 1954 Sep 26  2:00
+                  -6:00    -    CST 1955 Apr 24  2:00
+                  -6:00    1:00 CDT 1955 Sep 25  2:00
+                  -6:00    -    CST 1956 Apr 29  2:00
+                  -6:00    1:00 CDT 1956 Oct 28  2:00
+                  -6:00    -    CST 1957 Apr 28  2:00
+                  -6:00    1:00 CDT 1957 Oct 27  2:00
+                  -6:00    -    CST 1958 Apr 27  2:00
+                  -6:00    1:00 CDT 1958 Oct 26  2:00
+                  -6:00    -    CST 1959 Apr 26  2:00
+                  -6:00    1:00 CDT 1959 Oct 25  2:00
+                  -6:00    -    CST 1960 Apr 30  2:00
+                  -6:00    1:00 CDT 1960 Oct 29  2:00
+                  -6:00    -    CST 1961 Apr 30  2:00
+                  -6:00    1:00 CDT 1961 Jul 23  2:00
+                  -5:00    -    EST 1968 Apr 28  2:00
+                  -5:00    1:00 EDT 1968 Oct 27  2:00
+                  -5:00    -    EST 1969 Apr 27  2:00
+                  -5:00    1:00 EDT 1969 Oct 26  2:00
+                  -5:00    -    EST
