@@ -357,6 +357,32 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 37.6872, lon: -97.3301, date: "1968-07-15")
   end
 
+  # --- Louisiana: statewide CST, except New Orleans' one-summer 1946 CDT ---
+  # LA #1 (nearly all parishes) is pure CST; LA #2 (Orleans/Jefferson/St. Bernard)
+  # differs only by observing CDT in summer 1946, which IANA America/Chicago models.
+
+  def test_new_orleans_summer_1946_defers_to_iana_for_its_cdt
+    # Orleans Parish: the exclusion guard blocks the CST override so 1946 CDT resolves.
+    assert_nil TzHistory.for(lat: 29.9511, lon: -90.0715, date: "1946-07-15")
+  end
+
+  def test_new_orleans_winter_1946_is_the_cst_override
+    tz = TzHistory.for(lat: 29.9511, lon: -90.0715, date: "1946-02-15")
+    assert_equal "Etc/GMT+6", tz.identifier
+  end
+
+  def test_new_orleans_other_years_stay_on_the_cst_override
+    # 1950 summer: LA #2 was back on CST (only 1946 had CDT), so override applies.
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 29.9511, lon: -90.0715, date: "1950-07-15").identifier
+  end
+
+  def test_rest_of_louisiana_summer_1946_is_fixed_cst
+    # Baton Rouge (LA #1): kept CST in 1946; the New Orleans guard does not apply.
+    tz = TzHistory.for(lat: 30.4515, lon: -91.1871, date: "1946-07-15")
+    assert_equal "Etc/GMT+6", tz.identifier
+    assert_equal(-6 * 3600, offset_of(tz, "1946-07-15"))
+  end
+
   # --- non-matches ---
 
   def test_returns_nil_outside_any_polygon
