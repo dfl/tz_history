@@ -192,12 +192,13 @@ done" never reads as "everything covered."
 
 ---
 
-## 11. Milestones
+## 11. How the work is structured
 
-- **M1 — Tooling** (§6): triage + zic-from-json + add-feature + generalized
-  cross-check harness. Prove on KY (should reproduce current data exactly).
-- **M2 — Pilot state** end-to-end; refine tooling from what breaks.
-- **M3 — Audited states** batched through the pipeline.
-- **M4 — Coverage ledger** complete for CONUS; long tail documented as
-  intentionally-deferred.
-- **M5 (optional)** — publish the gem; the data keeps growing behind a stable API.
+There is no separate "tooling phase." **Each state is one self-contained run**
+(see `docs/RUNBOOK.md`). The *first* run also builds the reusable `tools/` (§6);
+every later run just reuses them. Progress is tracked in `docs/COVERAGE.md` so a
+fresh session (post context-clear) resumes at the next unfinished state.
+
+Order: **alphabetical over the 48 CONUS states** (exhaustive — we do them all).
+A state with no qualifying table (§4) is still "done": it's confirmed flat/IANA-
+sufficient and closed out in the ledger. Kentucky is already complete.
