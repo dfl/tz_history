@@ -19,7 +19,7 @@ by locating the state in the atlas (alphabetical) on first touch.
 | Arkansas | 40 | ✓ | flat CST | **done** | Single statewide table; crop-verified clean CST (only WWI/war/uniform, all IANA-modeled). No residual — flat/IANA sufficient. |
 | California | 52 | – | IANA? | **done** | Single statewide table; crop-verified. IANA America/Los_Angeles matches (1948 DST season + no pre-war DST). Flat/IANA sufficient. |
 | Colorado | 72 | – | IANA? | pending | **Residual found**: CO#1 (most counties) has NO 1920 DST, but IANA America/Denver applies a spurious 1920 Denver DST → rural-CO summer-1920 births read 1h fast. Needs county map (Denver-metro on CO#2 = IANA-ok). |
-| Connecticut | 79 | – | IANA? | pending | **Residual found**: CT#1 has NO DST 1920–1925, but IANA America/New_York applies continuous NYC DST → non-metro CT summer 1920–1925 births read 1h fast. Fixable via flat Etc/GMT+5. Needs county map (Fairfield/NYC-metro = IANA-ok). |
+| Connecticut | 79 | – | IANA? | **done** | Flat Etc/GMT+5 over rural counties (Litchfield/Middlesex/Tolland/Windham) for 1919-10-26..1926-04-25, correcting IANA's spurious NYC 1920–25 summer DST. Urban counties (Fairfield/Hartford/New Haven/New London) → warn (city-by-city split). County map by majority vote (tools/map_counties.rb). |
 | Delaware | 84 | – | IANA? | pending | Many tables (Philadelphia-metro early DST); needs analysis + county map. |
 | Florida | 90 | ✓ | flat EST/CST | pending | peninsula/panhandle split (fl_dst_history.md) |
 | Georgia | 104 | ✓ | flat EST + CST-west | pending | **Atlanta 1937-39 residual** (canonical case) |
@@ -69,6 +69,15 @@ Alaska / Hawaii: out of scope for now (single modern zones; add only if a birth-
 
 Record majority-vote counties and genuinely-split (`warn`) counties here as they come
 up, so partial coverage is never mistaken for complete coverage.
+
+**Connecticut:**
+- `override` Etc/GMT+5 (majority table CT #1, no DST 1920–25): Litchfield (09005),
+  Middlesex (09007), Tolland (09013), Windham (09015).
+- `warn` (genuine urban/rural DST split — big city on DST from 1920, towns from 1926):
+  Fairfield (09001), Hartford (09003), New Haven (09009), New London (09011).
+- Table taxonomy: CT #1 = no DST 1920–25; CT #2 = DST every year (IANA-ok);
+  CT #3 = DST 1920 only then none 1921–25. Minority table-3 cities in the override
+  counties are under-corrected for summer 1920 only (accepted; majority vote).
 
 **Alabama:**
 - `warn` (split, defer to IANA): Chambers (01017), Lee (01081), Russell (01113) —

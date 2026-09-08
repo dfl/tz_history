@@ -72,6 +72,30 @@ class TzHistoryTest < Minitest::Test
     assert_match(/Georgia line/i, note)
   end
 
+  # --- flat EST override where IANA over-applies early-1920s NYC daylight ---
+  # Rural/interior Connecticut kept EST year-round through the early-mid 1920s, but
+  # IANA America/New_York applies NYC's continuous 1920-1925 summer DST statewide.
+
+  def test_rural_connecticut_summer_1922_is_fixed_est_not_iana_edt
+    # Torrington (Litchfield Co.): a flat Etc/GMT+5 corrects IANA's spurious EDT.
+    tz = TzHistory.for(lat: 41.8007, lon: -73.1212, date: "1922-07-15")
+    assert_equal "Etc/GMT+5", tz.identifier
+    assert_equal(-5 * 3600, offset_of(tz, "1922-07-15")) # EST, not EDT
+  end
+
+  def test_rural_connecticut_after_1926_defers_to_iana
+    # From 1926 Connecticut generally observed DST (matching IANA), so we defer.
+    assert_nil TzHistory.for(lat: 41.8007, lon: -73.1212, date: "1930-07-15")
+  end
+
+  def test_urban_connecticut_county_is_a_warn_split_not_an_override
+    # Bridgeport (Fairfield Co.): the city ran DST from 1920 but surrounding towns did
+    # not -- a genuine straddle, so we warn and defer rather than guess.
+    assert_nil TzHistory.for(lat: 41.1792, lon: -73.1894, date: "1922-07-15")
+    note = TzHistory.note(lat: 41.1792, lon: -73.1894, date: "1922-07-15")
+    assert_match(/larger cities/i, note)
+  end
+
   # --- non-matches ---
 
   def test_returns_nil_outside_any_polygon
