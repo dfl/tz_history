@@ -185,9 +185,51 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 47.6777, lon: -116.7805, date: "1944-07-15")
   end
 
-  def test_north_idaho_after_1961_dst_resumption_defers_to_iana
-    # From 1961 the panhandle resumed DST (matching America/Los_Angeles), so we defer.
-    assert_nil TzHistory.for(lat: 47.6777, lon: -116.7805, date: "1962-07-15")
+  def test_north_idaho_1962_still_fixed_pst_dominant_table_resumed_dst_in_1964
+    # The dominant panhandle table (ID #2, by majority vote) kept PST through 1963 and
+    # only resumed DST in 1964, so 1962 is still corrected (America/LA has spurious PDT).
+    tz = TzHistory.for(lat: 47.6777, lon: -116.7805, date: "1962-07-15")
+    assert_equal "Etc/GMT+8", tz.identifier
+  end
+
+  def test_north_idaho_after_1964_dst_resumption_defers_to_iana
+    # From spring 1964 the panhandle observed DST (matching America/Los_Angeles), so defer.
+    assert_nil TzHistory.for(lat: 47.6777, lon: -116.7805, date: "1964-07-15")
+  end
+
+  # --- southern Idaho: MOUNTAIN from 1919 where IANA/Boise stays Pacific until 1923 ---
+  # Eastern/central Idaho counties switched to Mountain time in 1919 (Shanks ID #13-16),
+  # but IANA America/Boise keeps them Pacific until the official 1923-05-13 boundary move.
+
+  def test_eastern_idaho_1921_is_fixed_mst_not_iana_pst
+    # Pocatello (Bannock Co.): flat Etc/GMT+7 corrects Boise's spurious Pacific.
+    tz = TzHistory.for(lat: 42.8713, lon: -112.4455, date: "1921-07-15")
+    assert_equal "Etc/GMT+7", tz.identifier
+    assert_equal(-7 * 3600, offset_of(tz, "1921-07-15")) # MST, not PST
+  end
+
+  def test_idaho_falls_1921_winter_is_fixed_mst
+    # Idaho Falls (Bonneville Co.), the largest eastern-Idaho city.
+    tz = TzHistory.for(lat: 43.4917, lon: -112.0339, date: "1921-01-15")
+    assert_equal "Etc/GMT+7", tz.identifier
+  end
+
+  def test_eastern_idaho_after_1923_boundary_move_defers_to_iana
+    # From 1923-05-13 America/Boise itself is Mountain, so we defer.
+    assert_nil TzHistory.for(lat: 42.8713, lon: -112.4455, date: "1924-07-15")
+  end
+
+  def test_boise_matches_iana_and_defers
+    # Ada Co. (Boise): its cities map to Shanks ID #18, which switched in 1923-05-13 --
+    # exactly what America/Boise models -- so there is no residual to correct.
+    assert_nil TzHistory.for(lat: 43.615, lon: -116.2023, date: "1921-07-15")
+  end
+
+  def test_custer_county_is_a_pacific_mountain_straddle_warn
+    # Custer Co.: some towns went Mountain in 1919, others kept Pacific until 1923.
+    assert_nil TzHistory.for(lat: 43.9115, lon: -113.6103, date: "1921-07-15") # Mackay
+    note = TzHistory.note(lat: 43.9115, lon: -113.6103, date: "1921-07-15")
+    assert_match(/straddle/i, note)
   end
 
   # --- non-matches ---
