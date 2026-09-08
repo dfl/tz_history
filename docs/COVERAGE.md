@@ -12,6 +12,15 @@ Status values:
 already in `harmonic-explorer/research/historical_zones/atlas_ocr/`. Fill unknown pages
 by locating the state in the atlas (alphabetical) on first touch.
 
+> **⚠ Authoritative TT pages are now `tools/atlas_pages.tsv`** (header-verified for all 48
+> CONUS states via `tools/locate_states.rb`), NOT the "TT pg" column below, which holds
+> drifted printed-page numbers for the PENDING states. Several are wrong: **LA 207→219**
+> (the ledger's 207 is Kentucky's city listings), **MS 280→292, ND 393→405, OH 410→409,
+> TX 519→531, WV 604→603, WI 605→617**; and the previously-unknown states are located:
+> AZ 31, ME 229, MD 239, MA 254, MI 263, MN 281, MT 314, NV 325, NH 328, NJ 333, NM 345,
+> NY 352, OR 439, PA 448, RI 494, UT 556, VT 560, WA 592, WY 627. The done states (13–200)
+> are unaffected. Trust `atlas_pages.tsv`; confirm the header on first touch.
+
 | State | TT pg | OCR | Ships today | Status | Shanks tables / notes |
 |-------|------:|:---:|-------------|--------|-----------------------|
 | Alabama | 13 | ✓ | flat CST + AL#7 warn | **done** | **Shanks AL_1**: statewide 1941 summer DST (Jul 21–Oct 1, CDT) over 64 counties; flat CST windows + Georgia-line warn (Chambers/Lee/Russell) unchanged. Minority city-DST tables left flat (see fallback log). |
