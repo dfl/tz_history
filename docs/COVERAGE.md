@@ -23,7 +23,7 @@ by locating the state in the atlas (alphabetical) on first touch.
 | Delaware | 84 | – | IANA? | **done** | Town-by-town DST chaos. Sussex (rural south) → flat Etc/GMT+5 for 1919-10-26..1942-02-09 (no DST 1920–41 vs IANA's continuous EDT). Kent → warn (~50/50 split). New Castle (Wilmington metro) → IANA-ok (continuous DST). |
 | Florida | 90 | ✓ | flat EST/CST | **done** | Dominant no-DST overrides already ship + crop-verified (FL#1 panhandle CST, FL#5 peninsula EST); resolve correctly vs IANA's summer DST. Two residuals logged & deferred (see fallback log): pre-1919 peninsula-Central, minority post-war local-DST counties. |
 | Georgia | 104 | ✓ | flat EST + CST-west | **done*** | Atlanta local DST **1937–1940** (Shanks GA #21, EDT — 4 yrs, not 3) fixed via exclusion guard over Fulton+DeKalb → defer to IANA. Dominant EST/Central overrides already ship. ***Uncovered a pre-existing bug (see fallback log): Fulton is wrongly in the Western-GA Central set → Atlanta mis-zoned Central 1919–41 outside the guard; flagged for a dedicated geometry fix.** |
-| Idaho | 122 | – | IANA? | pending | **Residuals found (analysis started, needs county map):** (1) N/Pacific Idaho (ID #1–3) stayed PST — no DST 1946–1960 — but IANA America/Los_Angeles applies CA DST 1948–66 → N-Idaho summer 1948–60 births read 1h fast. (2) Some S-Idaho tables (ID #10 etc.) show 1930s local DST that America/Boise (no DST) omits — verify. Needs Pacific/Mountain × DST-era county map. |
+| Idaho | 122 | – | flat PST (north) | **done*** | 18 tables (ID #1–#18). **Shipped:** flat Etc/GMT+8 over the 10 north panhandle Pacific counties for 1945-09-30..1961-04-30 — they kept PST year-round (no DST) while IANA America/Los_Angeles applies California summer DST 1948 & 1950–1960 (1h-fast residual, universal across ID #1–12). ***Southern (Mountain, ID #13–18) deferred — needs a per-county switch-date map and is town-by-town (see fallback log): S-Idaho went Mountain in 1919 but America/Boise only switches 1923-05-13 (1919–1923 residual), plus scattered postwar MDT. Also deferred: north pre-war local DST (1931–41) and the 1961–65 DST-resumption tail.** |
 | Illinois | 116 | ✓ | warn (downstate) | pending | Chicago continuous DST; downstate warn only |
 | Indiana | ? | – | IANA? | pending | notoriously patchy — expect real work |
 | Iowa | 171 | ✓ | flat CST | pending | |
@@ -86,6 +86,38 @@ up, so partial coverage is never mistaken for complete coverage.
   removing Fulton needs targeted feature-block surgery (re-emit #40/#80 with compact
   geometry + corrected county list) or the boundary re-adjudicated — a dedicated pass,
   not safe to rush. The 1937–40 guard is a strict improvement in the meantime.
+
+**Idaho:** (18 tables; a two-zone state — Pacific north panhandle + Mountain south)
+- `override` Etc/GMT+8 (PST, no DST 1945-09-30..1961-04-30): the 10 north panhandle
+  counties — Benewah (16009), Bonner (16017), Boundary (16021), Clearwater (16035),
+  Idaho (16049), Kootenai (16055), Latah (16057), Lewis (16061), Nez Perce (16069),
+  Shoshone (16079). All 12 Pacific tables (ID #1–12) were PST year-round from war's end
+  until DST resumed in 1961; IANA America/Los_Angeles wrongly applies California DST in
+  1948 and 1950–1960. Blanket flat override is safe (residual is universal across the
+  north) — no city→table map needed.
+- **Deferred residual — north 1961–1965 DST-resumption tail**: the panhandle cities
+  split on *when* they resumed DST — ID #1/#4/#7/#10/#12 resumed 1961 (override ends
+  1961-04-30, then IANA is correct), but ID #2/#3/#5/#6/#8/#9/#11 resumed only 1964, so
+  their 1961–63 and 1965 summers stay under-corrected (read 1h fast vs the PST they
+  actually kept). Ending the override at 1961-04-30 is the SAFE choice — extending it
+  would over-correct the early-resumer counties. Per-city, low-volume; deferred.
+- **Deferred residual — north pre-war local DST (1931–1941)**: ID #3/#6/#8/#9/#10/#11
+  observed scattered summer PDT in 1931 and 1933–1941 that America/Los_Angeles (no DST
+  then) omits, so those specific city-summers read 1h *slow* under IANA. Opposite sign
+  to the shipped fix and not made worse by it (the override starts 1945-09-30). Also
+  ID #7's summer 1952 PDT is under-corrected by the flat PST override (single city, one
+  summer; accepted minority). Deferred.
+- **Deferred — SOUTHERN Idaho (Mountain, ID #13–18) entirely**: needs a per-county
+  switch-date map (the CITY LISTINGS) and is genuinely town-by-town. IANA America/Boise
+  runs Pacific until 1923-05-13 then Mountain (US rules, no DST 1923–66). But Shanks
+  shows south Idaho switched to Mountain much earlier and unevenly: ID #13/#14 on
+  1919-01-01, ID #15/#16 on 1919-06-01 (→ a **1919–1923 residual**, IANA reads 1h slow),
+  while ID #17/#18 switched 1923-05-13 (match Boise). Plus scattered postwar MDT that
+  Boise omits: ID #13/#17 in 1961–63, ID #15 in 1964–65. A blanket south override would
+  be WRONG (it would force the #17/#18 counties onto Mountain when they were still
+  Pacific pre-1923). ID #18 matches Boise exactly (no residual). Low birth volume for
+  the 1919–23 window (sparse rural, transitional zone); revisit if a south-Idaho
+  pre-1923 birth needs it.
 
 **Florida:** (dominant no-DST overrides already shipped from the prior audit; verified)
 - Deferred residual 1 — **pre-1919 peninsula was Central**: the FL peninsula ran CST

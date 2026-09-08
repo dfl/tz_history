@@ -161,6 +161,35 @@ class TzHistoryTest < Minitest::Test
     assert_equal "Etc/GMT+5", tz.identifier
   end
 
+  # --- north Idaho panhandle: PST 1946-1960 where IANA applies California DST ---
+  # The 10 Pacific-zone counties kept Pacific Standard year-round from the end of war
+  # time until DST resumed in 1961 (Shanks ID #1-12), but IANA America/Los_Angeles
+  # applies California summer DST in 1948 and 1950-1960.
+
+  def test_north_idaho_summer_1955_is_fixed_pst_not_iana_pdt
+    # Coeur d'Alene (Kootenai Co.): flat Etc/GMT+8 corrects IANA's spurious PDT.
+    tz = TzHistory.for(lat: 47.6777, lon: -116.7805, date: "1955-07-15")
+    assert_equal "Etc/GMT+8", tz.identifier
+    assert_equal(-8 * 3600, offset_of(tz, "1955-07-15")) # PST, not PDT
+  end
+
+  def test_north_idaho_summer_1948_is_fixed_pst
+    # Lewiston (Nez Perce Co.): 1948 was California's first post-war DST year.
+    tz = TzHistory.for(lat: 46.4165, lon: -117.0177, date: "1948-07-15")
+    assert_equal "Etc/GMT+8", tz.identifier
+    assert_equal(-8 * 3600, offset_of(tz, "1948-07-15"))
+  end
+
+  def test_north_idaho_war_time_defers_to_iana
+    # A 1944 birth is before the override window (war time PWT, which IANA models).
+    assert_nil TzHistory.for(lat: 47.6777, lon: -116.7805, date: "1944-07-15")
+  end
+
+  def test_north_idaho_after_1961_dst_resumption_defers_to_iana
+    # From 1961 the panhandle resumed DST (matching America/Los_Angeles), so we defer.
+    assert_nil TzHistory.for(lat: 47.6777, lon: -116.7805, date: "1962-07-15")
+  end
+
   # --- non-matches ---
 
   def test_returns_nil_outside_any_polygon
