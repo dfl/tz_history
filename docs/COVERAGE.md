@@ -23,7 +23,7 @@ by locating the state in the atlas (alphabetical) on first touch.
 | Delaware | 84 | – | IANA? | **done** | Town-by-town DST chaos. Sussex (rural south) → flat Etc/GMT+5 for 1919-10-26..1942-02-09 (no DST 1920–41 vs IANA's continuous EDT). Kent → warn (~50/50 split). New Castle (Wilmington metro) → IANA-ok (continuous DST). |
 | Florida | 90 | ✓ | flat EST/CST | **done** | Dominant no-DST overrides already ship + crop-verified (FL#1 panhandle CST, FL#5 peninsula EST); resolve correctly vs IANA's summer DST. Two residuals logged & deferred (see fallback log): pre-1919 peninsula-Central, minority post-war local-DST counties. |
 | Georgia | 104 | ✓ | flat EST + CST-west | **done*** | Atlanta local DST **1937–1940** (Shanks GA #21, EDT — 4 yrs, not 3) fixed via exclusion guard over Fulton+DeKalb → defer to IANA. Dominant EST/Central overrides already ship. ***Uncovered a pre-existing bug (see fallback log): Fulton is wrongly in the Western-GA Central set → Atlanta mis-zoned Central 1919–41 outside the guard; flagged for a dedicated geometry fix.** |
-| Idaho | ? | – | IANA? | pending | |
+| Idaho | 122 | – | IANA? | pending | **Residuals found (analysis started, needs county map):** (1) N/Pacific Idaho (ID #1–3) stayed PST — no DST 1946–1960 — but IANA America/Los_Angeles applies CA DST 1948–66 → N-Idaho summer 1948–60 births read 1h fast. (2) Some S-Idaho tables (ID #10 etc.) show 1930s local DST that America/Boise (no DST) omits — verify. Needs Pacific/Mountain × DST-era county map. |
 | Illinois | 116 | ✓ | warn (downstate) | pending | Chicago continuous DST; downstate warn only |
 | Indiana | ? | – | IANA? | pending | notoriously patchy — expect real work |
 | Iowa | 171 | ✓ | flat CST | pending | |
