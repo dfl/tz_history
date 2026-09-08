@@ -1,5 +1,42 @@
 # Plan — full-atlas OCR + nearest-city ("split") resolution
 
+> **Phase 1 tooling: DONE + VALIDATED (branch `feature/ocr-nearest-city`, 2026-09).**
+> The reusable pipeline is built and reproduces the shipped Idaho ground truth exactly.
+> Tools (all dev-only, `tools/**` is rubocop-excluded):
+> - `render_state.rb` — now flag-driven: `--dpi=300`, `--cols=N`, `--top/--bot` region,
+>   band tiling (`--band-h=2400 --band-overlap=200`), `--colw`, scratchpad `--out`.
+>   Writes a `crops.json` manifest that the consumers read (no layout re-guessing).
+> - `ocr_tables.rb` — consumes the banded manifest (col-major/band-minor = table flow).
+> - `extract_cities.rb` — NEW. Tolerant coord parser (`l→1`, `Nn→N`, fused `MMSS`,
+>   optional apostrophe) + wrap-handling token-walk + **LMT (`H:MM:SS` = lon×240s)
+>   cross-check that repairs a mangled longitude. Emits `cities[]` (+ `--legend`).
+> - `locate_states.rb` — NEW. Header-OCR (low-dpi top strip) → state→first-page.
+> - `build_index.rb` — NEW. One state → git-ignored `research/index/<ST>/` (timetables,
+>   cities, legend, meta). Legend is read from the TIME-TABLES page, not the city pages.
+> - `build_atlas_index.rb` — NEW. N-wide parallel driver over `tools/atlas_pages.tsv`,
+>   deriving each state's city-page range from the sorted tt-page list. `--dry-run` first.
+> - `map_counties.rb` — added `--from-cities=` (consume the index instead of re-OCRing)
+>   and `--split-emit --zone-map=T:zone,...` → a per-town split spec for `add_feature.rb`.
+>
+> **Validation gate (analogous to "triage reproduces KY #69/#71"):** `extract_cities.rb`
+> over Idaho PDF 123–127 reproduces all 20 shipped Custer/Power town coords within
+> ~0.0005° (~50m) with correct county#/table#, and `map_counties --split-emit` reproduces
+> the exact geographic zoning shipped for Custer + Power. Names retain OCR artifacts
+> ("uster", bled "Broadf Arbon") — a documented soft limitation; the mandatory
+> visual-verify gate covers names, coords (the data nearest-city uses) are exact.
+>
+> **Parallelism (answering "OCR in parallel with agents?"):** the bulk render+OCR is
+> mechanical + per-page independent → shell process fan-out (`build_atlas_index.rb
+> --jobs=3`; 3–4 is the IO sweet spot on the 1 GB PDF). LLM agents are NOT used for the
+> mechanical OCR (they'd just shell out); they earn their keep at the per-state
+> **visual-verify / transcription** step, which stays the separate gated pass Phase 2/the
+> runbook loop drives. Full atlas ≈ 190 renders ≈ 1.3 h at 3-wide.
+>
+> **Remaining:** run the full-atlas pass (`build_atlas_index.rb`, after `locate_states`
+> fixes the tail ledger drift — WV/WI 604/605 and the unknown late states), then resume
+> the alphabetical sweep (next pending = **Louisiana**) triaging against the index, and
+> backfill `split` on done states where a logged warn is a true geographic straddle.
+
 Status: proposed (2026-09). Prereqs proven on Idaho (see the `split` feature kind in
 `lib/tz_history/lookup.rb` and Custer/Power in `docs/COVERAGE.md`). This is the scale-up
 of two things we validated ad-hoc during Idaho:

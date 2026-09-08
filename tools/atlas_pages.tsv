@@ -1,0 +1,39 @@
+# Seed manifest: state -> PDF page of its TIME TABLES (the state's first atlas page).
+# Verified pages from docs/COVERAGE.md + the memory's "verified page index" (the ledger's
+# printed-page column drifts -- Georgia's 159-county listing pushes later states several
+# PDF pages, so these are the CONFIRMED PDF pages, header-checked).
+# City-listing page ranges are DERIVED by tools/build_atlas_index.rb from the sorted tt
+# pages (a state's city pages run from tt+1 up to the next state's tt-1).
+# Fill an unknown state with:  ruby tools/locate_states.rb <first> <last>
+# Columns: <ST>\t<tt_pdf_page>
+AL	13
+AR	40
+CA	52
+CO	72
+CT	79
+DE	84
+DC	89
+FL	90
+GA	104
+HI	119
+ID	122
+IL	128
+IN	150
+IA	183
+KS	192
+KY	200
+LA	207
+MS	280
+MO	300
+NE	319
+NC	387
+ND	393
+OH	410
+OK	432
+SC	496
+SD	505
+TN	510
+TX	519
+VA	566
+WV	604
+WI	605

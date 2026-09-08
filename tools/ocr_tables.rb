@@ -6,19 +6,22 @@
 # (tools/triage.rb) only; the source of truth is always the rendered crop read by a
 # human/subagent (docs/EXTRACTION.md §2 "OCR is a draft, never the source of truth").
 #
-#   ruby tools/ocr_tables.rb <render_dir> [num_columns=6]
+#   ruby tools/ocr_tables.rb <render_dir>
 #   => writes <render_dir>/ocr_tables.json  and prints a summary
 #
 # Ported from research/historical_zones/parse_timetable.rb (the script that
 # transcribed KY #69/#71). A table is numbered (`AL # 1`) and FLOWS DOWN one column,
 # CONTINUING at the top of the next column -- not within-column wrap. We track the
 # current table across columns so continuation rows land in the right table.
+#
+# Consumes the render_state.rb crops.json manifest (col*_band* strips): it reads the
+# bands of each column top-to-bottom, column by column, so the table flow-down order is
+# preserved. Falls back to the legacy col%d.png naming when no manifest is present.
 
 require "json"
 require "open3"
 
-render_dir = ARGV[0] or abort "usage: ocr_tables.rb <render_dir> [num_columns=6]"
-num_cols   = (ARGV[1] || 6).to_i
+render_dir = ARGV[0] or abort "usage: ocr_tables.rb <render_dir>"
 
 # Zone code -> {offset in seconds, dst?}. US#n = federal uniform rules from that date
 # (we defer to IANA thereafter, so treat as a marker, not an offset).
@@ -40,9 +43,17 @@ def ocr(img)
                  err: File::NULL).first
 end
 
-crops = (0...num_cols).map { |c| File.join(render_dir, format("col%d.png", c)) }
-                      .select { |f| File.exist?(f) }
-abort "no col*.png crops in #{render_dir} -- run render_state.rb first" if crops.empty?
+manifest = File.join(render_dir, "crops.json")
+crops =
+  if File.exist?(manifest)
+    JSON.parse(File.read(manifest))["crops"]
+      .sort_by { |c| [c["col"], c["band"]] } # column-major, band-minor = table flow order
+      .map { |c| File.join(render_dir, c["path"]) }
+  else # legacy single-strip-per-column layout
+    Dir[File.join(render_dir, "col*.png")].reject { |f| f =~ /_band\d+/ }.sort
+  end
+crops = crops.select { |f| File.exist?(f) }
+abort "no col crops in #{render_dir} -- run render_state.rb first" if crops.empty?
 
 tables = Hash.new { |h, k| h[k] = [] }
 cur = nil

@@ -4,3 +4,9 @@
 Gemfile.lock
 *.gem
 .DS_Store
+
+# Full-atlas OCR research index (Phase 1 of docs/OCR_NEAREST_CITY_PLAN.md).
+# The atlas is copyrighted: the OCR TEXT CORPUS + derived per-state JSON index stay a
+# local, git-ignored artifact. Only timezone FACTS (dates/offsets/coords authored into
+# zones + features) ship. Never commit this dir.
+/research/
