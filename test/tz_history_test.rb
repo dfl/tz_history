@@ -280,6 +280,31 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 44.039, lon: -69.211, date: "1960-07-15")
   end
 
+  # --- Massachusetts: MA #1 (98%) matches IANA; only rural western MA #2 diverges ---
+  # Crop-verified (PDF 254): MA #1 = EST with continuous EDT every summer from 1920 (exactly
+  # IANA America/New_York -- no residual). MA #2 (14 Franklin/Hampshire hill towns) kept EST
+  # with NO daylight saving in summers 1920 & 1921, resuming DST in 1922. Town-level split.
+
+  def test_western_ma_hill_town_is_est_in_1920_and_1921_summers
+    # Leverett (MA #2): EST while IANA applies EDT, in both divergent summers.
+    [["1920-07-15"], ["1921-07-15"]].each do |d,|
+      tz = TzHistory.for(lat: 42.4519, lon: -72.5019, date: d)
+      assert_equal "Etc/GMT+5", tz.identifier, "Leverett should be EST on #{d}"
+      assert_equal(-5 * 3600, offset_of(tz, d))
+    end
+  end
+
+  def test_western_ma_hill_town_matches_iana_outside_1920_1921
+    # Before 1920 and from 1922 (DST resumed) MA #2 matches IANA -> no override.
+    assert_nil TzHistory.for(lat: 42.4519, lon: -72.5019, date: "1919-07-15")
+    assert_nil TzHistory.for(lat: 42.4519, lon: -72.5019, date: "1922-07-15")
+  end
+
+  def test_ma1_boston_defers_to_iana_always
+    # Boston (MA #1) had continuous DST from 1920 -> IANA is correct, no override.
+    assert_nil TzHistory.for(lat: 42.3601, lon: -71.0589, date: "1920-07-15")
+  end
+
   # --- Maryland: TOWN-LEVEL EST correction, rural vs Baltimore, per-table postwar ---
   # Crop-verified (PDF 239): only MD #1 (greater Baltimore) observed peacetime DST 1920-41;
   # every other (rural) table kept EST while IANA applies continuous NYC EDT. Postwar was
