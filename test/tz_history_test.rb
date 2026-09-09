@@ -161,6 +161,30 @@ class TzHistoryTest < Minitest::Test
     assert_equal "Etc/GMT+5", tz.identifier
   end
 
+  # --- Atlanta-metro Central-set bug fix (was mis-zoned Central 1919-41) ---
+  # Fulton (Atlanta) + Cobb/Clayton/Cherokee/Forsyth were wrongly included in the
+  # Western-Georgia Central set (Etc/GMT+6), so outside the 1937-40 guard they read
+  # Central -- a 1 h error. They are Eastern (like DeKalb): removed from the Central
+  # features, they now fall through to the statewide Georgia EST override (Etc/GMT+5).
+
+  def test_atlanta_metro_is_eastern_standard_not_central_1925
+    # 1925 is outside the 1937-40 guard; before the fix Fulton resolved Etc/GMT+6.
+    %w[fulton cobb clayton cherokee forsyth].zip(
+      [[33.749, -84.388], [33.94, -84.57], [33.54, -84.36], [34.24, -84.48], [34.23, -84.13]]
+    ).each do |name, (lat, lon)|
+      tz = TzHistory.for(lat: lat, lon: lon, date: "1925-06-01")
+      assert_equal "Etc/GMT+5", tz.identifier, "#{name} should be Eastern (EST), not Central"
+    end
+  end
+
+  def test_true_western_georgia_stays_central_1925
+    # Columbus (Muscogee) + LaGrange (Troup) are genuinely Central -- unchanged.
+    [[32.4610, -84.9877], [33.0362, -85.0319]].each do |lat, lon|
+      tz = TzHistory.for(lat: lat, lon: lon, date: "1925-06-01")
+      assert_equal "Etc/GMT+6", tz.identifier
+    end
+  end
+
   # --- north Idaho panhandle: PST 1946-1960 where IANA applies California DST ---
   # The 10 Pacific-zone counties kept Pacific Standard year-round from the end of war
   # time until DST resumed in 1961 (Shanks ID #1-12), but IANA America/Los_Angeles

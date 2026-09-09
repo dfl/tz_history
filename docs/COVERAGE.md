@@ -31,7 +31,7 @@ by locating the state in the atlas (alphabetical) on first touch.
 | Connecticut | 79 | – | IANA? | **done** | Flat Etc/GMT+5 over rural counties (Litchfield/Middlesex/Tolland/Windham) for 1919-10-26..1926-04-25, correcting IANA's spurious NYC 1920–25 summer DST. Urban counties (Fairfield/Hartford/New Haven/New London) → warn (city-by-city split). County map by majority vote (tools/map_counties.rb). |
 | Delaware | 84 | – | IANA? | **done** | Town-by-town DST chaos. Sussex (rural south) → flat Etc/GMT+5 for 1919-10-26..1942-02-09 (no DST 1920–41 vs IANA's continuous EDT). Kent → warn (~50/50 split). New Castle (Wilmington metro) → IANA-ok (continuous DST). |
 | Florida | 90 | ✓ | flat EST/CST | **done** | Dominant no-DST overrides already ship + crop-verified (FL#1 panhandle CST, FL#5 peninsula EST); resolve correctly vs IANA's summer DST. Two residuals logged & deferred (see fallback log): pre-1919 peninsula-Central, minority post-war local-DST counties. |
-| Georgia | 104 | ✓ | flat EST + CST-west | **done*** | Atlanta local DST **1937–1940** (Shanks GA #21, EDT — 4 yrs, not 3) fixed via exclusion guard over Fulton+DeKalb → defer to IANA. Dominant EST/Central overrides already ship. ***Uncovered a pre-existing bug (see fallback log): Fulton is wrongly in the Western-GA Central set → Atlanta mis-zoned Central 1919–41 outside the guard; flagged for a dedicated geometry fix.** |
+| Georgia | 104 | ✓ | flat EST + CST-west | **done** | Atlanta local DST **1937–1940** (Shanks GA #21, EDT — 4 yrs, not 3) fixed via exclusion guard over Fulton+DeKalb → defer to IANA. Dominant EST/Central overrides ship. **Fixed the Atlanta-metro Central bug** (see fallback log): Fulton+Cobb+Clayton+Cherokee+Forsyth dropped from the Western-GA Central set → now resolve statewide EST like DeKalb; 43 true-Central counties unchanged. N/NE-mountain boundary counties may still be over-included (needs a GA time-tables crop pass, logged in DEFERRED). |
 | Idaho | 122 | – | flat PST (N) + flat MST (SE) | **done** | 18 tables (ID #1–#18); two-zone state, resolved with a city→county→table majority map (44 counties, `tools/map_counties.rb`, visual-verified). **Shipped (2 flat overrides + 2 split counties):** (1) flat Etc/GMT+8 over the 10 north panhandle Pacific counties for 1945-09-30..1964-04-26 — dominant table ID #2 kept PST (no DST) 1946–1963 while IANA America/Los_Angeles applies California summer DST 1948 & 1950–1963. (2) flat Etc/GMT+7 over 13 eastern/central Mountain counties for 1919-10-26..1923-05-13 — they went Mountain in 1919 (ID #13–16) but IANA America/Boise stays Pacific until the official 1923-05-13 move. (3) Custer + Power resolved town-by-town via `split` features (nearest documented Shanks town → Mountain override for the eastern towns, defer for the western/southern Boise-match towns). Western/SW counties (Ada/Boise etc., ID #17/#18) match Boise exactly → defer. Residual minorities logged & deferred (see fallback log). |
 | Illinois | 128 | ✓ | flat CST (downstate) | **done** | 100+ tables; resolved via a city→county→table majority map (`tools/map_counties.rb` over PDF 131–149, 102-county legend). **Shipped:** flat Etc/GMT+6 over the 95 downstate counties for two windows (1919-10-26..1942-02-09 and 1945-09-30..1959-07-01) — downstate kept CST (state law required CST birth records until 1959-07-01; dominant table IL #4 = pure CST 1919–1959) while IANA America/Chicago bakes in Chicago's continuous summer DST (CDT every year 1920–1966). Replaced the old coarse downstate "ambiguity" warn with the actual correction. The 7 Chicago-metro counties (Cook, DuPage, Kane, Kendall, Lake, McHenry, Will) defer to IANA via the pre-existing metro exclusion guard (they observed the DST). Town-by-town DST-adoption minorities logged & deferred (see fallback log). |
 | Indiana | 150 | – | warn (statewide) | **done*** | The hardest state. Shanks: "very complex ... contradictory ... not documented." Central-zone (CST) portions observed summer DST; Eastern-zone (EST) portions did not; counties switched Central↔Eastern at poorly-documented dates 1940s–60s (whole state on DST only 1969–70). IANA's 8 America/Indiana/* sub-zones are best-guesses that disagree with Shanks tables in both directions. ***Shipped a statewide `warn` (90 counties, 1918–1970; the clean NW Chicago corner Lake+Porter excluded) that flags the ambiguity and defers to IANA — no override asserted. A real correction needs per-county Shanks-table × per-county IANA-sub-zone reconciliation + synthetic zic zones; logged in `docs/DEFERRED.md` as a dedicated future pass.** |
@@ -89,16 +89,21 @@ up, so partial coverage is never mistaken for complete coverage.
   (Shanks GA #21, EDT), which IANA models; the guard blocks the statewide EST override
   so those years defer to IANA. Dominant statewide-EST (#269/270) + Western-GA Central
   (#40–88) overrides already ship.
-- **⚠ PRE-EXISTING BUG uncovered (needs dedicated fix): Fulton County (Atlanta) is
-  wrongly included in the Western-Georgia Central set** (feature #40, the merged
-  Etc/GMT+6 no-DST set, AND feature #80, a standalone Fulton America/Chicago feature).
-  So Atlanta resolves to CENTRAL time for 1919–1941 outside the 1937–40 guard window —
-  a 1–2 h error — even though Shanks' own Atlanta table (GA #21) is EASTERN. Likely
-  other Atlanta-metro / N-GA counties (Cobb, Clayton, Cherokee…) are similarly
-  over-included. NOT fixed here: #40's geometry is fully pretty-printed (exploded), so
-  removing Fulton needs targeted feature-block surgery (re-emit #40/#80 with compact
-  geometry + corrected county list) or the boundary re-adjudicated — a dedicated pass,
-  not safe to rush. The 1937–40 guard is a strict improvement in the meantime.
+- **✅ FIXED (2026-09, `feature/deferred-backfills`): Fulton (Atlanta) + Cobb/Clayton/
+  Cherokee/Forsyth were wrongly in the Western-Georgia Central set** (the merged Etc/GMT+6
+  feature + their standalone America/Chicago features, incl. the Fulton one), so Atlanta
+  read CENTRAL 1919–1941 outside the 1937–40 guard — a 1 h error, since Shanks' Atlanta
+  table (GA #21) is EASTERN. **Fix:** confirmed via the GA index which metro counties
+  resolved Etc/GMT+6 (vs DeKalb/Gwinnett already Eastern), dropped those 5 counties'
+  polygons from the merged Central feature and deleted their 5 per-county Central features,
+  so they fall through to the statewide GA Eastern override (Etc/GMT+5) like DeKalb. The
+  43 genuinely-Central counties (Columbus/Muscogee, LaGrange/Troup, …) are unchanged. The
+  geojson was normalised to compact-geometry-per-feature in the process (un-exploding the
+  old #40). Regression tests assert Atlanta-metro→EST and true-western-GA→CST for 1925.
+  **Note:** the N/NE-mountain boundary counties (Union/Fannin/Gilmer/Lumpkin/Dawson/
+  Pickens/Bartow) may still be over-included — they need the GA TIME-TABLES crop to map
+  table→zone (the index's per-city table# doesn't encode Central vs Eastern by number);
+  logged in DEFERRED.md for a follow-up crop-verified pass.
 
 **Idaho:** (18 tables; two-zone — Pacific north panhandle + Mountain south. Resolved
 with a city→county→table majority map, `tools/map_counties.rb` over PDF 122–127,
