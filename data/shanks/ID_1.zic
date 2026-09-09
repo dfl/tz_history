@@ -1,0 +1,19 @@
+# Shanks American Atlas TIME TABLE, North Idaho panhandle 1961-DST-resumer towns (Shanks ID #1): Pacific, resumed summer PDT in 1961-1963 -- three years before the dominant ID #2 (PST until 1964). IANA America/Los_Angeles applies California DST 1961-63 so those summers match IANA, but the flat Etc/GMT+8 panhandle override wrongly forces PST. Visual-verified from the crop (PDF 122)..
+# Atlas printed p.110 (PDF p.122), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: visual-verified only.
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/ID_1 -8:00    -    PST  1918 Mar 31  2:00
+                 -8:00    1:00 PWT  1918 Oct 27  2:00
+                 -8:00    -    PST  1919 Mar 30  2:00
+                 -8:00    1:00 PWT  1919 Oct 26  2:00
+                 -8:00    -    PST  1942 Feb  9  2:00
+                 -8:00    1:00 PWT  1945 Sep 30  2:00
+                 -8:00    -    PST  1961 Apr 30  2:00
+                 -8:00    1:00 PDT  1961 Oct 29  2:00
+                 -8:00    -    PST  1962 Apr 29  2:00
+                 -8:00    1:00 PDT  1962 Oct 28  2:00
+                 -8:00    -    PST  1963 Apr 28  2:00
+                 -8:00    1:00 PDT  1963 Oct 27  2:00
+                 -8:00    -    PST  1964 Apr 26  2:00
+                 -8:00    1:00 PDT

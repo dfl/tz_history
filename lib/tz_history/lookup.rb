@@ -47,13 +47,18 @@ module TzHistory
       # a resolvable geographic line (e.g. eastern Custer went Mountain in 1919, the
       # western Salmon-River basin stayed Pacific until Boise's 1923 switch). It embeds
       # the Shanks CITY LISTINGS points; we snap the birth coordinate to the nearest
-      # documented town and apply that town's verdict -- an `override` zone, or a
-      # `warn` (defer to IANA, keeping the straddle note) when the town matched IANA.
-      # This is strictly finer than a whole-county warn and never coarser.
+      # documented town and apply that town's verdict. A town carries EITHER a flat
+      # `zone` (a fixed offset, e.g. Etc/GMT+7) OR a `shanks` transition-table id (a full
+      # zic history, for towns whose DST varied year to year in a way a flat offset can't
+      # express) -- or neither, meaning it matched IANA and we `warn`/defer. This is how
+      # city-specific overrides complement IANA town by town where a county-majority
+      # override can't: each documented town gets its own answer.
       def resolve_split(f, lon, lat)
         c = nearest_city(f[:cities], lon, lat)
         common = f.merge(kind: nil, zone: nil, shanks: nil, city: c && c[:name])
-        if c && c[:zone]
+        if c && c[:shanks]
+          common.merge(kind: "override", shanks: c[:shanks])
+        elsif c && c[:zone]
           common.merge(kind: "override", zone: c[:zone])
         else
           common.merge(kind: "warn") # nearest town matched IANA -> defer, keep the note
@@ -117,7 +122,8 @@ module TzHistory
             from_date: props["from_date"],
             until_date: props["until_date"],
             cities: (props["cities"] || []).map do |c|
-              { name: c["name"], lon: c["lon"].to_f, lat: c["lat"].to_f, zone: c["zone"] }
+              { name: c["name"], lon: c["lon"].to_f, lat: c["lat"].to_f,
+                zone: c["zone"], shanks: c["shanks"] }
             end,
             geometry: polygons,
             bbox: BoundingBox.new(polygons),

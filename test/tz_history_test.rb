@@ -187,21 +187,42 @@ class TzHistoryTest < Minitest::Test
 
   # --- north Idaho panhandle: PST 1946-1960 where IANA applies California DST ---
   # The 10 Pacific-zone counties kept Pacific Standard year-round from the end of war
-  # time until DST resumed in 1961 (Shanks ID #1-12), but IANA America/Los_Angeles
-  # applies California summer DST in 1948 and 1950-1960.
+  # time until DST resumed, but IANA America/Los_Angeles applies California summer DST in
+  # 1948 and 1950-1960. The panhandle is now a TOWN-LEVEL split: most towns (Shanks ID #2)
+  # kept PST through 1963, but the ID #1 towns -- including Coeur d'Alene -- resumed summer
+  # DST in 1961. The correctness invariant is the OFFSET; which zone object serves a point
+  # (Etc/GMT+8 vs Shanks/ID_1) depends on the nearest documented town, and both are PST in
+  # a no-DST year like 1955/1948.
 
-  def test_north_idaho_summer_1955_is_fixed_pst_not_iana_pdt
-    # Coeur d'Alene (Kootenai Co.): flat Etc/GMT+8 corrects IANA's spurious PDT.
-    tz = TzHistory.for(lat: 47.6777, lon: -116.7805, date: "1955-07-15")
-    assert_equal "Etc/GMT+8", tz.identifier
+  def test_north_idaho_summer_1955_is_pst_not_iana_pdt
+    # 1955 predates any Idaho DST resumption, so every panhandle town is PST (-8), not
+    # IANA's spurious PDT -- whichever town the point snaps to.
+    tz = TzHistory.for(lat: 47.6777, lon: -116.7805, date: "1955-07-15") # Coeur d'Alene
     assert_equal(-8 * 3600, offset_of(tz, "1955-07-15")) # PST, not PDT
   end
 
-  def test_north_idaho_summer_1948_is_fixed_pst
-    # Lewiston (Nez Perce Co.): 1948 was California's first post-war DST year.
+  def test_north_idaho_summer_1948_is_pst
+    # 1948 was California's first post-war DST year; the panhandle kept PST (-8).
     tz = TzHistory.for(lat: 46.4165, lon: -117.0177, date: "1948-07-15")
-    assert_equal "Etc/GMT+8", tz.identifier
     assert_equal(-8 * 3600, offset_of(tz, "1948-07-15"))
+  end
+
+  def test_coeur_dalene_resumed_summer_dst_1962_via_town_layer
+    # Coeur d'Alene is a Shanks ID #1 town: it resumed summer DST in 1961, three years
+    # before the ID #2 majority. The old flat override wrongly forced PST 1961-63; the
+    # town-level split resolves it to Shanks/ID_1 -> PDT (-7). This is DEFERRED #5, now fixed.
+    tz = TzHistory.for(lat: 47.6777, lon: -116.7805, date: "1962-07-15")
+    assert_equal "Shanks/ID_1", tz.identifier
+    assert_equal(-7 * 3600, offset_of(tz, "1962-07-15")) # PDT, matching IANA (not forced PST)
+    assert_equal(-8 * 3600, offset_of(tz, "1962-01-15")) # but PST in winter
+  end
+
+  def test_north_idaho_id2_town_still_kept_pst_through_1963
+    # An ID #2 town kept PST even in 1962 (no early DST resumption) -- unchanged by the
+    # town layer, which corrects only the ID #1 resumers. (The ID #4/7/10/12 resumers are
+    # the same pattern and would extend the layer once their tables are transcribed.)
+    tz = TzHistory.for(lat: 48.14, lon: -116.75, date: "1962-07-15") # a Shanks ID #2 town
+    assert_equal(-8 * 3600, offset_of(tz, "1962-07-15"))
   end
 
   def test_north_idaho_war_time_defers_to_iana
@@ -209,12 +230,10 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 47.6777, lon: -116.7805, date: "1944-07-15")
   end
 
-  def test_north_idaho_1962_still_fixed_pst_dominant_table_resumed_dst_in_1964
-    # The dominant panhandle table (ID #2, by majority vote) kept PST through 1963 and
-    # only resumed DST in 1964, so 1962 is still corrected (America/LA has spurious PDT).
-    tz = TzHistory.for(lat: 47.6777, lon: -116.7805, date: "1962-07-15")
-    assert_equal "Etc/GMT+8", tz.identifier
-  end
+  # (Superseded: the old "Coeur d'Alene kept PST in 1962" test asserted the over-correction
+  # bug -- Coeur d'Alene is an ID #1 town that resumed DST in 1961. The ID #2 "kept PST"
+  # invariant is now checked with a real ID #2 coordinate above, and the Coeur d'Alene
+  # correction by test_coeur_dalene_resumed_summer_dst_1962_via_town_layer.)
 
   def test_north_idaho_after_1964_dst_resumption_defers_to_iana
     # From spring 1964 the panhandle observed DST (matching America/Los_Angeles), so defer.
