@@ -185,6 +185,35 @@ class TzHistoryTest < Minitest::Test
     end
   end
 
+  # --- rural Maine: TOWN-LEVEL EST correction where IANA bakes in NYC's continuous DST ---
+  # Shanks ME #1 towns kept EST with no peacetime daylight saving 1920-1954 (war time
+  # excepted), but IANA America/New_York applies EDT every summer. Maine was town-by-town
+  # (coastal/city towns observed DST, rural inland did not), so this is a nearest-town
+  # split: no-DST towns (ME #1, and ME #2 pre-war) resolve to Etc/GMT+5, DST towns defer.
+  # (Crop-verified ME #1/#2; PDF 229.)
+
+  def test_rural_maine_no_dst_town_summer_1930_is_fixed_est
+    tz = TzHistory.for(lat: 44.039, lon: -69.211, date: "1930-07-15") # North Cushing (ME #1)
+    assert_equal "Etc/GMT+5", tz.identifier
+    assert_equal(-5 * 3600, offset_of(tz, "1930-07-15")) # EST, not IANA's EDT
+  end
+
+  def test_rural_maine_no_dst_town_postwar_summer_1950_is_fixed_est
+    tz = TzHistory.for(lat: 43.907, lon: -69.516, date: "1950-07-15") # Pemaquid (ME #1)
+    assert_equal(-5 * 3600, offset_of(tz, "1950-07-15"))
+  end
+
+  def test_maine_dst_town_defers_to_iana
+    # A coastal town that observed local DST (ME #7) defers -- the town layer does NOT
+    # flatten it to EST the way a whole-county override would. This is the town-level win.
+    assert_nil TzHistory.for(lat: 44.056, lon: -69.087, date: "1930-07-15") # Ash Point (ME #7)
+  end
+
+  def test_maine_after_1955_uniform_dst_defers_to_iana
+    # From 1955 (US#2) Maine observed uniform DST, matching IANA -> outside the override window.
+    assert_nil TzHistory.for(lat: 44.039, lon: -69.211, date: "1960-07-15")
+  end
+
   # --- north Idaho panhandle: PST 1946-1960 where IANA applies California DST ---
   # The 10 Pacific-zone counties kept Pacific Standard year-round from the end of war
   # time until DST resumed, but IANA America/Los_Angeles applies California summer DST in
