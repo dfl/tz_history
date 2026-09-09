@@ -38,6 +38,12 @@ subset of towns/years · `bug` = a shipped feature is wrong and needs a fix ·
   minority under the IANA-ok classification. minority / low.
 - **Colorado** — Denver-metro straddle counties (Adams/Douglas/Jefferson + Broomfield)
   shipped as `warn`, not corrected. minority / low (already flagged to users).
+- **Maine** — the 7-window cohort nest (2026-09) coalesces adoption boundaries to 6 years
+  (1931/1932/1934/1936/1938/1940), so tables adopting in the skipped years (1933: #8/#36/#37;
+  1935: #26/#32; 1937: #24/#34; 1941: #2/#22) lose ~1 year of EST at the tail (defer to IANA
+  instead of EST). Under-correction only, never over — safe. ME #28 (3 towns, unread) and
+  the ME #36/#37 stray-1933-summer tables are treated as defer/adopt-1933 conservatively.
+  minority / low. Refine with per-year windows if a specific birth surfaces the need.
 
 ## How to work this backlog
 

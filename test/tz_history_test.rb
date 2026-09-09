@@ -241,10 +241,38 @@ class TzHistoryTest < Minitest::Test
     assert_equal(-5 * 3600, offset_of(tz, "1950-07-15"))
   end
 
-  def test_maine_dst_town_defers_to_iana
-    # A coastal town that observed local DST (ME #7) defers -- the town layer does NOT
-    # flatten it to EST the way a whole-county override would. This is the town-level win.
-    assert_nil TzHistory.for(lat: 44.056, lon: -69.087, date: "1930-07-15") # Ash Point (ME #7)
+  def test_maine_dst_city_town_defers_to_iana
+    # Bangor (ME #14) adopted local DST in 1920 -- IANA already models it, so the town
+    # layer defers rather than flattening to EST. This is the town-level win: a DST city
+    # is NOT swept into the rural EST override the way a whole-county override would.
+    assert_nil TzHistory.for(lat: 44.801, lon: -68.778, date: "1930-07-15") # Bangor (ME #14)
+    assert_nil TzHistory.for(lat: 44.801, lon: -68.778, date: "1925-07-15")
+  end
+
+  # --- Maine adoption-year cohort nest (crop-verified PDF 229) ---
+  # Every rural table follows ME #1 (EST, no DST) until it adopts US-standard DST, then
+  # matches IANA. So a town is EST only in the window BEFORE its table's adoption; the
+  # override defers afterward. Non-overlapping windows key off each cohort's adoption year.
+  def test_maine_me7_is_est_before_1934_then_defers
+    # Ash Point (ME #7) adopted DST 1934-04-29: EST in 1930, defers (IANA EDT) from 1934.
+    tz = TzHistory.for(lat: 44.056, lon: -69.087, date: "1930-07-15")
+    assert_equal(-5 * 3600, offset_of(tz, "1930-07-15"))
+    assert_nil TzHistory.for(lat: 44.056, lon: -69.087, date: "1935-07-15")
+  end
+
+  def test_maine_me6_cohort_1932
+    # Bradley (ME #6) adopted DST 1932-04-24: EST in 1931, defers (IANA EDT) from 1932.
+    tz = TzHistory.for(lat: 44.9208, lon: -68.6286, date: "1931-07-15")
+    assert_equal(-5 * 3600, offset_of(tz, "1931-07-15"))
+    assert_nil TzHistory.for(lat: 44.9208, lon: -68.6286, date: "1935-07-15")
+  end
+
+  def test_maine_me1_stays_est_through_the_whole_prewar_and_postwar
+    # Pemaquid (ME #1) never adopted peacetime DST -> EST across every window to 1954.
+    %w[1925-07-15 1931-07-15 1937-07-15 1941-01-15 1950-07-15].each do |d|
+      assert_equal "Etc/GMT+5", TzHistory.for(lat: 43.907, lon: -69.516, date: d).identifier,
+                   "Pemaquid (ME #1) should be EST on #{d}"
+    end
   end
 
   def test_maine_after_1955_uniform_dst_defers_to_iana
