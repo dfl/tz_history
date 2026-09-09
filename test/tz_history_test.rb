@@ -214,6 +214,27 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 44.039, lon: -69.211, date: "1960-07-15")
   end
 
+  # --- Maryland: TOWN-LEVEL EST correction, rural vs Baltimore ---
+  # Crop-verified (PDF 239): only MD #1 (greater Baltimore) observed peacetime DST 1920-41;
+  # every other (rural) table kept EST while IANA applies continuous NYC EDT. Town-level
+  # split: rural towns -> Etc/GMT+5 (pre-war 1920-1941), Baltimore-area towns defer.
+
+  def test_rural_maryland_summer_1930_is_fixed_est_not_iana_edt
+    tz = TzHistory.for(lat: 39.704, lon: -79.448, date: "1930-07-15") # western MD (rural)
+    assert_equal "Etc/GMT+5", tz.identifier
+    assert_equal(-5 * 3600, offset_of(tz, "1930-07-15")) # EST, not IANA's EDT
+  end
+
+  def test_baltimore_defers_to_iana_for_its_dst
+    # Baltimore (MD #1) observed daylight time, which IANA models -- defer, don't flatten.
+    assert_nil TzHistory.for(lat: 39.290, lon: -76.612, date: "1930-07-15")
+  end
+
+  def test_maryland_war_years_defer_to_iana
+    # 1944 is war time (EWT), which IANA models -> outside the pre-war override window.
+    assert_nil TzHistory.for(lat: 39.704, lon: -79.448, date: "1944-07-15")
+  end
+
   # --- north Idaho panhandle: PST 1946-1960 where IANA applies California DST ---
   # The 10 Pacific-zone counties kept Pacific Standard year-round from the end of war
   # time until DST resumed, but IANA America/Los_Angeles applies California summer DST in
