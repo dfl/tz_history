@@ -214,10 +214,11 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 44.039, lon: -69.211, date: "1960-07-15")
   end
 
-  # --- Maryland: TOWN-LEVEL EST correction, rural vs Baltimore ---
+  # --- Maryland: TOWN-LEVEL EST correction, rural vs Baltimore, per-table postwar ---
   # Crop-verified (PDF 239): only MD #1 (greater Baltimore) observed peacetime DST 1920-41;
-  # every other (rural) table kept EST while IANA applies continuous NYC EDT. Town-level
-  # split: rural towns -> Etc/GMT+5 (pre-war 1920-1941), Baltimore-area towns defer.
+  # every other (rural) table kept EST while IANA applies continuous NYC EDT. Postwar was
+  # per-table: most tables resumed DST in 1947, MD #7 held EST until 1948, MD #16 until 1954.
+  # Modeled as non-overlapping windows so each town gets EST exactly until ITS table's year.
 
   def test_rural_maryland_summer_1930_is_fixed_est_not_iana_edt
     tz = TzHistory.for(lat: 39.704, lon: -79.448, date: "1930-07-15") # western MD (rural)
@@ -231,8 +232,26 @@ class TzHistoryTest < Minitest::Test
   end
 
   def test_maryland_war_years_defer_to_iana
-    # 1944 is war time (EWT), which IANA models -> outside the pre-war override window.
+    # 1944 is war time (EWT), which IANA models -> outside the override window.
     assert_nil TzHistory.for(lat: 39.704, lon: -79.448, date: "1944-07-15")
+  end
+
+  def test_maryland_1947_resumer_town_is_est_1946_then_defers
+    # A town whose table resumed DST in 1947: EST in summer 1946, defers from 1947.
+    assert_equal(-5 * 3600, offset_of(TzHistory.for(lat: 39.704, lon: -79.448, date: "1946-07-15"), "1946-07-15"))
+    assert_nil TzHistory.for(lat: 39.704, lon: -79.448, date: "1947-07-15")
+  end
+
+  def test_maryland_md7_town_held_est_through_1947
+    # MD #7 towns resumed DST only in 1948, so 1947 is still EST; 1950 defers.
+    assert_equal(-5 * 3600, offset_of(TzHistory.for(lat: 38.3953, lon: -75.4133, date: "1947-07-15"), "1947-07-15"))
+    assert_nil TzHistory.for(lat: 38.3953, lon: -75.4133, date: "1950-07-15")
+  end
+
+  def test_maryland_md16_town_held_est_through_1953
+    # MD #16 towns kept EST until US#4 uniform DST in 1954, so 1950 is EST; 1955 defers.
+    assert_equal(-5 * 3600, offset_of(TzHistory.for(lat: 38.7006, lon: -76.9725, date: "1950-07-15"), "1950-07-15"))
+    assert_nil TzHistory.for(lat: 38.7006, lon: -76.9725, date: "1955-07-15")
   end
 
   # --- north Idaho panhandle: PST 1946-1960 where IANA applies California DST ---
