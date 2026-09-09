@@ -32,10 +32,19 @@
 > **visual-verify / transcription** step, which stays the separate gated pass Phase 2/the
 > runbook loop drives. Full atlas ≈ 190 renders ≈ 1.3 h at 3-wide.
 >
-> **Remaining:** run the full-atlas pass (`build_atlas_index.rb`, after `locate_states`
-> fixes the tail ledger drift — WV/WI 604/605 and the unknown late states), then resume
-> the alphabetical sweep (next pending = **Louisiana**) triaging against the index, and
-> backfill `split` on done states where a logged warn is a true geographic straddle.
+> **Full-atlas pass: DONE.** `build_atlas_index.rb --jobs=10` over the header-verified
+> `atlas_pages.tsv` built the git-ignored index for all 48 CONUS states: **~75,600 cities,
+> every state 100% within its bounding box, ~94–99% coord confidence** (7.4 MB local).
+> Bugs it surfaced and we fixed: (a) a `--max-city-pages=8` cap silently truncated every
+> state → raised to 50; (b) 4 SINGLE-TABLE states (AR/CA/SC/WY) drop the per-city table#
+> column (`Name county# LAT LON`) → the parser now accepts both layouts. On a 16-core box,
+> 300dpi is CPU-bound (~54s/pg, near-linear across cores); the full pass ran in ~1 h.
+>
+> **Remaining:** resume the alphabetical sweep (next pending = **Louisiana**, tt PDF 219)
+> triaging against the index instead of re-rendering, applying the Phase-2 decision rule;
+> backfill `split` on done states where a logged warn is a true geographic straddle
+> (candidates: DE Kent, CT urban counties). The index makes each of these a query, not a
+> render. `tools/map_counties.rb --from-cities <ST>/cities.json --split-emit` is the hook.
 
 Status: proposed (2026-09). Prereqs proven on Idaho (see the `split` feature kind in
 `lib/tz_history/lookup.rb` and Custer/Power in `docs/COVERAGE.md`). This is the scale-up
