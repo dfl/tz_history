@@ -30,9 +30,15 @@ require "json"
 require "open3"
 
 dirs = ARGV.reject { |a| a.start_with?("--") }
-abort "usage: extract_cities.rb <render_dir> [more_dirs...] [--out=] [--legend]" if dirs.empty?
+abort "usage: extract_cities.rb <render_dir> [more_dirs...] [--out=] [--legend] [--max-table=N]" if dirs.empty?
 flags = ARGV.grep(/\A--/).to_h { |a| k, v = a.sub("--", "").split("=", 2); [k, v || true] }
 want_legend = flags.key?("legend")
+# The per-city table# is captured by looking back from the LAT+LON pair. When a bled
+# fragment from the neighbouring column shifts the token stream, that look-back can grab
+# the LATITUDE's degree (Maine towns are 43-47N -> spurious table# 44/45/47) instead of
+# the real table#. A state has only so many tables; --max-table=N rejects any record
+# whose table# exceeds N as a bleed misparse (0 = no cap, unchanged for other states).
+$max_table = (flags["max-table"] || 0).to_i
 
 def ocr(img)
   Open3.capture2({ "OMP_THREAD_LIMIT" => "1" }, "tesseract", img, "stdout", "--psm", "6",
@@ -127,6 +133,13 @@ def parse_stream(tokens)
       name_end = i - 2
     else
       i += 2
+      next
+    end
+    # Reject a bleed misparse: a table# above the state's real table count is the
+    # latitude degree that leaked into the table slot (see $max_table). Drop the record
+    # -- the real town is captured cleanly in its own column.
+    if $max_table.positive? && tnum > $max_table
+      i += 3
       next
     end
     # Most Shanks town names are 1-2 words ("American Falls", "Arbon PO"); cap the
