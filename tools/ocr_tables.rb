@@ -8,35 +8,28 @@
 #   ruby tools/render_state.rb <pg> --cols=1 --top=0 --bot=0.45 --band-h=2400 --out=DIR
 #   ruby tools/ocr_tables.rb DIR
 #
-# The dense N-column layout defeated fixed w/N crops (the columns aren't at w/N -- margins
-# shift them -- so crops bleed the neighbour in and headers get lost). The fix: DETECT the
-# real columns. A first tsv pass locates the DATE words; their left-x forms tight per-column
-# clusters, and the wide gaps between clusters are the column separators (so the column
-# COUNT is discovered, not assumed -- Maryland is 5 columns, Idaho 6). We then crop each
-# real column cleanly and OCR it as one block. A numbered table FLOWS DOWN a column and
-# CONTINUES at the next column's top; every table opens with an 18xx epoch date (which OCRs
-# far better than the words "Before"/"LMT"), so that segments them. Columns are cropped to
-# just BEFORE the next column's first date so the ZONE (rightmost field) isn't clipped, and
-# each column is OCR'd in vertical bands (a full-height 300dpi column degrades tesseract at
-# the bottom). The "XX # N" header, when legible, sets the number; otherwise it increments.
+# OCR backend: Apple Vision (tools/vision_ocr.swift) when available -- on-device (so the
+# copyrighted atlas never leaves the machine) and far higher recall on the faint 1978 print
+# than tesseract (24 vs 15 of Maryland's 26 tables). Falls back to tesseract otherwise.
 #
-# STATUS (validated on Maryland + Idaho): a big step up from the old row-merging parser --
-# it auto-detects the column count, and for the tables it DETECTS the DST classification is
-# accurate (Baltimore's continuous DST, the 1947/1948/1954 resumption years, Idaho's 1961
-# resumers + 1930s pre-war DST all come out right). BUT recall is ~50-60% of tables/page:
-# some tables' faint epoch line isn't OCR'd, and a missed table shifts the sequential
-# numbering. So trust the DST *pattern* of a detected table as a strong triage signal, but
-# CROP-VERIFY a table's number + resumption date before authoring (RUNBOOK: OCR is a draft).
-# Full recall needs a sharper source render or a better OCR engine -- a further follow-up.
+# Layout handling: the dense N-column tables have no gutter at a fixed w/N, so we DETECT the
+# columns from the DATE tokens' x-clusters (wide gaps = separators; the COUNT is discovered,
+# not assumed -- Maryland is 5 columns, Idaho 6). Each OCR token (date/time/zone) is a
+# separate box; we assign it to a column by x, group a column's tokens into ROWS by y, and
+# read columns in flow order (a table flows down a column, continues at the next). Every
+# table opens with an 18xx epoch date, which segments them; the "XX # N" header sets the
+# number when legible, else it increments.
+#
+# STILL A DRAFT: recall is high but not perfect and a missed table shifts the numbering, so
+# crop-verify a table's number + resumption date before authoring (RUNBOOK: OCR is a draft).
 
 require "json"
 require "open3"
 
 render_dir = ARGV[0] or abort "usage: ocr_tables.rb <render_dir>"
 manifest = JSON.parse(File.read(File.join(render_dir, "crops.json")))
-full = File.join(render_dir, "full.png")
-w = manifest["page_w"]
-region_h = (manifest["page_h"] * 0.45).to_i
+VISION = File.expand_path("vision_ocr.swift", __dir__)
+HAVE_VISION = system("which", "swift", out: File::NULL, err: File::NULL) && File.exist?(VISION)
 
 ZONES = {
   "EST" => [-5 * 3600, false], "EDT" => [-4 * 3600, true], "EWT" => [-4 * 3600, true], "EPT" => [-4 * 3600, true],
@@ -44,81 +37,101 @@ ZONES = {
   "MST" => [-7 * 3600, false], "MDT" => [-6 * 3600, true], "MWT" => [-6 * 3600, true], "MPT" => [-6 * 3600, true],
   "PST" => [-8 * 3600, false], "PDT" => [-7 * 3600, true], "PWT" => [-7 * 3600, true], "PPT" => [-7 * 3600, true]
 }.freeze
-DATE  = %r{\b(\d{1,2})/(\d{1,2})/(\d{4})\b}
-EPOCH = %r{\b\d{1,2}/\d{1,2}/18\d\d\b}          # the "Before 11/18/1883" opener
-ZONE  = /\b([ECMP][SDWP]T)\b/
-HEADER = /\b([A-Z]{2})\s*[#*XxYy¥]+\s*(\d{1,3})\b/
+DATE  = %r{\A(\d{1,2})/(\d{1,2})/(\d{4})\z}
+EPOCH = %r{\A\d{1,2}/\d{1,2}/18\d\d\z}
+ZONE  = /\A([ECMP][SDWP]T)\z/
+HEADER = /\A[A-Z]{2}\z/
 
-def tsv_date_xs(img)
-  Open3.capture2({ "OMP_THREAD_LIMIT" => "1" }, "tesseract", img, "stdout", "--psm", "6", "tsv",
-                 err: File::NULL).first.each_line.drop(1).filter_map do |l|
-    f = l.chomp.split("\t")
-    f[6].to_i if f.size >= 12 && f[11].to_s =~ %r{\A\d{1,2}/\d{1,2}/\d{2,4}\z}
+# Per band -> tokens [{x, y (vertical center, page coords), text}]. Vision gives box coords
+# (origin top-left); tesseract tsv gives left/top/height.
+def tokens(img, y_off)
+  if HAVE_VISION
+    Open3.capture2("swift", VISION, img).first.each_line.filter_map do |l|
+      f = l.chomp.split("\t")
+      next if f.size < 5
+
+      { x: f[1].to_i, y: f[2].to_i + (f[4].to_i / 2) + y_off, text: f[0].strip }
+    end
+  else
+    Open3.capture2({ "OMP_THREAD_LIMIT" => "1" }, "tesseract", img, "stdout", "--psm", "6", "tsv",
+                   err: File::NULL).first.each_line.drop(1).filter_map do |l|
+      f = l.chomp.split("\t")
+      next if f.size < 12 || f[11].to_s.strip.empty?
+
+      { x: f[6].to_i, y: f[7].to_i + (f[9].to_i / 2) + y_off, text: f[11].strip }
+    end
   end
 end
 
-def ocr(img)
-  Open3.capture2({ "OMP_THREAD_LIMIT" => "1" }, "tesseract", img, "stdout", "--psm", "6", err: File::NULL).first
-end
+# 1. First pass: locate the columns from date-token x-clusters (gaps > 500px = separators;
+#    the COUNT is discovered, not assumed). Boundary sits just BEFORE the next column's
+#    first date so a row's ZONE (rightmost field, in the gutter) isn't clipped off.
+crops = manifest["crops"].sort_by { |c| c["band"] }
+first = crops.flat_map { |c| tokens(File.join(render_dir, c["path"]), c["y"]) }
+abort "no OCR tokens" if first.empty?
+date_xs = first.select { |t| t[:text] =~ %r{\A\d{1,2}/\d{1,2}/\d{2,4}\z} }.map { |t| t[:x] }.sort
+abort "no date tokens -- not a time-tables page?" if date_xs.size < 5
+seps = date_xs.each_cons(2).select { |a, b| b - a > 500 }.map { |_a, b| b - 90 }
+w = manifest["page_w"]
+region_h = (manifest["page_h"] * 0.45).to_i
+bounds = ([0] + seps + [w]).each_cons(2).to_a
 
-# 1. Locate columns from the DATE-word x clusters (gaps > 500px = column separators).
-xs = manifest["crops"].sort_by { |c| c["band"] }
-                      .flat_map { |c| tsv_date_xs(File.join(render_dir, c["path"])) }.sort
-abort "no date words -- not a time-tables page?" if xs.size < 5
-# A column's row is date..time..ZONE, and the zone reaches almost to the NEXT column's
-# date; so the boundary must sit just BEFORE the next column's first date (b - margin),
-# not at the gap midpoint -- else the zone (the bit we most need) gets clipped.
-seps = xs.each_cons(2).select { |a, b| b - a > 500 }.map { |_a, b| b - 90 }
-bounds = [0] + seps + [w]
-
-# 2. Crop each real column and OCR it, VERTICALLY BANDED (a full-height 300dpi column
-#    degrades tesseract at the bottom, dropping the last tables in each column), then
-#    concatenate in column order (a table flows down a column, so its rows stay together).
+# 2. CROP each real column (banded -- a full-height 300dpi column degrades OCR at the
+#    bottom) and OCR the clean single-column crop. Group its tokens into ROWS by y. A table
+#    flows down a column and continues at the next's top, so read columns in order.
+LINE_TOL = 24
 tmp = File.join(render_dir, "_col.png")
 lines = []
-band_h = 2400
-band_ov = 200
-(bounds.size - 1).times do |c|
-  x0 = bounds[c]
-  cw = bounds[c + 1] - x0
-  step = band_h - band_ov
-  prev = nil
-  (0...region_h).step(step) do |y0|
-    bh = [band_h, region_h - y0].min
+full = File.join(render_dir, "full.png")
+bounds.each do |x0, x1|
+  cw = x1 - x0
+  (0...region_h).step(2200) do |y0|
+    bh = [2400, region_h - y0].min
     next if bh <= 0
 
     system("magick", full, "-crop", "#{cw}x#{bh}+#{x0}+#{y0}", "+repage", tmp, err: File::NULL)
-    ocr(tmp).each_line do |l|
-      l = l.rstrip
-      # drop the line repeated across the band overlap
-      lines << l unless l.empty? || l == prev
-      prev = l
+    toks = tokens(tmp, y0).sort_by { |t| [t[:y], t[:x]] }
+    cur_y = nil
+    row = nil
+    toks.each do |t|
+      if cur_y.nil? || (t[:y] - cur_y).abs > LINE_TOL
+        lines << row if row
+        row = []
+        cur_y = t[:y]
+      end
+      row << t[:text]
     end
+    lines << row if row
   end
 end
 File.delete(tmp) if File.exist?(tmp)
 
-# 3. Segment at each epoch date; number from a legible header else increment; parse rows.
+# Segment tables at each epoch date; number from a legible header else increment.
 tables = []
 cur = nil
-lines.each_with_index do |line, i|
-  if line =~ EPOCH
+lines.each_with_index do |toks, i|
+  if toks.any? { |t| t =~ EPOCH }
     hdr = nil
-    ((i - 3)..i).each { |j| (m = lines[j]&.match(HEADER)) && m[2].to_i.positive? && (hdr = m[2].to_i) }
-    cur = { num: hdr || ((tables.last&.dig(:num) || 0) + 1), rows: [] }
+    ((i - 2)..i).each do |j|
+      next unless lines[j]
+
+      lines[j].each_index { |k| lines[j][k] =~ HEADER && lines[j][k + 1] =~ /\A\d{1,3}\z/ && (hdr = lines[j][k + 1].to_i) }
+    end
+    cur = { num: (hdr&.positive? ? hdr : (tables.last&.dig(:num) || 0) + 1), rows: [] }
     tables << cur
     next
   end
   next unless cur
 
-  d = line.match(DATE) or next
-  y, mo, dy = d[3].to_i, d[1].to_i, d[2].to_i
+  di = toks.index { |t| t =~ DATE } or next
+  m = toks[di].match(DATE)
+  y, mo, dy = m[3].to_i, m[1].to_i, m[2].to_i
   next unless y.between?(1884, 1970) && mo.between?(1, 12) && dy.between?(1, 31)
 
-  if line =~ ZONE
-    off, dst = ZONES[Regexp.last_match(1)]
-    cur[:rows] << { at_local: format("%04d-%02d-%02d", y, mo, dy), abbr: Regexp.last_match(1), off: off, dst: dst, uniform: false }
-  elsif line =~ /US\s*[#*]?\s*\d/i
+  if (zt = toks.find { |t| t =~ ZONE })
+    off, dst = ZONES[zt]
+    cur[:rows] << { at_local: format("%04d-%02d-%02d", y, mo, dy), abbr: zt, off: off, dst: dst, uniform: false }
+  elsif toks.any? { |t| t =~ /\AUS/ }
     cur[:rows] << { at_local: format("%04d-%02d-%02d", y, mo, dy), abbr: "US#", off: nil, dst: nil, uniform: true }
   end
 end
@@ -129,7 +142,7 @@ result = by_num.transform_values { |rows| rows.uniq { |r| r[:at_local] }.sort_by
 
 out = File.join(render_dir, "ocr_tables.json")
 File.write(out, JSON.pretty_generate(result.transform_keys(&:to_s)))
-puts "parsed #{result.size} tables in #{bounds.size - 1} columns -> #{out}"
+puts "parsed #{result.size} tables in #{bounds.size} columns via #{HAVE_VISION ? 'Vision' : 'tesseract'} -> #{out}"
 result.sort.each do |num, rows|
   peace = rows.select { |r| r[:dst] }.map { |r| r[:at_local][0, 4].to_i }
               .reject { |y| (1942..1945).cover?(y) || [1918, 1919].include?(y) }.uniq.sort
