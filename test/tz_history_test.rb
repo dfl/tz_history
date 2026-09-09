@@ -217,10 +217,18 @@ class TzHistoryTest < Minitest::Test
     assert_equal(-8 * 3600, offset_of(tz, "1962-01-15")) # but PST in winter
   end
 
+  def test_lewiston_id12_also_resumed_summer_dst_1962
+    # Lewiston (Nez Perce Co., Shanks ID #12) is another 1961-resumer -- all five resumer
+    # tables (ID #1/#4/#7/#10/#12) share the identical in-window history, so they map to the
+    # same crop-verified transition zone. Summer 1962 is PDT (-7), winter PST (-8).
+    tz = TzHistory.for(lat: 46.4165, lon: -117.0177, date: "1962-07-15")
+    assert_equal(-7 * 3600, offset_of(tz, "1962-07-15"))
+    assert_equal(-8 * 3600, offset_of(tz, "1962-01-15"))
+  end
+
   def test_north_idaho_id2_town_still_kept_pst_through_1963
     # An ID #2 town kept PST even in 1962 (no early DST resumption) -- unchanged by the
-    # town layer, which corrects only the ID #1 resumers. (The ID #4/7/10/12 resumers are
-    # the same pattern and would extend the layer once their tables are transcribed.)
+    # town layer, which corrects only the ID #1/#4/#7/#10/#12 resumers.
     tz = TzHistory.for(lat: 48.14, lon: -116.75, date: "1962-07-15") # a Shanks ID #2 town
     assert_equal(-8 * 3600, offset_of(tz, "1962-07-15"))
   end
