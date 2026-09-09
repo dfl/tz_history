@@ -185,6 +185,44 @@ class TzHistoryTest < Minitest::Test
     end
   end
 
+  # --- N/NE-mountain boundary counties: genuinely Central until the 1941 switch ---
+  # Union/Fannin/Gilmer/Lumpkin/Dawson/Pickens/Bartow all cite Shanks GA #8 (crop-
+  # verified, PDF 104): CST with NO peacetime daylight saving from 1919, switching to
+  # Eastern on 1941-03-21. IANA models them America/New_York (Eastern) for all time, so
+  # the pre-1941 CST is a real correction. This locks the timeline in place: DEFERRED #1
+  # once worried these were "wrongly kept Central" -- the crop shows they belong there
+  # pre-1941, and dropping them would reintroduce a 1 h error. The seats below resolve
+  # via feat[40] (Etc/GMT+6, window 1919-10-26..1941-03-21) then the statewide EST.
+  GA_MOUNTAIN_SEATS = {
+    "Blairsville (Union)" => [34.8761, -83.9583], "Blue Ridge (Fannin)" => [34.8687, -84.3238],
+    "Ellijay (Gilmer)" => [34.6939, -84.4822], "Dahlonega (Lumpkin)" => [34.5325, -83.9850],
+    "Dawsonville (Dawson)" => [34.4211, -84.1192], "Jasper (Pickens)" => [34.4678, -84.4292],
+    "Cartersville (Bartow)" => [34.1650, -84.8000]
+  }.freeze
+
+  def test_ga_mountain_counties_are_central_no_dst_before_1941
+    # Summer 1938 is inside the peacetime-DST era, but GA #8 had NO peacetime DST:
+    # a flat Etc/GMT+6 (CST), not IANA's EDT and not America/Chicago's CDT.
+    GA_MOUNTAIN_SEATS.each do |name, (lat, lon)|
+      tz = TzHistory.for(lat: lat, lon: lon, date: "1938-07-15")
+      assert_equal "Etc/GMT+6", tz.identifier, "#{name} should be CST (no DST) in 1938"
+    end
+  end
+
+  def test_ga_mountain_counties_switch_to_eastern_after_1941
+    # Post-1941 they follow GA #8's switch to Eastern -> statewide EST override.
+    GA_MOUNTAIN_SEATS.each do |name, (lat, lon)|
+      tz = TzHistory.for(lat: lat, lon: lon, date: "1946-06-15")
+      assert_equal "Etc/GMT+5", tz.identifier, "#{name} should be Eastern (EST) in 1946"
+    end
+  end
+
+  def test_ga_mountain_switch_straddles_march_1941
+    # Blairsville (Union): CST just before the 1941-03-21 switch, Eastern just after.
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 34.8761, lon: -83.9583, date: "1941-02-15").identifier
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 34.8761, lon: -83.9583, date: "1941-06-15").identifier
+  end
+
   # --- rural Maine: TOWN-LEVEL EST correction where IANA bakes in NYC's continuous DST ---
   # Shanks ME #1 towns kept EST with no peacetime daylight saving 1920-1954 (war time
   # excepted), but IANA America/New_York applies EDT every summer. Maine was town-by-town

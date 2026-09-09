@@ -14,7 +14,7 @@ subset of towns/years · `bug` = a shipped feature is wrong and needs a fix ·
 
 | # | State | Item | Type | Impact | Fix needed |
 |---|-------|------|------|--------|-----------|
-| 1 | Georgia | ✅ **FIXED (2026-09):** Fulton (Atlanta) + Cobb/Clayton/Cherokee/Forsyth dropped from the Western-GA Central set → now resolve statewide EST (Etc/GMT+5) like DeKalb; 43 true-Central counties unchanged; regression tests added; geojson normalised to compact geometry. **Residual:** N/NE-mountain boundary counties (Union/Fannin/Gilmer/Lumpkin/Dawson/Pickens/Bartow) may still be over-included — needs the GA TIME-TABLES crop to map table→zone (the index's per-city table# doesn't encode Central vs Eastern). | bug (core fixed) | resolved (mountain-tier residual: low) | Mountain-tier: crop-verify GA time tables → classify each boundary county → drop the Eastern ones from the Central feature. |
+| 1 | Georgia | ✅ **FIXED (2026-09):** Fulton (Atlanta) + Cobb/Clayton/Cherokee/Forsyth dropped from the Western-GA Central set → now resolve statewide EST (Etc/GMT+5) like DeKalb; 43 true-Central counties unchanged; regression tests added; geojson normalised to compact geometry. **Mountain-tier residual RESOLVED (2026-09, crop-verified PDF 104, no change needed):** all 7 boundary counties (Union/Fannin/Gilmer/Lumpkin/Dawson/Pickens/Bartow) cite Shanks **GA #8** (97–100% majority), which the time-tables crop shows is **Central-no-DST from 1919 → switches to Eastern on 1941-03-21**. So they were *genuinely* Central pre-1941 — the earlier "may be over-included" worry is refuted; dropping them would reintroduce a 1 h error. The shipped feat[40] (`Etc/GMT+6`, window 1919-10-26..1941-03-21) already covers them and its window ends exactly at the switch; feat[264/265] (`Etc/GMT+5`) carry post-1941 EST. Verified every indexed city in all 7 counties resolves CST pre-1941 (no CDT summer leak — the per-county `America/Chicago` features are correctly shadowed by feat[40]) and EST in 1946. 3 regression tests added (`test_ga_mountain_*`). **Note:** the per-county `America/Chicago` GA features (feat[43/46/59/71/75/77/79]) are dead code (always shadowed) — harmless but removable in a future cleanup. | bug (fixed) + residual (resolved) | done | — (verified correct; no geometry change) |
 | 2 | Florida | Pre-1919 peninsula was **Central** (switched to Eastern 1919-01-01); IANA models it Eastern back to 1883 → pre-1919 peninsula births read 1 h fast. | transition | low (pre-1919 volume) | Not a flat fix — peninsula ran CWT (−05) in 1918 before the switch; needs a transition zone, not flat Etc/GMT+6. |
 | 3 | Florida | Minority post-war local DST: FL #2/#3/#4 (Central) had CDT in scattered 1931/1941/1946–65 summers; FL #6 (Eastern) EDT 1946. Dominant no-DST override over-corrects those county-summers. | minority | low | Per-county summer carve-outs or synthetic zones; low value. |
 | 4 | Alabama | Minority-table city DST the statewide AL_1 doesn't model: AL #2 (summers 1958–60) and AL #4 (1935, 1940) — likely Birmingham/Mobile one-off local DST. Under-corrected (reads CST). | minority | low | Per-city-year carve-outs; not worth it standalone. |
@@ -41,8 +41,9 @@ subset of towns/years · `bug` = a shipped feature is wrong and needs a fix ·
 
 ## How to work this backlog
 
-Sort by Impact. Item 1 (Georgia Fulton bug) is the only **bug** and the highest-value
-single fix. Item 11 (Indiana) is the largest and highest-impact *residual* but also the
+Sort by Impact. Item 1 (Georgia) is fully resolved — the Fulton metro bug was fixed and
+the N/NE-mountain boundary counties were crop-verified as genuinely Central pre-1941 (no
+change needed). Item 11 (Indiana) is the largest and highest-impact *residual* but also the
 hardest — a dedicated multi-day pass in its own right (and Shanks flags the data as
 contradictory, so it may only partly resolve). Item 9 (Illinois town-by-town) is the next
 largest residual but is tractable because the IL city→county→table map already exists in a
