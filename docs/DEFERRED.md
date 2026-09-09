@@ -48,3 +48,37 @@ contradictory, so it may only partly resolve). Item 9 (Illinois town-by-town) is
 largest residual but is tractable because the IL city→county→table map already exists in a
 session scratchpad. Everything else is low-volume minority/sliver work — batch it, or
 address opportunistically when a specific birth record surfaces the need.
+
+## Index-informed status (2026-09, branch `feature/deferred-backfills`)
+
+The full-atlas index (`research/index/<ST>/`, git-ignored) + `tools/analyze_split.rb`
+(geographic-separability test) now make most of this a query, not a re-render. Findings:
+
+**Geographic-split backfills** (candidates that were `warn`/IANA-ok):
+- **DE New Castle** — separability **0.93 / 20 km** override(no-DST rural south) vs
+  defer(DST Wilmington). Currently shipped IANA-ok; a `split` would correctly give the
+  rural-south towns Etc/GMT+5. Real (if modest) fix. *Next: crop-verify pg 85–89, clean
+  the town names, emit via `map_counties --split-emit`, add a test.*
+- **DE Kent** — **0.84 / 13 km**, borderline geographic → a `split` resolves the warn.
+- **DE Sussex** — **not a split**: no defer group (uniformly no-DST) → already correct as a
+  flat override. Remove from split candidates.
+- **CO Jefferson / LA c38** — spatially separable BUT must first confirm the two tables
+  differ in DST/offset (separability alone ≠ a meaningful split). Pending table-semantics.
+
+**Georgia Fulton bug** (item 1) — *index helps but needs a clean GA county map first.*
+The Central set is feat[40] (48-poly `Etc/GMT+6`) + feat[41–88] (per-county
+`America/Chicago`); Fulton (13121) is wrongly inside → Atlanta reads Central 1919–41.
+Blocker found: the GA index's **159-county legend did not OCR into names**, and the
+"GA #11–15 = Central" table labels don't line up with the index's table numbers, so the
+Central FIPS set can't yet be re-derived by county#. **Refined approach:** identify the
+true Central counties GEOGRAPHICALLY (western tier, town-lon ≲ −84.8, sharing the Central
+table) from the index town coords, map to FIPS by point-in-county (coords → plotly county
+polygons), then re-emit feat[40] + the per-county Central features COMPACT minus Fulton +
+any Eastern-voting metro (DeKalb/Cobb/Clayton/Cherokee), and assert Atlanta→Eastern
+1919–41 in a test. Careful geometry work — do it deliberately, not rushed (rushing is what
+produced the original over-inclusion).
+
+**Illinois (item 9/10)** and **Indiana (item 11)** — the prerequisite city→county→table
+maps are now permanent in the index (IL 3018 cities/121 counties; IN 2040/98), so both are
+unblocked from the OCR side; each still needs its own authoring pass (IL per-county DST
+windows; IN sub-zone reconciliation + synthetic zic).
