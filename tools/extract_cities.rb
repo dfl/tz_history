@@ -110,10 +110,22 @@ def parse_stream(tokens)
       i += 1
       next
     end
-    # Look back for table# then county# (two small integers), then the name.
-    tnum = tokens[i - 1]&.match(/\A\d{1,3}\z/) && tokens[i - 1].to_i
-    cnum = tokens[i - 2]&.match(/\A\d{1,3}\z/) && tokens[i - 2].to_i
-    unless tnum && cnum && cnum.positive? && tnum.positive?
+    # Look back for the integer column(s) before the lat. Two layouts:
+    #   multi-table states:  Name county# table# LAT LON   ("Arbon 39 18 42n27'21 ..")
+    #   single-table states: Name county#        LAT LON   ("Hunt 64 34n57 ..") -- when a
+    #     state has ONE table the atlas drops the per-city table# column, so only county#
+    #     precedes the lat and the table is implicitly 1.
+    int1 = tokens[i - 1]&.match(/\A\d{1,3}\z/) && tokens[i - 1].to_i
+    int2 = tokens[i - 2]&.match(/\A\d{1,3}\z/) && tokens[i - 2].to_i
+    if int1&.positive? && int2&.positive? # county# table#
+      cnum = int2
+      tnum = int1
+      name_end = i - 3
+    elsif int1&.positive? # county# only -> single-table state, table = 1
+      cnum = int1
+      tnum = 1
+      name_end = i - 2
+    else
       i += 2
       next
     end
@@ -121,7 +133,7 @@ def parse_stream(tokens)
     # walk-back at 2 so a stray bled name-token from the neighbouring column can't
     # prepend itself to the real name.
     name_toks = []
-    j = i - 3
+    j = name_end
     while j >= 0 && name_toks.size < 2 && tokens[j] !~ /\A\d/ && tokens[j] =~ /[A-Za-z]/
       name_toks.unshift(tokens[j].gsub(/[^A-Za-z.'()\-]/, ""))
       j -= 1
