@@ -20,8 +20,17 @@
 # table opens with an 18xx epoch date, which segments them; the "XX # N" header sets the
 # number when legible, else it increments.
 #
-# STILL A DRAFT: recall is high but not perfect and a missed table shifts the numbering, so
-# crop-verify a table's number + resumption date before authoring (RUNBOOK: OCR is a draft).
+# STATUS (validated on Maryland + Idaho): for the tables it OUTPUTS, the DST classification
+# is accurate -- Baltimore's continuous DST, MD #6=1947 / #7=1948 resumptions, Idaho's 1961
+# resumers + 1930s pre-war DST. A table whose "XX # N" header is legible is labelled with
+# that number (authoritative); otherwise it's "~N" (a positional guess -- crop-verify).
+# Higher DPI helps and is supported (--dpi=600); all pixel geometry scales with it.
+#
+# KNOWN LIMIT: recall is ~50-60% of tables. This is NOT an OCR-recall problem any more --
+# Vision sees ~all the "Before 18xx" openers in a raw scan -- it's the token->row->table
+# RECONSTRUCTION (column assignment + row grouping) dropping tables. Closing that is a
+# pipeline task, not an OCR one. So: trust the DST pattern of an OUTPUT table, treat "~N"
+# numbers as hints, and crop-verify before authoring (RUNBOOK: OCR is a draft).
 
 require "json"
 require "open3"
@@ -71,7 +80,10 @@ first = crops.flat_map { |c| tokens(File.join(render_dir, c["path"]), c["y"]) }
 abort "no OCR tokens" if first.empty?
 date_xs = first.select { |t| t[:text] =~ %r{\A\d{1,2}/\d{1,2}/\d{2,4}\z} }.map { |t| t[:x] }.sort
 abort "no date tokens -- not a time-tables page?" if date_xs.size < 5
-seps = date_xs.each_cons(2).select { |a, b| b - a > 500 }.map { |_a, b| b - 90 }
+# All pixel geometry scales with DPI (higher DPI => bigger image => bigger gaps), so the
+# column-gap threshold, the zone margin, and the row tolerance are all relative to it.
+s = (manifest["dpi"] || 300) / 300.0
+seps = date_xs.each_cons(2).select { |a, b| b - a > 500 * s }.map { |_a, b| b - (90 * s).to_i }
 w = manifest["page_w"]
 region_h = (manifest["page_h"] * 0.45).to_i
 bounds = ([0] + seps + [w]).each_cons(2).to_a
@@ -79,14 +91,15 @@ bounds = ([0] + seps + [w]).each_cons(2).to_a
 # 2. CROP each real column (banded -- a full-height 300dpi column degrades OCR at the
 #    bottom) and OCR the clean single-column crop. Group its tokens into ROWS by y. A table
 #    flows down a column and continues at the next's top, so read columns in order.
-LINE_TOL = 24
+line_tol = (24 * s).to_i
+band = (2400 * s).to_i
 tmp = File.join(render_dir, "_col.png")
 lines = []
 full = File.join(render_dir, "full.png")
 bounds.each do |x0, x1|
   cw = x1 - x0
-  (0...region_h).step(2200) do |y0|
-    bh = [2400, region_h - y0].min
+  (0...region_h).step(band - (200 * s).to_i) do |y0|
+    bh = [band, region_h - y0].min
     next if bh <= 0
 
     system("magick", full, "-crop", "#{cw}x#{bh}+#{x0}+#{y0}", "+repage", tmp, err: File::NULL)
@@ -94,7 +107,7 @@ bounds.each do |x0, x1|
     cur_y = nil
     row = nil
     toks.each do |t|
-      if cur_y.nil? || (t[:y] - cur_y).abs > LINE_TOL
+      if cur_y.nil? || (t[:y] - cur_y).abs > line_tol
         lines << row if row
         row = []
         cur_y = t[:y]
@@ -109,15 +122,19 @@ File.delete(tmp) if File.exist?(tmp)
 # Segment tables at each epoch date; number from a legible header else increment.
 tables = []
 cur = nil
+last_epoch = -99
 lines.each_with_index do |toks, i|
-  if toks.any? { |t| t =~ EPOCH }
+  # The "Before 11/18/1883" opener AND the "11/18/1883 12:00 EST" first row both carry the
+  # 18xx date (adjacent lines); dedup so each table starts once, not twice.
+  if toks.any? { |t| t =~ EPOCH } && i - last_epoch > 2
+    last_epoch = i
     hdr = nil
     ((i - 2)..i).each do |j|
       next unless lines[j]
 
       lines[j].each_index { |k| lines[j][k] =~ HEADER && lines[j][k + 1] =~ /\A\d{1,3}\z/ && (hdr = lines[j][k + 1].to_i) }
     end
-    cur = { num: (hdr&.positive? ? hdr : (tables.last&.dig(:num) || 0) + 1), rows: [] }
+    cur = { hdr: (hdr&.positive? ? hdr : nil), rows: [] }
     tables << cur
     next
   end
@@ -136,17 +153,24 @@ lines.each_with_index do |toks, i|
   end
 end
 
-by_num = {}
-tables.each { |t| (by_num[t[:num]] ||= []).concat(t[:rows]) }
-result = by_num.transform_values { |rows| rows.uniq { |r| r[:at_local] }.sort_by { |r| r[:at_local] } }
+# Keep EVERY detected table in detection order (a table flows down a column then continues
+# at the next, so this is Shanks order). The legible "XX # N" header gives the authoritative
+# number; where it's missing the position is only a hint. Merging by a fabricated sequential
+# number was collapsing distinct tables -- don't.
+tables.each { |t| t[:rows] = t[:rows].uniq { |r| r[:at_local] }.sort_by { |r| r[:at_local] } }
+seq = 0
+tables.each { |t| seq = t[:hdr] || (seq + 1); t[:label] = t[:hdr] ? t[:hdr].to_s : "~#{seq}" }
+result = tables.map { |t| [t[:label], t[:rows]] }
 
 out = File.join(render_dir, "ocr_tables.json")
-File.write(out, JSON.pretty_generate(result.transform_keys(&:to_s)))
-puts "parsed #{result.size} tables in #{bounds.size} columns via #{HAVE_VISION ? 'Vision' : 'tesseract'} -> #{out}"
-result.sort.each do |num, rows|
-  peace = rows.select { |r| r[:dst] }.map { |r| r[:at_local][0, 4].to_i }
-              .reject { |y| (1942..1945).cover?(y) || [1918, 1919].include?(y) }.uniq.sort
+File.write(out, JSON.pretty_generate(result.to_h))
+headered = tables.count { |t| t[:hdr] }
+puts "parsed #{tables.size} tables (#{headered} header-numbered) in #{bounds.size} columns " \
+     "via #{HAVE_VISION ? 'Vision' : 'tesseract'} -> #{out}"
+tables.each do |t|
+  peace = t[:rows].select { |r| r[:dst] }.map { |r| r[:at_local][0, 4].to_i }
+                  .reject { |y| (1942..1945).cover?(y) || [1918, 1919].include?(y) }.uniq.sort
   resume = peace.find { |y| y >= 1946 }
-  puts format("  #%-3d %2d rows  peacetime-DST %-24s %s", num, rows.size, peace.first(8).join(","),
+  puts format("  %-5s %2d rows  peacetime-DST %-24s %s", t[:label], t[:rows].size, peace.first(8).join(","),
               resume ? "resume #{resume}" : (peace.empty? ? "NO-DST" : ""))
 end
