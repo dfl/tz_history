@@ -1079,4 +1079,26 @@ class TzHistoryTest < Minitest::Test
   def test_south_dakota_far_west_mountain_defers
     assert_nil TzHistory.for(lat: 44.0805, lon: -103.2310, date: "1930-07-15") # Rapid City (SD#3) = Mountain -> IANA Denver
   end
+
+  # --- Tennessee two-zone, verify-confirmed (tt PDF 510-511; existing per-county treatment) ---
+  # West/Middle TN = Central (Shanks TN#3, crop-verified pure CST). East TN = Central until its
+  # per-county 1946-1960 switch to Eastern (the SHIPPED model per harmonic-explorer tn_dst_history.md;
+  # note Shanks TN#1 lists East-TN cities as EST from 1883, deliberately overridden). NE Tri-Cities
+  # = Eastern since 1883 (Shanks TN#1/#2, crop-verified pure EST).
+  def test_tennessee_west_middle_is_central
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 35.1495, lon: -90.0490, date: "1930-07-15").identifier # Memphis
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 36.1627, lon: -86.7816, date: "1930-07-15").identifier # Nashville
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 36.1627, lon: -86.7816, date: "1950-07-15").identifier # still Central
+  end
+
+  def test_tennessee_east_switches_central_to_eastern
+    # Knoxville: Central before its mid-century switch, Eastern after.
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 35.9606, lon: -83.9207, date: "1930-07-15").identifier
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 35.9606, lon: -83.9207, date: "1950-07-15").identifier
+  end
+
+  def test_tennessee_ne_tricities_is_eastern
+    # Bristol (NE Tri-Cities): Eastern (EST) since 1883, no DST.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 36.5951, lon: -82.1887, date: "1930-07-15").identifier
+  end
 end
