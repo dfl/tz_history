@@ -992,4 +992,23 @@ class TzHistoryTest < Minitest::Test
     assert_equal "Etc/GMT+6", TzHistory.for(lat: 36.1540, lon: -95.9928, date: "1966-07-15").identifier
     assert_nil TzHistory.for(lat: 36.1540, lon: -95.9928, date: "1968-07-15") # post US#1 -> IANA
   end
+
+  # --- Oregon Pacific no-DST 1953-1960 (tt PDF 439, tables OR#1-17) ---
+  # Oregon had no state DST law 1949-1962; in the 1953-1960 decade EVERY Oregon table
+  # (rural OR#2 and urban Portland OR#12) kept PST, while IANA America/Los_Angeles applies
+  # California's PDT every summer. Flat Etc/GMT+8 over the 35 Pacific counties for that
+  # window; Malheur (OR#1, Mountain) and the messy edge summers defer -> DEFERRED.md.
+  def test_oregon_pacific_is_pst_no_dst_1953_1960
+    # Portland: PST (-8) all summer while IANA America/Los_Angeles applies PDT (-7).
+    tz = TzHistory.for(lat: 45.5152, lon: -122.6784, date: "1955-07-15")
+    assert_equal "Etc/GMT+8", tz.identifier
+    assert_equal(-8 * 3600, offset_of(tz, "1955-07-15"))
+    assert_equal "Etc/GMT+8", TzHistory.for(lat: 44.0521, lon: -123.0868, date: "1960-07-15").identifier # Eugene
+  end
+
+  def test_oregon_edge_years_and_malheur_defer
+    assert_nil TzHistory.for(lat: 45.5152, lon: -122.6784, date: "1948-07-15") # Portland had DST 1948
+    assert_nil TzHistory.for(lat: 45.5152, lon: -122.6784, date: "1962-07-15") # DST resumed by 1962
+    assert_nil TzHistory.for(lat: 44.0266, lon: -116.9629, date: "1955-07-15") # Malheur = Mountain
+  end
 end
