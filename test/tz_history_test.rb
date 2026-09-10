@@ -280,6 +280,26 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 44.039, lon: -69.211, date: "1960-07-15")
   end
 
+  # --- Maine tables ME#39-49 recovery (tt spans PDF 229-230; the original --max-table=38
+  # wrongly dropped ~230 towns on these real tables). Index rebuilt to 1188 towns. ---
+  def test_maine_me44_recovered_est_before_1931
+    # Beaver Dam (ME #44) adopted DST 1931: EST in 1928, defers after.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 43.2667, lon: -70.8667, date: "1928-07-15").identifier
+    assert_nil TzHistory.for(lat: 43.2667, lon: -70.8667, date: "1935-07-15")
+  end
+
+  def test_maine_me45_recovered_est_through_prewar
+    # Bancroft (ME #45) adopted DST 1946: EST every pre-war summer.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 45.6736, lon: -68.0314, date: "1940-07-15").identifier
+  end
+
+  def test_maine_me47_recovered_postwar_est_until_1949
+    # Bas Alton (ME #47) adopted DST 1949: EST pre-war AND postwar 1946-1948, defers after.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 45.0333, lon: -68.7333, date: "1935-07-15").identifier
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 45.0333, lon: -68.7333, date: "1947-07-15").identifier
+    assert_nil TzHistory.for(lat: 45.0333, lon: -68.7333, date: "1950-07-15")
+  end
+
   # --- Massachusetts: MA #1 (98%) matches IANA; only rural western MA #2 diverges ---
   # Crop-verified (PDF 254): MA #1 = EST with continuous EDT every summer from 1920 (exactly
   # IANA America/New_York -- no residual). MA #2 (14 Franklin/Hampshire hill towns) kept EST
