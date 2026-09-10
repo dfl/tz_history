@@ -684,6 +684,23 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 39.6944, lon: -74.8417, date: "1925-07-15")
   end
 
+  # --- New Mexico: pure MST, no peacetime DST until 1967 (flat Mountain override) ---
+  # Crop-verified (PDF 345): NM #1 (98%) is pure MST with no peacetime daylight saving
+  # 1883-1967 (war excepted); NM #2/#3 are also MST no-DST. IANA America/Denver applies MDT.
+  def test_new_mexico_is_fixed_mst_not_iana_mdt
+    [[35.084, -106.65], [35.687, -105.938], [33.394, -104.523]].each do |lat, lon| # ABQ/Santa Fe/Roswell
+      %w[1930-07-15 1950-07-15 1960-07-15].each do |d|
+        tz = TzHistory.for(lat: lat, lon: lon, date: d)
+        assert_equal "Etc/GMT+7", tz.identifier, "NM at #{lat},#{lon} should be MST on #{d}"
+        assert_equal(-7 * 3600, offset_of(tz, d))
+      end
+    end
+  end
+
+  def test_new_mexico_from_1967_uniform_act_defers_to_iana
+    assert_nil TzHistory.for(lat: 35.084, lon: -106.65, date: "1968-07-15")
+  end
+
   # --- Kansas: dominant Central kept CST 1920-1966; far-west Mountain deferred ---
   # KS #1 (bulk of the state) is straight CST with no local DST until the 1967 Uniform
   # Time Act, while IANA America/Chicago applies continuous summer CDT.
