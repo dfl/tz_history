@@ -584,6 +584,30 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 32.3642, lon: -88.7036, date: "1968-07-15")
   end
 
+  # --- Montana: MT #1 (68%) + MT #9 (22%) = 90% kept MST, no DST, until 1967 ---
+  # Crop-verified (PDF 314): MT #1 and MT #9 are pure MST with no peacetime daylight saving
+  # 1919-1967 (war excepted; MT #9 differs only pre-1895 = Pacific), while IANA America/Denver
+  # applies MDT. The ~10% metro DST tables (MT #2/#3/#10, postwar MDT from 1946) defer, so it
+  # is a town-level split (not a flat override that would over-correct the metros).
+  def test_rural_montana_no_dst_towns_are_fixed_mst_not_iana_mdt
+    [[47.0536, -109.4158], [47.1053, -104.7119], [45.2164, -112.6367]].each do |lat, lon| # Lewistown/Glendive/Dillon
+      %w[1930-07-15 1950-07-15 1960-07-15].each do |d|
+        tz = TzHistory.for(lat: lat, lon: lon, date: d)
+        assert_equal "Etc/GMT+7", tz.identifier, "MT no-DST town at #{lat},#{lon} should be MST on #{d}"
+        assert_equal(-7 * 3600, offset_of(tz, d))
+      end
+    end
+  end
+
+  def test_montana_dst_metro_town_defers_to_iana
+    # Finlen (Butte/Silver Bow area, MT #10) observed postwar MDT -> defers to IANA.
+    assert_nil TzHistory.for(lat: 46.0383, lon: -112.7903, date: "1950-07-15")
+  end
+
+  def test_montana_from_1967_uniform_act_defers_to_iana
+    assert_nil TzHistory.for(lat: 47.0536, lon: -109.4158, date: "1968-07-15")
+  end
+
   # --- Kansas: dominant Central kept CST 1920-1966; far-west Mountain deferred ---
   # KS #1 (bulk of the state) is straight CST with no local DST until the 1967 Uniform
   # Time Act, while IANA America/Chicago applies continuous summer CDT.
