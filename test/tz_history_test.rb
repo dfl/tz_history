@@ -1047,4 +1047,19 @@ class TzHistoryTest < Minitest::Test
   def test_rhode_island_defers_from_1923_dst_adoption
     assert_nil TzHistory.for(lat: 41.8240, lon: -71.4128, date: "1923-07-15") # continuous DST from 1923 = IANA
   end
+
+  # --- South Carolina verify-only (tt PDF 496, single table SC#1) ---
+  # SC#1 (1044 towns = whole state) = pure EST, no peacetime DST 1883 -> US#1 1967 (only war),
+  # like Mississippi but Eastern. Pre-existing flat Etc/GMT+5 override confirmed; single table
+  # so no metro-DST minority (Charleston/Columbia/Greenville all kept EST).
+  def test_south_carolina_is_fixed_est_no_dst
+    tz = TzHistory.for(lat: 34.0007, lon: -81.0348, date: "1930-07-15") # Columbia
+    assert_equal "Etc/GMT+5", tz.identifier
+    assert_equal(-5 * 3600, offset_of(tz, "1930-07-15"))
+  end
+
+  def test_south_carolina_holds_est_until_1967
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 32.7765, lon: -79.9311, date: "1966-07-15").identifier # Charleston
+    assert_nil TzHistory.for(lat: 32.7765, lon: -79.9311, date: "1968-07-15") # post US#1 1967 -> IANA
+  end
 end
