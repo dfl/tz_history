@@ -844,4 +844,32 @@ class TzHistoryTest < Minitest::Test
     assert_equal "Etc/GMT+5", TzHistory.for(lat: 41.9983, lon: -73.9244, date: "1923-07-15").identifier
     assert_nil TzHistory.for(lat: 41.9983, lon: -73.9244, date: "1930-07-15")
   end
+
+  # --- Missouri postwar CST cohort nest (tt PDF 300-301, tables MO#1-49) ---
+  # Pre-war ALL tables were CST no-DST (flat Etc/GMT+6 already ships). Postwar every table
+  # was CST from 1946 until it adopted DST at a table-specific year; the dominant rural MO#3
+  # (86%) never adopted (CST to 1966), while IANA America/Chicago applies CDT every summer.
+  # Replaces the old postwar "warn" with a real correction.
+  def test_mo_rural_prewar_is_flat_cst
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 38.5767, lon: -92.1735, date: "1935-07-15").identifier
+  end
+
+  def test_mo_dominant_rural_postwar_cst_through_1966
+    # MO#3 kept CST every postwar summer until US#1 1967.
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 38.5767, lon: -92.1735, date: "1955-07-15").identifier
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 38.5767, lon: -92.1735, date: "1966-07-15").identifier
+    assert_nil TzHistory.for(lat: 38.5767, lon: -92.1735, date: "1968-07-15")
+  end
+
+  def test_mo_st_louis_suburb_table40_cst_early_then_defers_after_1963
+    # Affton (St Louis Co., MO#40) kept CST until adopting DST in 1963 -- the cohort nest
+    # corrects 1955 but must NOT over-correct 1965 (a flat postwar override would).
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 38.551, lon: -90.333, date: "1955-07-15").identifier
+    assert_nil TzHistory.for(lat: 38.551, lon: -90.333, date: "1965-07-15")
+  end
+
+  def test_mo_st_louis_metro_continuous_dst_defers
+    # St Louis city (MO#1) had continuous CDT from 1946 = IANA -> defer.
+    assert_nil TzHistory.for(lat: 38.633, lon: -90.25, date: "1955-07-15")
+  end
 end

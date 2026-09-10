@@ -71,7 +71,7 @@ counting transition rows (`02:00` / `Before 11/18`) in the top of each `tt+off` 
 | MI | 5 | probed/deferred (#14) | index junk; the dedicated pass must use tt 263-267. |
 | OH | 5 | pending | rebuild index tt 409-413 / cities 414-... when reached. |
 | PA | 5 | pending | tt 448-452 / cities 453-... |
-| MO | 2 | pending | tt 300-301. |
+| MO | 2 | **DONE** | tt 300-301; index already clean (tt rows do not parse as cities). Replaced postwar warn with a 5-window CST cohort nest (dominant MO#3=86% CST to 1966). |
 | TN | 2 | pending | tt 510-511. |
 | VT | 2 | pending | tt 560-561. |
 | WA | 2 | pending | tt 592-593. |
