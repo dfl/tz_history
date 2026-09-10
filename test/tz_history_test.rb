@@ -550,6 +550,24 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 41.5868, lon: -93.6250, date: "1943-07-15")
   end
 
+  # --- Minnesota: dominant CST kept no DST until 1957 (verify the imported override) ---
+  # Crop-verified (PDF 281): MN #1 (1543 index towns, 95%) is straight CST with no local
+  # DST 1919-1957 (war time excepted), adopting DST on 1957-04-28 (US#1 1966), while IANA
+  # America/Chicago applies CDT every summer. The pre-war + postwar Etc/GMT+6 overrides
+  # (windows end exactly at the 1957 adoption) are correct for the dominant table.
+  def test_rural_minnesota_1930_and_1950_are_fixed_cst_not_iana_cdt
+    [%w[1930-07-15], %w[1950-07-15], %w[1956-07-15]].each do |d,|
+      tz = TzHistory.for(lat: 44.9853, lon: -95.4731, date: d) # rural western MN (MN #1)
+      assert_equal "Etc/GMT+6", tz.identifier, "rural MN should be CST on #{d}"
+      assert_equal(-6 * 3600, offset_of(tz, d))
+    end
+  end
+
+  def test_minnesota_from_1957_adoption_defers_to_iana
+    # From the 1957-04-28 DST adoption MN matches IANA -> outside the override window.
+    assert_nil TzHistory.for(lat: 44.9853, lon: -95.4731, date: "1958-07-15")
+  end
+
   # --- Kansas: dominant Central kept CST 1920-1966; far-west Mountain deferred ---
   # KS #1 (bulk of the state) is straight CST with no local DST until the 1967 Uniform
   # Time Act, while IANA America/Chicago applies continuous summer CDT.
