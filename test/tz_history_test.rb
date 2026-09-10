@@ -1033,4 +1033,18 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 41.0322, lon: -76.3083, date: "1943-07-15") # war time = IANA
     assert_nil TzHistory.for(lat: 41.0322, lon: -76.3083, date: "1950-07-15") # postwar deferred (follow-up)
   end
+
+  # --- Rhode Island seaboard no-DST 1920-1922 (tt PDF 494, single-tt span; tables RI#1-2) ---
+  # RI#1 (98 towns, 99% = whole state) = EST with no DST summers 1920-1922, then continuous EDT
+  # from 1923 (= IANA). Flat Etc/GMT+5 over the 5 counties for 1919-10-26..1923-04-29.
+  def test_rhode_island_is_est_no_dst_early_1920s
+    tz = TzHistory.for(lat: 41.8240, lon: -71.4128, date: "1921-07-15") # Providence
+    assert_equal "Etc/GMT+5", tz.identifier
+    assert_equal(-5 * 3600, offset_of(tz, "1921-07-15"))
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 41.4901, lon: -71.3128, date: "1922-07-15").identifier # Newport
+  end
+
+  def test_rhode_island_defers_from_1923_dst_adoption
+    assert_nil TzHistory.for(lat: 41.8240, lon: -71.4128, date: "1923-07-15") # continuous DST from 1923 = IANA
+  end
 end
