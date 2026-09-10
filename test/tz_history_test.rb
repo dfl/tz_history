@@ -872,4 +872,25 @@ class TzHistoryTest < Minitest::Test
     # St Louis city (MO#1) had continuous CDT from 1946 = IANA -> defer.
     assert_nil TzHistory.for(lat: 38.633, lon: -90.25, date: "1955-07-15")
   end
+
+  # --- Nebraska two-zone standard time (tt PDF 319, tables NE#1-6) ---
+  # NE#1 (71%) = Central CST no-DST; NE#2/#3/#5/#6 = western Mountain MST no-DST. The old
+  # flat statewide CST override bled Etc/GMT+6 onto the Mountain transition-belt towns
+  # (NE#3 etc.) -- fixed with a town-level split (Central->CST, Mountain->MST).
+  def test_ne_central_is_cst
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 41.25, lon: -95.9667, date: "1935-07-15").identifier
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 41.25, lon: -95.9667, date: "1955-07-15").identifier
+  end
+
+  def test_ne_mountain_transition_town_is_mst_not_cst
+    # Calamus (NE#3, ~lon -99.8): Shanks Mountain (MST); the old flat CST override wrongly
+    # read it Etc/GMT+6. Must now be Etc/GMT+7 (MST), not CST.
+    assert_equal "Etc/GMT+7", TzHistory.for(lat: 42.1833, lon: -99.75, date: "1935-07-15").identifier
+    assert_equal "Etc/GMT+7", TzHistory.for(lat: 42.1833, lon: -99.75, date: "1955-07-15").identifier
+  end
+
+  def test_ne_far_west_defers_to_iana_denver
+    # Bushnell (NE#2 panhandle): IANA America/Denver was itself MST no-DST here -> defer.
+    assert_nil TzHistory.for(lat: 41.2322, lon: -103.8914, date: "1935-07-15")
+  end
 end
