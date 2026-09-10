@@ -48,7 +48,7 @@ by locating the state in the atlas (alphabetical) on first touch.
 | Missouri | 300 | ✓ | flat CST + postwar warn | pending | |
 | Montana | 314 | – | **town-level MST split** | **done** | Crop-verified (PDF 314, printed 302): MT #1 (68%) + MT #9 (22%) = **90% of towns are pure MST, no peacetime DST 1919–1967** (war excepted; MT #9 only differs pre-1895 = Pacific), while IANA America/Denver applies MDT. Shipped a **town-level split** over all 56 counties (568 no-DST towns → Etc/GMT+7 for pre-war 1919-10-26..1942-02-09 + postwar 1945-09-30..1967-04-30; the ~10% metro DST tables MT #2/#3/#10 defer). Town-level (not flat) because the DST minority is large enough (postwar metros) that a flat override would over-correct. The big cities (Helena/Missoula/Butte) were themselves no-DST → MST. 3 tests. |
 | Nebraska | 319 | ✓ | flat CST + far-west warn | pending | |
-| Nevada | ? | – | IANA? | pending | |
+| Nevada | 325 | – | **eastern-Mountain split** | **done** | Crop-verified (PDF 325, printed 313): NV #1 (77%) = Pacific (PST→PDT from 1948) = America/Los_Angeles, **no residual**. The sparsely-populated eastern tables observed **MST while IANA models all Nevada as Pacific** (1 h zone divergence): NV #3 (12 towns) = MST throughout; NV #2 (25) = Pacific until 1930 then MST to 1967; NV #4 (19) = MST 1930–1965 then back to Pacific. Shipped a **3-window non-overlapping Mountain nest** over all 17 counties (a town is MST only while its table was Mountain → Etc/GMT+7; NV #1 defers). Shanks flags the eastern boundary as "undocumented," but each town's table resolves it. 4 tests. |
 | New Hampshire | ? | – | IANA? | pending | |
 | New Jersey | ? | – | IANA? | pending | |
 | New Mexico | ? | – | IANA? | pending | |

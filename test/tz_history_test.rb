@@ -608,6 +608,36 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 47.0536, lon: -109.4158, date: "1968-07-15")
   end
 
+  # --- Nevada: Pacific majority is IANA-ok; eastern towns were MOUNTAIN, not Pacific ---
+  # Crop-verified (PDF 325): NV #1 (77%) is Pacific (PST->PDT from 1948) = America/Los_Angeles,
+  # no residual. The sparsely-populated eastern tables observed MST while IANA models all of
+  # Nevada as Pacific -- a 1 h zone divergence. NV #3 = MST throughout; NV #2 = Pacific until
+  # 1930 then MST; NV #4 = MST 1930-1965 then back to Pacific. Non-overlapping Mountain windows.
+  def test_nevada_pacific_majority_defers_to_iana
+    assert_nil TzHistory.for(lat: 40.5789, lon: -118.3042, date: "1930-01-15") # NV #1 (Pacific)
+  end
+
+  def test_eastern_nevada_always_mountain_town_is_mst
+    # NV #3 (far east, near Utah) was Mountain the whole time -> MST where IANA says Pacific.
+    [%w[1925-01-15], %w[1950-01-15], %w[1966-01-15]].each do |d,|
+      tz = TzHistory.for(lat: 37.3144, lon: -114.4897, date: d) # NV #3
+      assert_equal "Etc/GMT+7", tz.identifier, "eastern NV should be MST on #{d}"
+      assert_equal(-7 * 3600, offset_of(tz, d))
+    end
+  end
+
+  def test_eastern_nevada_switched_to_mountain_in_1930
+    # NV #2: Pacific (defer) before 1930, Mountain (MST) after.
+    assert_nil TzHistory.for(lat: 41.7261, lon: -115.8964, date: "1925-01-15")
+    assert_equal "Etc/GMT+7", TzHistory.for(lat: 41.7261, lon: -115.8964, date: "1950-01-15").identifier
+  end
+
+  def test_nevada_nv4_reverted_to_pacific_after_1965
+    # NV #4 was Mountain 1930-1965, then back to Pacific -> defers again from 1965.
+    assert_equal "Etc/GMT+7", TzHistory.for(lat: 39.6533, lon: -114.8017, date: "1950-01-15").identifier
+    assert_nil TzHistory.for(lat: 39.6533, lon: -114.8017, date: "1966-01-15")
+  end
+
   # --- Kansas: dominant Central kept CST 1920-1966; far-west Mountain deferred ---
   # KS #1 (bulk of the state) is straight CST with no local DST until the 1967 Uniform
   # Time Act, while IANA America/Chicago applies continuous summer CDT.
