@@ -974,4 +974,22 @@ class TzHistoryTest < Minitest::Test
     # 1942-1945 Ohio observed war time (EWT/CWT) = IANA -> the split omits the war window.
     assert_nil TzHistory.for(lat: 40.2842, lon: -84.1552, date: "1943-07-15")
   end
+
+  # --- Oklahoma verify-only (tt PDF 432, single-tt span; tables OK#1-4) ---
+  # OK#1 (854 towns, 96.5%) = pure CST, no peacetime DST 1883 -> US#1 1967 (like Mississippi).
+  # The pre-existing flat Etc/GMT+6 override (pre-war 1919-10-26..1942-02-09 + postwar
+  # 1945-09-30..1967-04-30) is confirmed correct. Panhandle OK#4 (MST until 1921) + NE-corner
+  # OK#2/#3 (late CDT) are minor residuals -> DEFERRED.md.
+  def test_oklahoma_dominant_is_fixed_cst_no_dst
+    # Oklahoma City: CST (-6) all summer while IANA America/Chicago applies CDT.
+    tz = TzHistory.for(lat: 35.4676, lon: -97.5164, date: "1930-07-15")
+    assert_equal "Etc/GMT+6", tz.identifier
+    assert_equal(-6 * 3600, offset_of(tz, "1930-07-15"))
+  end
+
+  def test_oklahoma_cst_holds_until_1967_us_adoption
+    # Tulsa: still CST no-DST in 1966 (US#1 adoption is 1967-04-30).
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 36.1540, lon: -95.9928, date: "1966-07-15").identifier
+    assert_nil TzHistory.for(lat: 36.1540, lon: -95.9928, date: "1968-07-15") # post US#1 -> IANA
+  end
 end
