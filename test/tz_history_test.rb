@@ -923,4 +923,55 @@ class TzHistoryTest < Minitest::Test
     # Western ND (ND#9) = MST no-DST; the old flat CST override bled Etc/GMT+6 onto it.
     assert_equal "Etc/GMT+7", TzHistory.for(lat: 47.9206, lon: -104.0306, date: "1935-07-15").identifier
   end
+
+  # --- Ohio two-zone town split (tt PDF 409-413, a 5-page span; tables OH#1-118) ---
+  # WESTERN Ohio kept CENTRAL time (CST, no DST) until it switched to Eastern in the mid-1920s,
+  # then EST no-DST until 1967 (dominant rural OH#34, 1177 towns, switched 1927-04-03). CENTRAL/
+  # SE + NE Ohio switched to EST in 1919 and kept EST no-DST until a postwar adoption year.
+  # Big-city DST tables defer to IANA. This replaced the buggy flat-EST override (which rendered
+  # western Ohio's pre-1927 Central as Eastern) + the postwar warn. Coords are Sidney (Shelby,
+  # western OH#34-region), Lancaster (Fairfield, eastern), Ravenna (Portage, NE adopts 1956).
+  def test_western_ohio_is_central_cst_before_the_1927_switch
+    # Sidney: CST (-6), NOT Eastern -- IANA America/New_York applies EST/EDT (1-2 h fast).
+    tz = TzHistory.for(lat: 40.2842, lon: -84.1552, date: "1925-07-15")
+    assert_equal "Etc/GMT+6", tz.identifier
+    assert_equal(-6 * 3600, offset_of(tz, "1925-07-15"))
+  end
+
+  def test_western_ohio_is_est_no_dst_after_the_1927_switch
+    # Sidney: after the 1927 switch to Eastern, EST with no summer DST (IANA applies EDT).
+    tz = TzHistory.for(lat: 40.2842, lon: -84.1552, date: "1935-07-15")
+    assert_equal "Etc/GMT+5", tz.identifier
+    assert_equal(-5 * 3600, offset_of(tz, "1935-07-15"))
+    # ...still EST no-DST postwar, until US#1 1967.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 40.2842, lon: -84.1552, date: "1960-07-15").identifier
+  end
+
+  def test_eastern_ohio_is_est_no_dst_until_1967
+    # Lancaster (Fairfield, OH#27): EST no-DST 1919->1967 while IANA applies EDT every summer.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 39.7137, lon: -82.5993, date: "1930-07-15").identifier
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 39.7137, lon: -82.5993, date: "1966-07-15").identifier
+    assert_nil TzHistory.for(lat: 39.7137, lon: -82.5993, date: "1968-07-15") # post US#1 -> IANA
+  end
+
+  def test_northeast_ohio_adopts_dst_1956_then_defers
+    # Ravenna (Portage, OH#67): EST no-DST until the 1956 US#5 adoption, then matches IANA.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 41.1578, lon: -81.2412, date: "1950-07-15").identifier
+    assert_nil TzHistory.for(lat: 41.1578, lon: -81.2412, date: "1960-07-15")
+  end
+
+  def test_cleveland_metro_defers_to_iana
+    # Big-city DST tables (Cleveland/OH#26) observed DST that IANA models -> defer, no override.
+    assert_nil TzHistory.for(lat: 41.4993, lon: -81.6944, date: "1935-07-15")
+  end
+
+  def test_cincinnati_is_central_until_1927
+    # SW Ohio / Cincinnati kept Central time until 1927 (pre-existing metro override, feat[110]).
+    assert_equal "America/Chicago", TzHistory.for(lat: 39.1031, lon: -84.5120, date: "1925-07-15").identifier
+  end
+
+  def test_ohio_war_years_defer_to_iana
+    # 1942-1945 Ohio observed war time (EWT/CWT) = IANA -> the split omits the war window.
+    assert_nil TzHistory.for(lat: 40.2842, lon: -84.1552, date: "1943-07-15")
+  end
 end
