@@ -568,6 +568,22 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 44.9853, lon: -95.4731, date: "1958-07-15")
   end
 
+  # --- Mississippi: pure CST, no peacetime DST at all until 1967 (verify the override) ---
+  # Crop-verified (PDF 292): MS #1 (1423 index towns, 99%) is straight CST -- only war time
+  # 1918-19/1942-45, no peacetime DST -- until the 1967-04-30 Uniform Act, while IANA
+  # America/Chicago applies CDT. Pre-existing pre-war + postwar Etc/GMT+6 overrides cover it.
+  def test_rural_mississippi_is_fixed_cst_not_iana_cdt
+    [%w[1930-07-15], %w[1950-07-15], %w[1960-07-15]].each do |d,|
+      tz = TzHistory.for(lat: 32.3642, lon: -88.7036, date: d) # Meridian (MS #1)
+      assert_equal "Etc/GMT+6", tz.identifier, "Meridian should be CST on #{d}"
+      assert_equal(-6 * 3600, offset_of(tz, d))
+    end
+  end
+
+  def test_mississippi_from_1967_uniform_act_defers_to_iana
+    assert_nil TzHistory.for(lat: 32.3642, lon: -88.7036, date: "1968-07-15")
+  end
+
   # --- Kansas: dominant Central kept CST 1920-1966; far-west Mountain deferred ---
   # KS #1 (bulk of the state) is straight CST with no local DST until the 1967 Uniform
   # Time Act, while IANA America/Chicago applies continuous summer CDT.
