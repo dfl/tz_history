@@ -661,6 +661,29 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 42.8617, lon: -71.2172, date: "1935-07-15")
   end
 
+  # --- New Jersey: urban continuous-DST = IANA; rural tables kept EST at staggered years ---
+  # Crop-verified (PDF 333): NJ #1/#6/#9/#11 (urban) had continuous DST from 1920 = IANA, no
+  # residual. Rural tables kept EST until adopting US DST: NJ #2 -> 1921, NJ #17 -> 1931,
+  # NJ #12 -> 1937 (while IANA applies NYC DST from 1920). Non-overlapping adoption windows.
+  def test_nj_urban_continuous_dst_defers_to_iana
+    assert_nil TzHistory.for(lat: 40.75, lon: -74.2167, date: "1925-07-15") # NJ #1
+  end
+
+  def test_nj_rural_tables_kept_est_until_their_adoption_year
+    # NJ #17 (adopt 1931): EST in 1925, defers (had EDT) from 1931.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 39.9069, lon: -74.7886, date: "1925-07-15").identifier
+    assert_nil TzHistory.for(lat: 39.9069, lon: -74.7886, date: "1935-07-15")
+    # NJ #12 (adopt 1937): still EST in 1935.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 39.9092, lon: -74.1553, date: "1935-07-15").identifier
+    assert_nil TzHistory.for(lat: 39.9092, lon: -74.1553, date: "1938-07-15")
+  end
+
+  def test_nj_early_adopter_only_diverges_in_1920
+    # NJ #2 (adopt 1921): EST only in the 1920 summer, then defers.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 39.6944, lon: -74.8417, date: "1920-07-15").identifier
+    assert_nil TzHistory.for(lat: 39.6944, lon: -74.8417, date: "1925-07-15")
+  end
+
   # --- Kansas: dominant Central kept CST 1920-1966; far-west Mountain deferred ---
   # KS #1 (bulk of the state) is straight CST with no local DST until the 1967 Uniform
   # Time Act, while IANA America/Chicago applies continuous summer CDT.
