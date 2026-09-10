@@ -638,6 +638,29 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 39.6533, lon: -114.8017, date: "1966-01-15")
   end
 
+  # --- New Hampshire: rural EST kept until 1937 (seaboard pattern, like Maine/CT/DE) ---
+  # Crop-verified (PDF 328): no NH table observed DST before 1931; the rural NH #1 (67%)
+  # kept EST until 1937, while urban tables adopted DST 1931-1936 and IANA America/New_York
+  # applies continuous NYC DST from 1920. Two windows: all towns EST 1919-1931; then only
+  # NH #1 EST 1931-1937 (urban towns defer -- they had EDT, which IANA models).
+  def test_all_new_hampshire_is_est_before_1931
+    # Even an urban NH #2 town was EST before its 1931 DST adoption.
+    tz = TzHistory.for(lat: 42.8617, lon: -71.2172, date: "1925-07-15") # NH #2 town (urban)
+    assert_equal "Etc/GMT+5", tz.identifier
+    assert_equal(-5 * 3600, offset_of(tz, "1925-07-15"))
+  end
+
+  def test_rural_new_hampshire_kept_est_until_1937
+    # Conway (NH #1): EST through 1935, then DST from 1937 -> defers.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 44.0536, lon: -71.1289, date: "1935-07-15").identifier
+    assert_nil TzHistory.for(lat: 44.0536, lon: -71.1289, date: "1938-07-15")
+  end
+
+  def test_urban_new_hampshire_defers_after_its_1931_dst_adoption
+    # NH #2 town observed EDT from 1931 -> defers to IANA in 1935 (not EST).
+    assert_nil TzHistory.for(lat: 42.8617, lon: -71.2172, date: "1935-07-15")
+  end
+
   # --- Kansas: dominant Central kept CST 1920-1966; far-west Mountain deferred ---
   # KS #1 (bulk of the state) is straight CST with no local DST until the 1967 Uniform
   # Time Act, while IANA America/Chicago applies continuous summer CDT.
