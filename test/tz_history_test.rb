@@ -907,4 +907,20 @@ class TzHistoryTest < Minitest::Test
     # NC#1 adopted US#1 daylight on 1966-04-24 -> matches IANA, override window ends there.
     assert_nil TzHistory.for(lat: 36.4103, lon: -76.7992, date: "1966-07-15")
   end
+
+  # --- North Dakota two-zone town split (tt PDF 405, tables ND#1-10) ---
+  # ND#1 (305 towns, 76%) = pure CST no-DST to 1967; ND#9 (71) = pure MST no-DST (western).
+  # Fixes: the old flat override warned 1957-1960 (under-correcting pure ND#1) and bled CST
+  # onto Mountain ND#9 towns. Town-level split: Central->CST, Mountain->MST.
+  def test_nd_central_pure_cst_through_the_1957_60_experiment
+    # Everest (ND#1): CST every year incl. the 1957-1960 daylight experiment (was a warn).
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 46.8597, lon: -97.2208, date: "1935-07-15").identifier
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 46.8597, lon: -97.2208, date: "1958-07-15").identifier
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 46.8597, lon: -97.2208, date: "1963-07-15").identifier
+  end
+
+  def test_nd_western_mountain_town_is_mst_not_cst
+    # Western ND (ND#9) = MST no-DST; the old flat CST override bled Etc/GMT+6 onto it.
+    assert_equal "Etc/GMT+7", TzHistory.for(lat: 47.9206, lon: -104.0306, date: "1935-07-15").identifier
+  end
 end
