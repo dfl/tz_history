@@ -1011,4 +1011,26 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 45.5152, lon: -122.6784, date: "1962-07-15") # DST resumed by 1962
     assert_nil TzHistory.for(lat: 44.0266, lon: -116.9629, date: "1955-07-15") # Malheur = Mountain
   end
+
+  # --- Pennsylvania pre-war rural EST no-DST (tt PDF 448-452, a 5-page span; tables PA#1-123) ---
+  # PA is Eastern; rural PA kept EST with no daylight saving while IANA America/New_York applies
+  # EDT every summer. Crop-verified dominant rural tables PA#1 (1445 towns; EST no-DST to US#2
+  # 1945) and PA#6 (1058 towns; EST no-DST to US#2 1965) -> Etc/GMT+5 for the pre-war window.
+  # The DST cities (Philadelphia PA#9, Pittsburgh PA#114, etc.) are on their own tables and
+  # defer. Postwar + the other tables are a documented follow-up (tt OCR unreliable) -> DEFERRED.
+  def test_pennsylvania_rural_is_est_no_dst_prewar
+    # PA#1 rural (Columbia Co.): EST (-5) all summer while IANA applies EDT (-4).
+    tz = TzHistory.for(lat: 41.0322, lon: -76.3083, date: "1930-07-15")
+    assert_equal "Etc/GMT+5", tz.identifier
+    assert_equal(-5 * 3600, offset_of(tz, "1930-07-15"))
+    # PA#6 rural (western PA): also EST no-DST pre-war.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 40.8547, lon: -80.4572, date: "1930-07-15").identifier
+  end
+
+  def test_pennsylvania_dst_cities_and_war_defer
+    assert_nil TzHistory.for(lat: 39.9526, lon: -75.1652, date: "1930-07-15") # Philadelphia (PA#9) had DST
+    assert_nil TzHistory.for(lat: 40.4406, lon: -79.9959, date: "1930-07-15") # Pittsburgh (PA#114) had DST
+    assert_nil TzHistory.for(lat: 41.0322, lon: -76.3083, date: "1943-07-15") # war time = IANA
+    assert_nil TzHistory.for(lat: 41.0322, lon: -76.3083, date: "1950-07-15") # postwar deferred (follow-up)
+  end
 end
