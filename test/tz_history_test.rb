@@ -893,4 +893,18 @@ class TzHistoryTest < Minitest::Test
     # Bushnell (NE#2 panhandle): IANA America/Denver was itself MST no-DST here -> defer.
     assert_nil TzHistory.for(lat: 41.2322, lon: -103.8914, date: "1935-07-15")
   end
+
+  # --- North Carolina: VERIFY-ONLY (tt PDF 387) ---
+  # NC#1 (2652 towns, 97.6%) = pure EST no-DST 1883, adopting US#1 daylight in 1966 (a year
+  # before the federal act), while IANA America/New_York applies EDT every summer. The shipped
+  # flat Etc/GMT+5 override (pre-war + postwar ending exactly 1966-04-24) is confirmed correct.
+  def test_nc_rural_est_prewar_and_postwar
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 36.4103, lon: -76.7992, date: "1935-07-15").identifier
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 36.4103, lon: -76.7992, date: "1955-07-15").identifier
+  end
+
+  def test_nc_defers_after_1966_us_adoption
+    # NC#1 adopted US#1 daylight on 1966-04-24 -> matches IANA, override window ends there.
+    assert_nil TzHistory.for(lat: 36.4103, lon: -76.7992, date: "1966-07-15")
+  end
 end
