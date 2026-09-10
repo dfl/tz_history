@@ -776,4 +776,52 @@ class TzHistoryTest < Minitest::Test
   def test_note_is_nil_for_a_modern_birth
     assert_nil TzHistory.note(lat: 35.9606, lon: -83.9207, date: "1990-01-15")
   end
+
+  # --- New York rural-EST cohort nest (tt PDF 352-359, tables NY#1-226) ---
+  # IANA America/New_York applies NYC's continuous EDT every summer from 1920, but most of
+  # upstate NY kept EST for years, adopting daylight saving only at staggered dates. The
+  # dominant rural table NY#226 (967 towns) stayed EST through 1954. Summer 1920 was daylight
+  # statewide and the war years were EWT (both == IANA), so only 1921-1941 / 1946-onward
+  # EST summers are corrected.
+
+  def test_ny_dominant_rural_table_summer_1935_is_est
+    # Averys Place (Adirondacks, Shanks NY #226): EST via NY#4, IANA gives NYC EDT.
+    tz = TzHistory.for(lat: 43.2942, lon: -74.5550, date: "1935-07-15")
+    assert_equal "Etc/GMT+5", tz.identifier
+  end
+
+  def test_ny_dominant_rural_table_still_est_postwar_1950
+    # NY #226 kept EST post-war until adopting DST in 1955.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 43.2942, lon: -74.5550, date: "1950-07-15").identifier
+  end
+
+  def test_ny_dominant_rural_table_defers_after_1955_adoption
+    assert_nil TzHistory.for(lat: 43.2942, lon: -74.5550, date: "1955-07-15")
+  end
+
+  def test_ny_summer_1920_defers_statewide_daylight
+    # Every NY table observed EDT in summer 1920 (statewide law) = IANA -> defer.
+    assert_nil TzHistory.for(lat: 43.2942, lon: -74.5550, date: "1920-07-15")
+  end
+
+  def test_ny_war_years_defer_to_iana_ewt
+    # 1942-45 the towns ran EWT (-4) == IANA -> defer, never forced to EST.
+    assert_nil TzHistory.for(lat: 43.2942, lon: -74.5550, date: "1943-07-15")
+  end
+
+  def test_nyc_metro_continuous_dst_defers_to_iana
+    # Babylon (Suffolk Co., Long Island metro, NY #1) had continuous DST = IANA.
+    assert_nil TzHistory.for(lat: 40.6956, lon: -73.3261, date: "1935-07-15")
+  end
+
+  def test_ny_early_adopter_table13_est_before_1939
+    # Austin (Cayuga Co., NY #13): EST until adopting DST in 1939.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 42.8108, lon: -76.4711, date: "1935-07-15").identifier
+  end
+
+  def test_ny_early_adopter_table7_defers_after_1925_adoption
+    # Barrytown (Dutchess Co., NY #7): EST until 1925, DST (=IANA) after.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 41.9983, lon: -73.9244, date: "1923-07-15").identifier
+    assert_nil TzHistory.for(lat: 41.9983, lon: -73.9244, date: "1930-07-15")
+  end
 end

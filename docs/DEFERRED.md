@@ -52,6 +52,50 @@ subset of towns/years · `bug` = a shipped feature is wrong and needs a fix ·
   the ME #36/#37 stray-1933-summer tables are treated as defer/adopt-1933 conservatively.
   minority / low. Refine with per-year windows if a specific birth surfaces the need.
 
+## ⚠ SYSTEMIC OCR BUG (2026-09): multi-page TIME TABLES mis-parsed as cities
+
+`build_atlas_index.rb` assumed **exactly one TIME-TABLES page per state** and derived each
+state's city-listing range as `tt+1 .. next_state_tt-1`. **Any state whose time tables span
+>1 page therefore had its extra tt pages parsed as bogus "cities"** (garbled names, real
+coords, table# from the tt rows) AND its high-numbered tables never captured. Detected by
+counting transition rows (`02:00` / `Before 11/18`) in the top of each `tt+off` page
+(scratch `ny_work/ttspan.sh`). **Affected states (tt span in pages):**
+
+| State | tt span | Status | Action |
+|---|---|---|---|
+| NY | 8 | **DONE** | re-OCR'd (tt 352-359, cities 360-386, `--max-table=226`) → clean index 4817 towns; 11-window cohort nest shipped. Residual: long-tail tables <15 towns unclassified (see NY tail below). |
+| **ME** | 2 | **DONE — cohort nest, INCOMPLETE** | ⚠ tables **ME#39-#49 are REAL** (crop-verified pg 230), not latitude misreads; the shipped `--max-table=38` guard WRONGLY dropped ~230 real towns on tables 39-49 → those towns defer to IANA when many were EST. **Re-OCR ME cities with --max-table=49, classify ME#39-49 (same ME#1-then-adopt cohort), extend the nest.** |
+| KY | 3 | done (seed, targeted #69/#71) | index incomplete; KY shipped only Louisville + Campbell/Kenton by hand — revisit if a KY birth needs a rural table. |
+| IN | 11 | done* (statewide warn, deferred) | index junk already noted (#11); the dedicated pass must rebuild the index with tt 150-160 excluded from city range. |
+| IL | 5 | done (county-map, not index) | index junk; downstate override was county-map-based so shipped features OK, but the town-level residual work (#9) needs a clean index (tt 128-132 are tt). |
+| MI | 5 | probed/deferred (#14) | index junk; the dedicated pass must use tt 263-267. |
+| OH | 5 | pending | rebuild index tt 409-413 / cities 414-... when reached. |
+| PA | 5 | pending | tt 448-452 / cities 453-... |
+| MO | 2 | pending | tt 300-301. |
+| TN | 2 | pending | tt 510-511. |
+| VT | 2 | pending | tt 560-561. |
+| WA | 2 | pending | tt 592-593. |
+| WV | 2 | pending | tt 603-604. |
+
+**Fix for pending states:** on first touch, VERIFY where tt ends / cities begin by scanning
+page headers (don't trust that tt is one page); rebuild the index with the correct
+`--cities=<first>-<last>` and `extract_cities --max-table=<real max>`. The 40 single-tt-page
+states (span=1) are UNAFFECTED — their indices are clean.
+
+### NY long-tail tables (unclassified)
+
+The NY cohort nest classifies every table with **≥15 towns** (crop-verified EST-year sets:
+NY#1-36 + #41/#42/#45/#48/#75/#86/#105/#151/#153/#186/#211/#226), covering ~85% of the
+4817 indexed towns (~2650 correctable). The remaining ~180 tables (each <15 towns, ~15% of
+towns / ~730) are **not yet classified → they default to no zone = defer to IANA** (those
+EST summers read 1 h fast). Safe under-correction, never wrong. To extend: crop-verify the
+next tier of tables from `research/index/NY/timetables.json` (tt renders in scratch
+`ny_work/reocr/tt352-359`) and add their EST-year sets to `TABLE_EST` in
+`research/builders/build_ny.rb` (the window mechanism already handles arbitrary EST
+intervals). Also a handful of the classified messy tables lose 1-2 summers at window seams
+(e.g. NY#20 misses summer 1950, #15 misses 1940) from boundary coalescing — safe
+under-correction; refine with finer windows if a specific birth needs it.
+
 ## How to work this backlog
 
 Sort by Impact. Item 1 (Georgia) is fully resolved — the Fulton metro bug was fixed and
