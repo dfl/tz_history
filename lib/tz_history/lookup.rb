@@ -40,23 +40,27 @@ module TzHistory
           (feat[:from_date].nil? || iso >= feat[:from_date]) && iso < feat[:until_date] &&
             feat[:bbox].cover?(lon, lat) && point_in_geometry?(lon, lat, feat[:geometry])
         end.min_by { |feat| feat[:priority] }
-        f && f[:kind] == "split" ? resolve_split(f, lon, lat) : f
+        f && f[:kind] == "split" ? resolve_split(f, lon, lat, iso) : f
       end
 
       # A "split" feature covers a county whose towns disagree town-by-town but along
       # a resolvable geographic line (e.g. eastern Custer went Mountain in 1919, the
       # western Salmon-River basin stayed Pacific until Boise's 1923 switch). It embeds
       # the Shanks CITY LISTINGS points; we snap the birth coordinate to the nearest
-      # documented town and apply that town's verdict. A town carries EITHER a flat
-      # `zone` (a fixed offset, e.g. Etc/GMT+7) OR a `shanks` transition-table id (a full
-      # zic history, for towns whose DST varied year to year in a way a flat offset can't
-      # express) -- or neither, meaning it matched IANA and we `warn`/defer. This is how
-      # city-specific overrides complement IANA town by town where a county-majority
-      # override can't: each documented town gets its own answer.
-      def resolve_split(f, lon, lat)
+      # documented town and apply that town's verdict. A town carries ONE OF: a `sched`
+      # (a list of [from, until, zone] segments -- a per-town date-ranged schedule, for
+      # cohort-nest states where a town kept standard time only in certain year spans; the
+      # segment covering the birth date wins, else defer); a flat `zone` (a fixed offset,
+      # e.g. Etc/GMT+7); a `shanks` transition-table id (a full zic history); or none of
+      # these, meaning it matched IANA and we `warn`/defer. This is how city-specific
+      # overrides complement IANA town by town where a county-majority override can't.
+      def resolve_split(f, lon, lat, iso = nil)
         c = nearest_city(f[:cities], lon, lat)
         common = f.merge(kind: nil, zone: nil, shanks: nil, city: c && c[:name])
-        if c && c[:shanks]
+        seg = iso && c && c[:sched]&.find { |s| (s[0].nil? || iso >= s[0]) && iso < s[1] }
+        if seg
+          common.merge(kind: "override", zone: seg[2])
+        elsif c && c[:shanks]
           common.merge(kind: "override", shanks: c[:shanks])
         elsif c && c[:zone]
           common.merge(kind: "override", zone: c[:zone])
@@ -123,7 +127,7 @@ module TzHistory
             until_date: props["until_date"],
             cities: (props["cities"] || []).map do |c|
               { name: c["name"], lon: c["lon"].to_f, lat: c["lat"].to_f,
-                zone: c["zone"], shanks: c["shanks"] }
+                zone: c["zone"], shanks: c["shanks"], sched: c["sched"] }
             end,
             geometry: polygons,
             bbox: BoundingBox.new(polygons),
