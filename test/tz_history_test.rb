@@ -1201,8 +1201,18 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 44.4759, lon: -73.2121, date: "1956-07-15") # post US#2 1955 -> IANA
   end
 
-  def test_vermont_early_dst_minority_defers
-    assert_nil TzHistory.for(lat: 42.8509, lon: -72.5579, date: "1940-07-15") # Brattleboro (VT#13) adopted DST early
+  def test_vermont_early_dst_minority_est_before_adoption_then_defers
+    # The cohort nest (build_vt.rb) recovers the minority tables' pre-adoption EST years.
+    # Brattleboro (VT#13) kept EST until adopting daylight in 1935: EST in 1930, defers by 1940.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 42.8509, lon: -72.5579, date: "1930-07-15").identifier
+    assert_nil TzHistory.for(lat: 42.8509, lon: -72.5579, date: "1940-07-15") # adopted DST 1935 -> IANA
+  end
+
+  def test_vermont_holdout_table_17_recovered
+    # VT#17 (34 towns, e.g. Bridgewater) kept EST like VT#1 until 1955, except its 1940-41 EDT
+    # summers: EST in 1935 & 1950, defers in 1940.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 43.5881, lon: -72.6256, date: "1950-07-15").identifier
+    assert_nil TzHistory.for(lat: 43.5881, lon: -72.6256, date: "1940-07-15")
   end
 
   # --- Virginia verify-confirmed (tt PDF 566; flat EST pre-war + patchy postwar warn) ---
