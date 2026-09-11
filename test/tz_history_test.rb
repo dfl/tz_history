@@ -1225,4 +1225,14 @@ class TzHistoryTest < Minitest::Test
     assert_equal(-7 * 3600, offset_of(TzHistory.for(lat: 42.8666, lon: -106.3131, date: "1966-07-15"), "1966-07-15"))
     assert_nil TzHistory.for(lat: 41.1400, lon: -104.8202, date: "1968-07-15") # post US#1 -> IANA
   end
+
+  # --- Arizona IANA-sufficient (tt PDF 31, the final CONUS state) ---
+  # AZ#1 (555 towns, 89%, incl. Phoenix) = MST no-DST + war-MWT (with the 1944 early-end quirk) +
+  # one MDT summer 1967 = EXACTLY IANA America/Phoenix, so nothing ships (Phoenix defers to IANA).
+  # The far-west/southern Pacific tables (AZ#2/#3, "estimated from incomplete info") are a sliver
+  # residual -> DEFERRED.
+  def test_arizona_is_iana_sufficient
+    assert_nil TzHistory.for(lat: 33.4484, lon: -112.0740, date: "1930-07-15") # Phoenix -> IANA America/Phoenix (MST)
+    assert_nil TzHistory.for(lat: 33.4484, lon: -112.0740, date: "1967-07-15") # 1967 MDT year = IANA
+  end
 end
