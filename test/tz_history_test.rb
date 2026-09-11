@@ -1195,4 +1195,20 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 38.3498, lon: -81.6326, date: "1945-07-15") # war = IANA
     assert_nil TzHistory.for(lat: 38.3498, lon: -81.6326, date: "1950-07-15") # patchy postwar -> warn/defer
   end
+
+  # --- Wisconsin verify-confirmed (tt PDF 617; two clean CST windows + fringe warns) ---
+  # WI#1 (dominant) = CST no-DST 1883-1956 -> CDT 1957. Early-1920s city DST experiments (warn
+  # 1919-1923) + staggered 1955-1957 adoption (warn 1955-1967); clean CST override 1923-1942 +
+  # 1945-1955. Matches harmonic-explorer midwest_dst_history.md.
+  def test_wisconsin_clean_windows_are_fixed_cst
+    tz = TzHistory.for(lat: 43.0389, lon: -87.9065, date: "1930-07-15") # Milwaukee
+    assert_equal "Etc/GMT+6", tz.identifier
+    assert_equal(-6 * 3600, offset_of(tz, "1930-07-15"))
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 43.0731, lon: -89.4012, date: "1950-07-15").identifier # Madison
+  end
+
+  def test_wisconsin_fringe_periods_defer
+    assert_nil TzHistory.for(lat: 43.0389, lon: -87.9065, date: "1921-07-15") # early-1920s DST experiments -> warn
+    assert_nil TzHistory.for(lat: 43.0389, lon: -87.9065, date: "1956-07-15") # staggered 1955-1957 -> warn
+  end
 end

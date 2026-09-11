@@ -58,6 +58,8 @@ subset of towns/years · `bug` = a shipped feature is wrong and needs a fix ·
 
 | 33 | Washington | **Early-DST minority tables deferred.** The town split asserts only the crop-verified dominant WA#1 (74%, PST no-DST->1961). The minority tables that adopted DST earlier/scattered (WA#8 PDT 1948-1951, WA#4 1949/1951/1956, + the smaller tables) defer -- their PST-no-DST years in the gaps read IANA PDT (under-corrected). | minority | low (small minority, sparse) | Per-table PST-year windows for the minority tables (crop-verify from research/index/WA/tt_ocr_cols.txt). |
 
+| 34 | Wisconsin | **Dominant WI#1 under-corrected in the two fringe-warn windows.** The shipped treatment warns 1919-1923 (early-1920s city DST experiments in the city tables) and 1955-1967 (staggered adoption), deferring to IANA there. But WI#1 (the dominant rural table) had NO 1919-1923 experiments (CST straight from 1919) and held CST no-DST until 1957 -- so its 1919-1923 and 1955-1956 summers read IANA CDT (under-corrected). Safe (never over-corrects); the warns are conservative because the city/early-adopter tables disagree in those windows. | minority | low-medium (dominant table, ~7 fringe summers) | Town-level split: assert WI#1 -> Etc/GMT+6 across 1919-1923 and 1955-1956 too (crop-verify WI#2-6 experiment/adoption years from research/index/WI/tt_ocr_cols.txt), leaving the city tables to warn. |
+
 ## Also parked (from earlier states, lower detail)
 
 - **Connecticut** — CT table-3 cities in the override counties under-corrected for summer
