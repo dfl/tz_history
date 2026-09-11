@@ -1023,6 +1023,16 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 36.1540, lon: -95.9928, date: "1968-07-15") # post US#1 -> IANA
   end
 
+  def test_oklahoma_panhandle_was_mountain_until_1921
+    # Cimarron/Texas counties (far-west panhandle) kept MST until 1921-03-08, then Central.
+    # IANA and the flat statewide CST override both read CST there; the sliver override fixes it.
+    tz = TzHistory.for(lat: 36.6153, lon: -102.3731, date: "1920-06-15") # Boise City area
+    assert_equal "Etc/GMT+7", tz.identifier
+    assert_equal(-7 * 3600, offset_of(tz, "1920-06-15")) # MST, not CST
+    # After the 1921 switch it falls back to the statewide CST override.
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 36.6153, lon: -102.3731, date: "1930-07-15").identifier
+  end
+
   # --- Oregon Pacific no-DST 1953-1960 (tt PDF 439, tables OR#1-17) ---
   # Oregon had no state DST law 1949-1962; in the 1953-1960 decade EVERY Oregon table
   # (rural OR#2 and urban Portland OR#12) kept PST, while IANA America/Los_Angeles applies
