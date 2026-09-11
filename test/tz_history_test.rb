@@ -1211,4 +1211,18 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 43.0389, lon: -87.9065, date: "1921-07-15") # early-1920s DST experiments -> warn
     assert_nil TzHistory.for(lat: 43.0389, lon: -87.9065, date: "1956-07-15") # staggered 1955-1957 -> warn
   end
+
+  # --- Wyoming flat MST (tt PDF 627, single table) ---
+  # WY#1 (whole state) = pure MST no-DST -> US#1 1967. Matches IANA America/Denver 1921-1964; the
+  # flat Etc/GMT+7 override's real effect is 1920 + 1965-1966 (IANA MDT). Like New Mexico/Utah.
+  def test_wyoming_is_fixed_mst_no_dst
+    tz = TzHistory.for(lat: 41.1400, lon: -104.8202, date: "1930-07-15") # Cheyenne
+    assert_equal "Etc/GMT+7", tz.identifier
+    assert_equal(-7 * 3600, offset_of(tz, "1930-07-15"))
+  end
+
+  def test_wyoming_keeps_mst_through_1966
+    assert_equal(-7 * 3600, offset_of(TzHistory.for(lat: 42.8666, lon: -106.3131, date: "1966-07-15"), "1966-07-15"))
+    assert_nil TzHistory.for(lat: 41.1400, lon: -104.8202, date: "1968-07-15") # post US#1 -> IANA
+  end
 end
