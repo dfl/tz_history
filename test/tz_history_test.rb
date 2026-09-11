@@ -1101,4 +1101,19 @@ class TzHistoryTest < Minitest::Test
     # Bristol (NE Tri-Cities): Eastern (EST) since 1883, no DST.
     assert_equal "Etc/GMT+5", TzHistory.for(lat: 36.5951, lon: -82.1887, date: "1930-07-15").identifier
   end
+
+  # --- Texas verify-only (tt PDF 531; TX#1 Central, TX#2 El Paso Mountain) ---
+  # TX#1 (dominant) = pure CST no-DST -> US#1 1967 (a single unified Central table); TX#2 = far-west
+  # El Paso/Hudspeth, pure MST -> IANA America/Denver keeps MST, so a note-less guard defers them.
+  def test_texas_is_fixed_cst_no_dst
+    tz = TzHistory.for(lat: 32.7767, lon: -96.7970, date: "1930-07-15") # Dallas
+    assert_equal "Etc/GMT+6", tz.identifier
+    assert_equal(-6 * 3600, offset_of(tz, "1930-07-15"))
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 29.7604, lon: -95.3698, date: "1966-07-15").identifier # Houston
+    assert_nil TzHistory.for(lat: 32.7767, lon: -96.7970, date: "1968-07-15") # post US#1 -> IANA
+  end
+
+  def test_texas_el_paso_mountain_defers
+    assert_nil TzHistory.for(lat: 31.7619, lon: -106.4850, date: "1930-07-15") # El Paso (TX#2) = Mountain -> IANA
+  end
 end
