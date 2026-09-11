@@ -1116,4 +1116,20 @@ class TzHistoryTest < Minitest::Test
   def test_texas_el_paso_mountain_defers
     assert_nil TzHistory.for(lat: 31.7619, lon: -106.4850, date: "1930-07-15") # El Paso (TX#2) = Mountain -> IANA
   end
+
+  # --- Utah flat MST (tt PDF 556; UT#1 dominant Mountain) ---
+  # UT#1 (170 towns, 84%) = pure MST no-DST -> US#1 1967. Matches IANA America/Denver for 1921-1964,
+  # so the flat Etc/GMT+7 override's real effect is the 1920 + 1965-1966 summers where IANA applies
+  # MDT that Utah did not observe. (UT#2 far-west Pacific cluster deferred -> DEFERRED.)
+  def test_utah_is_fixed_mst_no_dst
+    tz = TzHistory.for(lat: 40.7608, lon: -111.8910, date: "1930-07-15") # Salt Lake City
+    assert_equal "Etc/GMT+7", tz.identifier
+    assert_equal(-7 * 3600, offset_of(tz, "1930-07-15"))
+  end
+
+  def test_utah_keeps_mst_through_1966_when_iana_applies_mdt
+    # 1965-1966: Utah still MST (-7); IANA America/Denver applies MDT (-6). Override corrects it.
+    assert_equal(-7 * 3600, offset_of(TzHistory.for(lat: 40.7608, lon: -111.8910, date: "1966-07-15"), "1966-07-15"))
+    assert_nil TzHistory.for(lat: 40.7608, lon: -111.8910, date: "1968-07-15") # post US#1 -> IANA
+  end
 end
