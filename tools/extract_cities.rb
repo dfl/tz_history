@@ -30,9 +30,85 @@ require "json"
 require "open3"
 
 dirs = ARGV.reject { |a| a.start_with?("--") }
-abort "usage: extract_cities.rb <render_dir> [more_dirs...] [--out=] [--legend] [--max-table=N]" if dirs.empty?
+abort "usage: extract_cities.rb <render_dir> [more_dirs...] [--out=] [--legend] [--max-table=N] [--counties=FIPS.json]" if dirs.empty?
 flags = ARGV.grep(/\A--/).to_h { |a| k, v = a.sub("--", "").split("=", 2); [k, v || true] }
 want_legend = flags.key?("legend")
+
+# --- County# repair (majority-learned) --------------------------------------------------
+# The per-city county# OCRs less reliably than the coordinates (which are 300-dpi + repaired
+# from the LMT column). A stray digit misread ("39" for "9") or a whole-column bleed can land
+# an impossible county#. When a county-FIPS geojson is supplied (--counties, or COUNTIES_GEOJSON),
+# we repair the OUTLIERS as follows: (1) point-in-polygon each town to its true county FIPS;
+# (2) LEARN this state's Shanks numbering from the data -- for each real county, the county# the
+# MAJORITY of its towns carry IS that county's number; (3) repair only the minority towns whose
+# county# disagrees with their county's majority. This learns the atlas's own numbering (so it
+# is correct for independent-city / renamed-county states like NV/VA/MD/MO, where a naive
+# alphabetical rank would be wrong) and never shifts a correctly-numbered majority.
+def in_ring?(x, y, ring)
+  inside = false
+  j = ring.length - 1
+  ring.each_index do |i|
+    xi, yi = ring[i]; xj, yj = ring[j]
+    inside = !inside if (yi > y) != (yj > y) && x < ((xj - xi) * (y - yi) / (yj - yi)) + xi
+    j = i
+  end
+  inside
+end
+
+def load_county_polys(path)
+  polys = {}; bboxes = {}
+  JSON.parse(File.read(path)).fetch("features").each do |f|
+    fips = f["id"].to_s
+    g = f["geometry"]
+    pl = g["type"] == "Polygon" ? [g["coordinates"]] : g["coordinates"]
+    polys[fips] = pl
+    pts = pl.flat_map(&:first)
+    xs = pts.map(&:first); ys = pts.map(&:last)
+    bboxes[fips] = [xs.min, ys.min, xs.max, ys.max]
+  end
+  [polys, bboxes]
+end
+
+def fips_for(lon, lat, polys, bboxes)
+  bboxes.each do |fips, (minx, miny, maxx, maxy)|
+    next unless lon.between?(minx, maxx) && lat.between?(miny, maxy)
+
+    return fips if polys[fips].any? { |rings| in_ring?(lon, lat, rings.first) && rings.drop(1).none? { |h| in_ring?(lon, lat, h) } }
+  end
+  nil
+end
+
+# Repair county# outliers in-place over a rows array, learning per-county numbering from the
+# majority. Returns [repaired_count, unresolved_count].
+def repair_county_nums!(rows, polys, bboxes)
+  rows.each { |r| r["_fips"] = (r["lat"] && r["lon"]) ? fips_for(r["lon"].to_f, r["lat"].to_f, polys, bboxes) : nil }
+  fips_to_num = {}
+  rows.group_by { |r| r["_fips"] }.each do |fips, ts|
+    next unless fips
+
+    num, support = ts.map { |r| r["county_num"] }.tally.max_by { |_n, s| s }
+    fips_to_num[fips] = num if support >= 2 # need >=2 agreeing towns to trust a county's number
+  end
+  repaired = 0; unresolved = 0
+  rows.each do |r|
+    fips = r.delete("_fips")
+    if fips.nil? then unresolved += 1; next end
+
+    target = fips_to_num[fips]
+    if target && target != r["county_num"]
+      r["county_num"] = target
+      repaired += 1
+    end
+  end
+  [repaired, unresolved]
+end
+
+counties_path = flags["counties"] || (flags.key?("counties") ? nil : ENV["COUNTIES_GEOJSON"])
+$county_polys = $county_bboxes = nil
+if counties_path && File.exist?(counties_path)
+  $county_polys, $county_bboxes = load_county_polys(counties_path)
+  warn "county# repair: loaded #{$county_polys.size} county polygons from #{counties_path}"
+end
 # The per-city table# is captured by looking back from the LAT+LON pair. When a bled
 # fragment from the neighbouring column shifts the token stream, that look-back can grab
 # the LATITUDE's degree (Maine towns are 43-47N -> spurious table# 44/45/47) instead of
@@ -212,6 +288,14 @@ dirs.each do |dir|
     tokens = text.split(/\s+/)
     all_rows.concat(parse_stream(tokens))
   end
+end
+
+# Repair county# outliers (majority-learned) when a county-FIPS geojson was supplied.
+# Runs before dedup so the dedup key uses the corrected county#.
+if $county_polys
+  repaired, unresolved = repair_county_nums!(all_rows, $county_polys, $county_bboxes)
+  warn "county# repair: corrected #{repaired} outlier(s) of #{all_rows.size} rows " \
+       "(#{unresolved} coords outside any county polygon)"
 end
 
 # Dedup: same town listed once. OCR + band overlap repeat rows; keep the highest-conf
