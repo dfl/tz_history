@@ -1148,4 +1148,20 @@ class TzHistoryTest < Minitest::Test
   def test_vermont_early_dst_minority_defers
     assert_nil TzHistory.for(lat: 42.8509, lon: -72.5579, date: "1940-07-15") # Brattleboro (VT#13) adopted DST early
   end
+
+  # --- Virginia verify-confirmed (tt PDF 566; flat EST pre-war + patchy postwar warn) ---
+  # All 26 tables held EST no-DST 1920-1941; postwar DST adoption is city-by-city 1946-1961
+  # (patchy border state) -> warn-only. Matches harmonic-explorer va_dst_history.md. VA#1
+  # (crop-verified) = EST no-DST -> EDT from 1947.
+  def test_virginia_prewar_is_fixed_est
+    tz = TzHistory.for(lat: 37.5407, lon: -77.4360, date: "1930-07-15") # Richmond
+    assert_equal "Etc/GMT+5", tz.identifier
+    assert_equal(-5 * 3600, offset_of(tz, "1930-07-15"))
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 36.8508, lon: -76.2859, date: "1930-07-15").identifier # Norfolk
+  end
+
+  def test_virginia_postwar_is_patchy_and_defers
+    assert_nil TzHistory.for(lat: 37.5407, lon: -77.4360, date: "1945-07-15") # war = IANA
+    assert_nil TzHistory.for(lat: 37.5407, lon: -77.4360, date: "1950-07-15") # patchy postwar -> warn/defer
+  end
 end
