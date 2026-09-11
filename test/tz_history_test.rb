@@ -1164,4 +1164,20 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 37.5407, lon: -77.4360, date: "1945-07-15") # war = IANA
     assert_nil TzHistory.for(lat: 37.5407, lon: -77.4360, date: "1950-07-15") # patchy postwar -> warn/defer
   end
+
+  # --- Washington Pacific no-DST (tt PDF 592-593; WA#1 dominant) ---
+  # WA#1 (1043 towns, 74%, statewide incl. Seattle/Spokane/Tacoma/Yakima) = pure PST no-DST until
+  # 1961, while IANA America/Los_Angeles applies California's PDT (1948, 1950-1966). Town split:
+  # Etc/GMT+8 over WA#1 for 1945-09-30..1961-04-30. (Pre-war both PST -> no residual.)
+  def test_washington_is_pst_no_dst_1948_1960
+    tz = TzHistory.for(lat: 47.6062, lon: -122.3321, date: "1955-07-15") # Seattle
+    assert_equal "Etc/GMT+8", tz.identifier
+    assert_equal(-8 * 3600, offset_of(tz, "1955-07-15"))
+    assert_equal "Etc/GMT+8", TzHistory.for(lat: 47.6588, lon: -117.4260, date: "1948-07-15").identifier # Spokane
+  end
+
+  def test_washington_prewar_and_post1961_defer
+    assert_nil TzHistory.for(lat: 47.6062, lon: -122.3321, date: "1940-07-15") # pre-1948 both PST -> no override
+    assert_nil TzHistory.for(lat: 47.6062, lon: -122.3321, date: "1962-07-15") # WA adopted PDT 1961 = IANA
+  end
 end

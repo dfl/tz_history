@@ -56,6 +56,8 @@ subset of towns/years · `bug` = a shipped feature is wrong and needs a fix ·
 
 | 32 | Vermont | **Early-DST minority + late-table tail deferred.** The town split asserts only the crop-verified dominant VT#1 (74%, EST no-DST->1955). The SE early-adopter tables (Brattleboro VT#13 ~1935, VT#15 ~1936, VT#2 ~1938, VT#3 ~1939, VT#4 ~1940) defer -- their own pre-adoption EST-no-DST years (1919->their adoption) read IANA EDT (under-corrected). Also VT#6/#14 (OCR suggests ~1955 like VT#1) defer, not crop-verified. | minority | low (small state, minority tables) | Full cohort nest (like NH/NJ): per-table adoption-year windows for the minority tables (crop-verify each from research/index/VT/tt_ocr_cols.txt). |
 
+| 33 | Washington | **Early-DST minority tables deferred.** The town split asserts only the crop-verified dominant WA#1 (74%, PST no-DST->1961). The minority tables that adopted DST earlier/scattered (WA#8 PDT 1948-1951, WA#4 1949/1951/1956, + the smaller tables) defer -- their PST-no-DST years in the gaps read IANA PDT (under-corrected). | minority | low (small minority, sparse) | Per-table PST-year windows for the minority tables (crop-verify from research/index/WA/tt_ocr_cols.txt). |
+
 ## Also parked (from earlier states, lower detail)
 
 - **Connecticut** — CT table-3 cities in the override counties under-corrected for summer
