@@ -525,6 +525,18 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 41.8781, lon: -87.6298, date: "1930-07-15")
   end
 
+  # The cohort nest (build_il.rb) refines the flat override: a downstate town whose Shanks
+  # table adopted daylight EARLY is CST before adoption but defers once it went onto DST --
+  # the flat override used to over-correct those town-summers to CST (DEFERRED #9/#10).
+  def test_downstate_illinois_early_dst_table_defers_after_adoption
+    # An IL#7 town (kept CST pre-war, adopted US daylight 1946): CST in 1935, defers by 1950.
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 41.1419, lon: -87.8611, date: "1935-07-15").identifier
+    assert_nil TzHistory.for(lat: 41.1419, lon: -87.8611, date: "1950-07-15")
+    # An IL#55 town (CST through 1954, then Chicago DST from 1955): CST 1953, defers 1956.
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 40.1167, lon: -88.7500, date: "1953-07-15").identifier
+    assert_nil TzHistory.for(lat: 40.1167, lon: -88.7500, date: "1956-07-15")
+  end
+
   # --- Indiana: pre-1970 Central/Eastern + DST chaos, flagged not corrected ---
   # Shanks calls Indiana "very complex ... contradictory ... not documented"; IANA's
   # eight America/Indiana/* sub-zones are best-guesses. We flag (warn) and defer rather
