@@ -1234,5 +1234,14 @@ class TzHistoryTest < Minitest::Test
   def test_arizona_is_iana_sufficient
     assert_nil TzHistory.for(lat: 33.4484, lon: -112.0740, date: "1930-07-15") # Phoenix -> IANA America/Phoenix (MST)
     assert_nil TzHistory.for(lat: 33.4484, lon: -112.0740, date: "1967-07-15") # 1967 MDT year = IANA
+    assert_nil TzHistory.note(lat: 33.4484, lon: -112.0740, date: "1930-07-15") # Phoenix: no flag (IANA correct)
+  end
+
+  def test_arizona_far_west_surfaces_pacific_uncertainty
+    # Yuma/Mohave: no offset asserted (Shanks flags it estimated), but a warn note surfaces the
+    # possible Pacific time so it is not silently served as Mountain.
+    assert_nil TzHistory.for(lat: 32.6927, lon: -114.6277, date: "1940-07-15") # still defers to IANA (no assertion)
+    note = TzHistory.note(lat: 32.6927, lon: -114.6277, date: "1940-07-15")
+    assert note && note =~ /Pacific/i, "far-west AZ should surface a Pacific-time warn note"
   end
 end
