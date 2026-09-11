@@ -1014,6 +1014,13 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 41.1578, lon: -81.2412, date: "1960-07-15")
   end
 
+  def test_ohio_next_tier_east_tables_recovered
+    # Extended the nest with the crop-verified next tier of EAST-EST tables (EST no-DST from
+    # 1919 -> US# adoption). OH#20 held EST until 1963 (a late holdout): EST in 1960, defers 1965.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 39.6797, lon: -80.9117, date: "1960-07-15").identifier
+    assert_nil TzHistory.for(lat: 39.6797, lon: -80.9117, date: "1965-07-15")
+  end
+
   def test_cleveland_metro_defers_to_iana
     # Big-city DST tables (Cleveland/OH#26) observed DST that IANA models -> defer, no override.
     assert_nil TzHistory.for(lat: 41.4993, lon: -81.6944, date: "1935-07-15")
