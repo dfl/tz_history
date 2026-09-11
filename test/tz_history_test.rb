@@ -742,6 +742,22 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 39.6944, lon: -74.8417, date: "1925-07-15")
   end
 
+  # The per-table cohort nest (build_nj.rb) recovers each tail table's exact 1920->adoption EST
+  # (the old 3-window nest quantized to boundaries) AND fixes the tables the old nest
+  # over-corrected because they actually observed early peacetime EDT.
+  def test_nj_tail_table_recovered_full_pre_adoption_est
+    # NJ #4 (adopt 1928): EST every summer 1920-1927 (old nest dropped it at the 1921 boundary).
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 40.8744, lon: -74.2081, date: "1925-07-15").identifier
+    assert_nil TzHistory.for(lat: 40.8744, lon: -74.2081, date: "1930-07-15")
+  end
+
+  def test_nj_early_edt_table_no_longer_over_corrected
+    # NJ #8 observed June-start EDT from 1921 -> defers 1925 (the old 3-window nest wrongly
+    # asserted CST/EST through 1930).
+    assert_nil TzHistory.for(lat: 39.6381, lon: -74.5944, date: "1925-07-15")
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 39.6381, lon: -74.5944, date: "1920-07-15").identifier
+  end
+
   # --- New Mexico: pure MST, no peacetime DST until 1967 (flat Mountain override) ---
   # Crop-verified (PDF 345): NM #1 (98%) is pure MST with no peacetime daylight saving
   # 1883-1967 (war excepted); NM #2/#3 are also MST no-DST. IANA America/Denver applies MDT.
