@@ -283,9 +283,10 @@ class TzHistoryTest < Minitest::Test
   # --- Maine tables ME#39-49 recovery (tt spans PDF 229-230; the original --max-table=38
   # wrongly dropped ~230 towns on these real tables). Index rebuilt to 1188 towns. ---
   def test_maine_me44_recovered_est_before_1931
-    # Beaver Dam (ME #44) adopted DST 1931: EST in 1928, defers after.
-    assert_equal "Etc/GMT+5", TzHistory.for(lat: 43.2667, lon: -70.8667, date: "1928-07-15").identifier
-    assert_nil TzHistory.for(lat: 43.2667, lon: -70.8667, date: "1935-07-15")
+    # ME #44 (Augusta area) adopted DST 1931: EST in 1928, defers after. (The prior coord
+    # 43.27,-70.87 was west of the Piscataqua = actually in NH; use an in-Maine ME#44 town.)
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 44.3106, lon: -69.7800, date: "1928-07-15").identifier
+    assert_nil TzHistory.for(lat: 44.3106, lon: -69.7800, date: "1935-07-15")
   end
 
   def test_maine_me45_recovered_est_through_prewar
@@ -709,6 +710,13 @@ class TzHistoryTest < Minitest::Test
   def test_urban_new_hampshire_defers_after_its_1931_dst_adoption
     # NH #2 town observed EDT from 1931 -> defers to IANA in 1935 (not EST).
     assert_nil TzHistory.for(lat: 42.8617, lon: -71.2172, date: "1935-07-15")
+  end
+
+  def test_new_hampshire_minority_table_recovered_1931_to_adoption
+    # The cohort nest (build_nh.rb) recovers each minority table's 1931->adoption EST years
+    # that the old NH#1-only window dropped. NH#5 kept EST until 1934: EST in 1932, defers 1935.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 42.7392, lon: -71.9808, date: "1932-07-15").identifier
+    assert_nil TzHistory.for(lat: 42.7392, lon: -71.9808, date: "1935-07-15")
   end
 
   # --- New Jersey: urban continuous-DST = IANA; rural tables kept EST at staggered years ---
