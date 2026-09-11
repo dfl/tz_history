@@ -54,6 +54,8 @@ subset of towns/years · `bug` = a shipped feature is wrong and needs a fix ·
 
 | 31 | Utah | **Far-west Utah / Nevada-border Pacific cluster (UT#2).** Crop-verified: UT#2 (~33 towns) = PST no-DST until 1969 (PDT summers 1966-68, then MDT 1969) — the far-west border communities (Ibapah/Gandy/Garrison/Trout Creek, lon ≤ -113.9) aligned with Nevada (Pacific), while IANA models all Utah as America/Denver (Mountain) → 1 h slow under IANA for ~46 years. NOT shipped: the indexed UT#2 town set is contaminated (~12 of 33 sit at lon -112, central Utah = almost certainly misassigned to UT#2), so a Pacific override would over-correct them. The shipped flat MST gives the true far-west towns Etc/GMT+7 = IANA (no worse, just not the correct Pacific -8). | minority (Pacific) | very low (sparse Nevada-border towns) | Re-verify which UT#2 towns are genuinely lon ≤ -113.9 (far-west), then a town-level split → Etc/GMT+8 for [1919-10-26..~1966] over just those; defer the messy 1966-69 PDT/MDT transition. |
 
+| 32 | Vermont | **Early-DST minority + late-table tail deferred.** The town split asserts only the crop-verified dominant VT#1 (74%, EST no-DST->1955). The SE early-adopter tables (Brattleboro VT#13 ~1935, VT#15 ~1936, VT#2 ~1938, VT#3 ~1939, VT#4 ~1940) defer -- their own pre-adoption EST-no-DST years (1919->their adoption) read IANA EDT (under-corrected). Also VT#6/#14 (OCR suggests ~1955 like VT#1) defer, not crop-verified. | minority | low (small state, minority tables) | Full cohort nest (like NH/NJ): per-table adoption-year windows for the minority tables (crop-verify each from research/index/VT/tt_ocr_cols.txt). |
+
 ## Also parked (from earlier states, lower detail)
 
 - **Connecticut** — CT table-3 cities in the override counties under-corrected for summer

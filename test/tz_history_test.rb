@@ -1132,4 +1132,20 @@ class TzHistoryTest < Minitest::Test
     assert_equal(-7 * 3600, offset_of(TzHistory.for(lat: 40.7608, lon: -111.8910, date: "1966-07-15"), "1966-07-15"))
     assert_nil TzHistory.for(lat: 40.7608, lon: -111.8910, date: "1968-07-15") # post US#1 -> IANA
   end
+
+  # --- Vermont rural EST no-DST (tt PDF 560-561; VT#1 dominant) ---
+  # VT#1 (301 towns, 74%, statewide incl. Burlington/Montpelier) = pure EST no-DST -> US#2 1955,
+  # while IANA America/New_York applies EDT every summer. The early-DST SE minority (Brattleboro
+  # VT#13 ~1935 etc.) defers. Town split: Etc/GMT+5 over VT#1 for 1919-1942 + 1945-1955.
+  def test_vermont_rural_is_est_no_dst_until_1955
+    tz = TzHistory.for(lat: 44.4759, lon: -73.2121, date: "1930-07-15") # Burlington (VT#1)
+    assert_equal "Etc/GMT+5", tz.identifier
+    assert_equal(-5 * 3600, offset_of(tz, "1930-07-15"))
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 44.4759, lon: -73.2121, date: "1954-07-15").identifier
+    assert_nil TzHistory.for(lat: 44.4759, lon: -73.2121, date: "1956-07-15") # post US#2 1955 -> IANA
+  end
+
+  def test_vermont_early_dst_minority_defers
+    assert_nil TzHistory.for(lat: 42.8509, lon: -72.5579, date: "1940-07-15") # Brattleboro (VT#13) adopted DST early
+  end
 end
