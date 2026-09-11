@@ -1237,6 +1237,16 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 47.6062, lon: -122.3321, date: "1962-07-15") # WA adopted PDT 1961 = IANA
   end
 
+  # The cohort nest (build_wa.rb) extends the correction from WA#1 to the minority tables:
+  # each keeps PST in the summers its own table stayed PST, and defers in its scattered PDT
+  # summers (DEFERRED #33).
+  def test_washington_minority_table_pst_except_its_own_dst_summers
+    # A WA#4 town (Ames Lake): PST in 1955 like the rest of the state, but WA#4 observed PDT
+    # in 1951, so that summer defers to IANA.
+    assert_equal "Etc/GMT+8", TzHistory.for(lat: 47.65, lon: -122.15, date: "1955-07-15").identifier
+    assert_nil TzHistory.for(lat: 47.65, lon: -122.15, date: "1951-07-15") # WA#4 PDT summer -> IANA
+  end
+
   # --- West Virginia verify-confirmed (tt PDF 603-604; flat EST pre-war + patchy postwar warn) ---
   # All ~35 tables held EST no-DST 1920-1941; postwar DST adoption is city-by-city 1946-1963
   # (WV#1/#2 held EST until 1963) -> warn-only. Matches harmonic-explorer wv_dst_history.md.
