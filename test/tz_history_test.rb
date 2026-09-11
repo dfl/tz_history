@@ -1180,4 +1180,19 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 47.6062, lon: -122.3321, date: "1940-07-15") # pre-1948 both PST -> no override
     assert_nil TzHistory.for(lat: 47.6062, lon: -122.3321, date: "1962-07-15") # WA adopted PDT 1961 = IANA
   end
+
+  # --- West Virginia verify-confirmed (tt PDF 603-604; flat EST pre-war + patchy postwar warn) ---
+  # All ~35 tables held EST no-DST 1920-1941; postwar DST adoption is city-by-city 1946-1963
+  # (WV#1/#2 held EST until 1963) -> warn-only. Matches harmonic-explorer wv_dst_history.md.
+  def test_west_virginia_prewar_is_fixed_est
+    tz = TzHistory.for(lat: 38.3498, lon: -81.6326, date: "1930-07-15") # Charleston
+    assert_equal "Etc/GMT+5", tz.identifier
+    assert_equal(-5 * 3600, offset_of(tz, "1930-07-15"))
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 40.0640, lon: -80.7209, date: "1930-07-15").identifier # Wheeling
+  end
+
+  def test_west_virginia_postwar_is_patchy_and_defers
+    assert_nil TzHistory.for(lat: 38.3498, lon: -81.6326, date: "1945-07-15") # war = IANA
+    assert_nil TzHistory.for(lat: 38.3498, lon: -81.6326, date: "1950-07-15") # patchy postwar -> warn/defer
+  end
 end
