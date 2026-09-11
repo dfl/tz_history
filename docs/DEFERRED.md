@@ -95,7 +95,7 @@ counting transition rows (`02:00` / `Before 11/18`) in the top of each `tt+off` 
 | OH | 5 | **DONE (2026-09)** | tt 409-413 (5-page span); **page 413 is BOTH the last tt page AND the first city page (A-Au towns)**. Re-OCR'd (tt 409-413, cities 413bottom-431, `--max-table=118`) → clean index 2883 towns. Shipped a two-zone CST/EST town-level split cohort nest (`build_oh.rb`) replacing the buggy flat-EST override + postwar warn. Residuals: rows #21-24 below. |
 | PA | 5 | **core DONE (2026-09)** | tt 448-452 (5-page span); **page 452 is BOTH last tt page AND first city page (A-cities)**. Re-OCR'd (cities 452bottom-493, `--max-table=115`) → clean index 6730 towns. Shipped the crop-verified pre-war core (PA#1+#6 → Etc/GMT+5 1919-1942, `build_pa.rb`). Full cohort nest = follow-up (row #29). |
 | MO | 2 | **DONE** | tt 300-301; index already clean (tt rows do not parse as cities). Replaced postwar warn with a 5-window CST cohort nest (dominant MO#3=86% CST to 1966). |
-| TN | 2 | pending | tt 510-511. |
+| TN | 2 | **DONE (2026-09)** | tt 510-511 (2-page span; p511 is pure tt, no city-bottom). Rebuilt the corrupt index (cities 512-530, `--max-table=40`) → 2366 towns. VERIFY-CONFIRMED the elaborate pre-existing two-zone treatment (feat[8-36] flat CST/EST + per-county East-TN "Central until 1946-1960" overrides feat[84-108] + NE Tri-Cities warn feat[111-115]). Crop-verified anchors: TN#3 pure CST (West/Middle), TN#1 pure EST (Eastern). No new features; 6 tests (commit 2d58c8c). |
 | VT | 2 | pending | tt 560-561. |
 | WA | 2 | pending | tt 592-593. |
 | WV | 2 | pending | tt 603-604. |
