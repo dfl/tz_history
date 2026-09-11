@@ -537,6 +537,24 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 40.1167, lon: -88.7500, date: "1956-07-15")
   end
 
+  # --- Michigan: LP kept Central, switched to Eastern piecemeal; IANA applies Detroit's
+  # 1915 Eastern switch to the whole peninsula. Crop-verified dominant tables carry the real
+  # Central span; the contested tail defers with a verify warning (DEFERRED #14). ---
+  def test_michigan_dominant_central_table_is_fixed_central_pre_switch
+    # An MI#1 town (Acme, Grand Traverse Co.): Central (CST -6) until the 1931 switch, while
+    # IANA America/Detroit says Eastern (-5). After 1931 it matches IANA and defers.
+    tz = TzHistory.for(lat: 44.7719, lon: -85.5014, date: "1925-07-15")
+    assert_equal "Etc/GMT+6", tz.identifier
+    assert_equal(-6 * 3600, offset_of(tz, "1925-07-15"))
+    assert_nil TzHistory.for(lat: 44.7719, lon: -85.5014, date: "1935-07-15") # Eastern from 1931 = IANA
+  end
+
+  def test_michigan_mi25_stays_central_until_wwii
+    # MI#25 kept Central until WWII (1942), longer than MI#1's 1931 switch.
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 45.9847, lon: -84.8206, date: "1940-07-15").identifier
+    assert_nil TzHistory.for(lat: 45.9847, lon: -84.8206, date: "1963-07-15") # Eastern postwar = IANA
+  end
+
   # --- Indiana: pre-1970 Central/Eastern + DST chaos, flagged not corrected ---
   # Shanks calls Indiana "very complex ... contradictory ... not documented"; IANA's
   # eight America/Indiana/* sub-zones are best-guesses. We flag (warn) and defer rather
