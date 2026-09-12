@@ -14,6 +14,19 @@ records these; IANA deliberately does not.
 `tz_history` corrects a documented set of these cases by point-in-polygon against
 actual US county boundaries, returning a `TZInfo::Timezone`.
 
+## Installation
+
+```ruby
+# Gemfile
+gem "tz_history"
+```
+
+or `gem install tz_history`. Requires Ruby >= 3.2; the only runtime dependency is
+`tzinfo`. The compiled zone data ships in the gem, so there is no build step or
+network access at runtime.
+
+## Usage
+
 ```ruby
 require "tz_history"
 
@@ -51,6 +64,29 @@ tz = TzHistory.for(lat:, lon:, date:)
 tz && ActiveSupport::TimeZone.create(tz.identifier, nil, tz)
 ```
 
+## Coverage
+
+All **48 contiguous US states** have been worked against the Shanks *American
+Atlas* TIME TABLES (Alaska/Hawaii are out of scope — single modern zones). Each
+state's disposition is recorded in [`docs/COVERAGE.md`](docs/COVERAGE.md); the
+patterns are:
+
+- **IANA already sufficient** — the modern zone matches history (e.g. Arizona,
+  California). No override; `for` returns `nil`.
+- **Flat standard-time override** — a state/region that kept one standard offset
+  with no daylight saving maps to a fixed `Etc/GMT±N` (the no-DST Central/Eastern/
+  Mountain/Pacific majorities: Mississippi, New Mexico, Oregon, …).
+- **Two-zone town split** — states straddling a zone boundary resolve town-by-town
+  via the nearest documented Shanks town (Ohio's Central-vs-Eastern west, the
+  Central/Mountain Dakotas, far-west-Pacific Utah/Arizona edges, …).
+- **Staggered-adoption cohort nest** — the seaboard states that dropped daylight
+  saving town-by-town at different years (New York, Pennsylvania, Vermont, …).
+- **Flagged, not guessed** — contested or incompletely-documented regions return a
+  `note` caveat while `for` defers to IANA.
+
+Known residual minorities and a few dedicated multi-zone projects still open
+(Illinois, Indiana, Michigan) are tracked in [`docs/DEFERRED.md`](docs/DEFERRED.md).
+
 ## How it works
 
 Two kinds of correction share one point-in-polygon lookup over a FeatureCollection
@@ -86,9 +122,9 @@ and cross-checks them against the public-domain IANA database wherever the two
 overlap (see the Kentucky #69 gold-standard equivalence test). No verbatim atlas
 tables are shipped.
 
-Coverage today is Kentucky plus the flat-offset overrides carried over from
-harmonic-explorer; more states are added as their Shanks tables are transcribed
-and IANA-cross-checked.
+Every zone shipped is cross-checked against IANA wherever the two overlap and
+gated behind a visual crop-verify of the atlas page it came from. No verbatim
+atlas tables are shipped.
 
 ## License
 
