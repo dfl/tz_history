@@ -24,10 +24,14 @@ Gem::Specification.new do |spec|
     "data/shanks/*.zic",
     "data/shanks/zoneinfo/**/*",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE.txt"
   ]
   spec.require_paths = ["lib"]
 
   spec.add_dependency "tzinfo", ">= 2.0"
   spec.metadata["rubygems_mfa_required"] = "true"
+  spec.metadata["homepage_uri"] = spec.homepage
+  spec.metadata["source_code_uri"] = spec.homepage
+  spec.metadata["changelog_uri"] = "#{spec.homepage}/blob/main/CHANGELOG.md"
 end
