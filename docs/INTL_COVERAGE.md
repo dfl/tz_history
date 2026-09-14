@@ -17,6 +17,7 @@ only) · `pending` (not yet worked). **Resolution** — `polygon` (country-wide)
 | Norway | 286 | 310 | 1 | override | polygon | `backzone` Europe/Oslo — **900/900** mid-months 1895–1969 | ✅ done (NO_1) |
 | Sweden | 377 | 401 | 1 | override | polygon | `backzone` Europe/Stockholm — **1092/1092** mid-months 1879–1949 | ✅ done (SE_1) |
 | Denmark | 121 | 145 | 1 | override | polygon | `backzone` Europe/Copenhagen — **960/960** mid-months 1890–1969 | ✅ done (DK_1) |
+| Netherlands Antilles (Aruba + Curaçao) | 280 | 304 | 3 (TT#3 anchor) | override | polygon | `backzone` America/Curaçao **& America/Aruba** — **695/696** mid-months (1912–1969; sole miss = Jan-1912 island LMT, out of window) | ✅ done (CW_1); SSS + Bonaire → Phase 2 |
 
 **Phase-1 sub-hour European mean-time cluster** (worklist order): Iceland ✅ · Ireland
 ❌ no-op · Luxembourg ✅ · Norway ✅ · Sweden ✅ · Denmark ✅. Page map in
@@ -78,6 +79,25 @@ WET 1918–1940 (with its own summer-time dates, differing from Belgium's), then
 mid-month cross-check misses are Mar–Apr 1940, where backzone applies Belgium's spring
 DST as a proxy while Shanks holds Luxembourg on WET until the May occupation switch
 (a Shanks-primary retention). The marginal pre-1904 LMT (+0:24:36, ~24 min) is deferred.
+
+**Netherlands Antilles notes** (first non-European / first Western-hemisphere override,
+and the first *multi-table* country worked as a partial Phase-1 win). Printed p.280 = PDF
+304 packs Netherlands / **NETHERLANDS ANTILLES** / New Caledonia. The atlas splits the
+Antilles into **5 divisions × 3 time tables**, read off the city listing (`Name div#
+table# LAT LON LMT`): **TT#1** `Begin Standard 60W00` (−4:00) → the northern SSS islands
+(Sint Maarten div 5, part of Saba); **TT#2** `68W17` (−4:33) → Bonaire (div 2); **TT#3**
+`67W30` (−4:30) → **Aruba (div 1) and Curaçao (div 3)**, then `60W00` (−4:00) from
+1/Jan/1965. Aruba and Curaçao share the identical *standard* history, so **one CW_1 table
+serves both polygons**; only their pre-1912 island LMT differs (Curaçao −4:35:44
+Willemstad, Aruba −4:40:24), deferred with the LMT era. The DEFAULT IANA build **Links
+both `America/Aruba` and `America/Curacao` → `America/Puerto_Rico`** (`backward`), which
+observed −4:00 (AST) from 1899 and **−3:00 Atlantic War Time 1942–1945** — so the default
+is 30 min fast across the whole 1912–1965 −0430 era and a full **90 min** off in 1942–1945;
+the real detail lives only in `backzone`. Window 1912-02-12 .. 1965-01-01. **Deferred to
+Phase 2:** the SSS islands (Shanks −4:00, which *diverges* from IANA's Curaçao-link) and
+Bonaire (Shanks −4:33; IANA links `America/Kralendijk` to Curaçao = −4:30 anyway, so the
+3-min sub-hour gap is immaterial). NE has Aruba and Curaçao as their own admin_0 features
+(no `lat_min` filter needed); the `INTL_COAST_TOL` recovers their coastlines.
 
 **Ireland is NOT a Phase-1 target** (triage correction). The divergence tool never
 listed `Europe/Dublin`; the hand-written queue conflated it with the divergent

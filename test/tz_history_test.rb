@@ -1511,4 +1511,34 @@ class TzHistoryTest < Minitest::Test
     assert_equal "Shanks/SE_1", TzHistory.for(lat: 55.6050, lon: 13.0038, date: "1917-07-15").identifier
     assert_nil TzHistory.for(lat: 53.5511, lon: 9.9937, date: "1917-07-15") # Hamburg, DE -> defers to IANA
   end
+
+  # --- Netherlands Antilles: Aruba + Curacao at -4:30 (1912-1965) then -4:00 (AST) ---
+  # The DEFAULT IANA build links both islands to America/Puerto_Rico (-4:00, and -3:00
+  # Atlantic War Time 1942-1945), so pre-1965 it is 30-90 min off. Shanks Time Table #3
+  # (shared by Aruba div 1 and Curacao div 3) restores -4:30; CW_1 == backzone to the
+  # second in-window. The northern SSS islands (Shanks -4:00) and Bonaire (-4:33) defer.
+  WILLEMSTAD = { lat: 12.11, lon: -68.93 }.freeze # Curacao
+  ORANJESTAD = { lat: 12.52, lon: -70.03 }.freeze # Aruba
+
+  def test_netherlands_antilles_resolves_minus_four_thirty
+    { "Curacao" => WILLEMSTAD, "Aruba" => ORANJESTAD }.each do |name, pt|
+      tz = TzHistory.for(**pt, date: "1943-07-15")
+      assert_equal "Shanks/CW_1", tz&.identifier, "#{name} should resolve to CW_1"
+      assert_equal(-16200, tz.period_for_local(Time.utc(1943, 7, 15, 12)).observed_utc_offset,
+                   "#{name} should be -4:30, not Puerto Rico's Atlantic War Time")
+    end
+  end
+
+  def test_netherlands_antilles_defers_outside_window_and_other_islands
+    assert_nil TzHistory.for(**WILLEMSTAD, date: "1970-07-15")  # after 1965 -> IANA (-4:00)
+    assert_nil TzHistory.for(**ORANJESTAD, date: "1905-07-15")  # pre-1912 island LMT -> deferred
+    # Sint Maarten (northern SSS group, Shanks -4:00) is not covered -> defers to IANA.
+    assert_nil TzHistory.for(lat: 18.02, lon: -63.05, date: "1940-07-15")
+  end
+
+  def test_netherlands_antilles_note_names_the_international_atlas
+    note = TzHistory.note(**WILLEMSTAD, date: "1943-07-15")
+    assert_match(/International Atlas/i, note)
+    assert_match(/Puerto Rico|AST|-4:00/i, note)
+  end
 end

@@ -186,4 +186,19 @@ class ZoneTest < Minitest::Test
     assert_equal(7200, offset_of(shanks, "1941-07-15")) # occupation CEST +2:00 (continuous 1940-1942)
     assert_equal(3600, offset_of(shanks, "1949-07-15")) # CET -- no Danish DST 1949 (Berlin kept it)
   end
+
+  # Netherlands Antilles ABC islands CW #1 (Aruba + Curacao, Shanks Time Table #3) --
+  # -4:30 from 12 Feb 1912, then -4:00 (AST) from 1 Jan 1965. The DEFAULT IANA build
+  # LINKS both America/Aruba and America/Curacao to America/Puerto_Rico (-4:00 from 1899,
+  # -3:00 Atlantic War Time 1942-1945), so it is 30 min fast across 1912-1965 and 90 min
+  # off in 1942-1945. CW_1 == backzone America/Curacao and America/Aruba to the second
+  # across the standard era (695/696 mid-months 1912-1969, the sole miss being Jan-1912
+  # island LMT, which is out of window).
+  def test_cw1_netherlands_antilles_abc_standard
+    shanks = TzHistory::Zone.tzinfo("CW_1")
+    assert_equal(-16200, offset_of(shanks, "1930-06-15")) # -4:30 standard (67W30)
+    assert_equal(-16200, offset_of(shanks, "1943-06-15")) # still -4:30 (default PR = -3:00 AWT)
+    assert_equal(-16200, offset_of(shanks, "1964-12-15")) # -4:30 through end of 1964
+    assert_equal(-14400, offset_of(shanks, "1965-06-15")) # -4:00 (AST) from 1 Jan 1965
+  end
 end
