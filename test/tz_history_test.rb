@@ -1400,7 +1400,9 @@ class TzHistoryTest < Minitest::Test
   def test_iceland_defers_outside_window_and_borders
     assert_nil TzHistory.for(**REYK, date: "1836-01-15")            # before the documented window
     assert_nil TzHistory.for(**REYK, date: "1975-07-15")            # after permanent GMT -> IANA
-    assert_nil TzHistory.for(lat: 55.6761, lon: 12.5683, date: "1930-01-15") # Copenhagen, DK -> not in IS polygon
+    # Copenhagen must not leak into Iceland's polygon -- it resolves to its own Denmark
+    # override (DK_1), not IS_1 (1930 is inside DK's 1890-1950 window).
+    assert_equal "Shanks/DK_1", TzHistory.for(lat: 55.6761, lon: 12.5683, date: "1930-01-15").identifier
   end
 
   def test_iceland_note_names_the_international_atlas
@@ -1477,5 +1479,36 @@ class TzHistoryTest < Minitest::Test
   def test_sweden_defers_outside_window
     assert_nil TzHistory.for(**STOCKHOLM, date: "1878-07-15") # pre-1879 town LMT -> Phase 2
     assert_nil TzHistory.for(**STOCKHOLM, date: "1960-07-15") # after 1950 -> IANA
+  end
+
+  # --- Denmark: Copenhagen MT +0:50:20 (1890-1894) then CET; summer years unlike Berlin ---
+  # In 1917 (no Danish DST -- Denmark used summer time only in 1916) an in-country point
+  # resolves to Shanks/DK_1 = CET, where the DEFAULT Europe/Copenhagen (Link to Berlin)
+  # applies Berlin's WWI CEST. DK_1 == backzone Copenhagen 960/960 mid-months 1890-1969.
+  COPENHAGEN = { lat: 55.6761, lon: 12.5683 }.freeze
+
+  def test_denmark_resolves_cet
+    tz = TzHistory.for(**COPENHAGEN, date: "1917-07-15")
+    assert_equal "Shanks/DK_1", tz.identifier
+    assert_equal(3600, tz.period_for_local(Time.utc(1917, 7, 15, 12)).observed_utc_offset) # CET, not Berlin's CEST
+  end
+
+  # Copenhagen falls 1.24 km OUTSIDE even the 10m coastline (a genuine sea-gap); the
+  # INTL_COAST_TOL near-edge tolerance (~2.8 km) recovers it and other coastal cities.
+  # Guards against a regression in that tolerance (a capital must never resolve to nil).
+  def test_denmark_coastal_tolerance_recovers_capital
+    { "Copenhagen" => [55.6761, 12.5683], "Aarhus" => [56.1629, 10.2039],
+      "Aalborg" => [57.0488, 9.9217] }.each do |name, (lat, lon)|
+      tz = TzHistory.for(lat:, lon:, date: "1917-07-15")
+      assert_equal "Shanks/DK_1", tz&.identifier, "#{name} should resolve to Denmark (DK_1)"
+    end
+  end
+
+  def test_denmark_defers_outside_window_and_borders
+    assert_nil TzHistory.for(**COPENHAGEN, date: "1889-07-15")            # pre-1890 town LMT -> Phase 2
+    assert_nil TzHistory.for(**COPENHAGEN, date: "1955-07-15")            # after 1950 -> IANA
+    # Malmo is Swedish (across the Oresund) -- must resolve to SE_1, not leak into DK_1.
+    assert_equal "Shanks/SE_1", TzHistory.for(lat: 55.6050, lon: 13.0038, date: "1917-07-15").identifier
+    assert_nil TzHistory.for(lat: 53.5511, lon: 9.9937, date: "1917-07-15") # Hamburg, DE -> defers to IANA
   end
 end

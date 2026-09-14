@@ -16,22 +16,40 @@ only) · `pending` (not yet worked). **Resolution** — `polygon` (country-wide)
 | Luxembourg | 256 | 280 | 1 | override | polygon | `backzone` Europe/Luxembourg — **790/792** mid-months 1904–1969 | ✅ done (LU_1) |
 | Norway | 286 | 310 | 1 | override | polygon | `backzone` Europe/Oslo — **900/900** mid-months 1895–1969 | ✅ done (NO_1) |
 | Sweden | 377 | 401 | 1 | override | polygon | `backzone` Europe/Stockholm — **1092/1092** mid-months 1879–1949 | ✅ done (SE_1) |
+| Denmark | 121 | 145 | 1 | override | polygon | `backzone` Europe/Copenhagen — **960/960** mid-months 1890–1969 | ✅ done (DK_1) |
 
 **Phase-1 sub-hour European mean-time cluster** (worklist order): Iceland ✅ · Ireland
-❌ no-op · Luxembourg ✅ · Norway ✅ · Sweden ✅. Page map in `research/intl/atlas_pages.tsv`.
+❌ no-op · Luxembourg ✅ · Norway ✅ · Sweden ✅ · Denmark ✅. Page map in
+`research/intl/atlas_pages.tsv`.
 
-**Coastline resolution (10m + Douglas–Peucker).** The builder sources Natural Earth
-**10m** admin_0 (not 50m): the runtime does EXACT ray-cast point-in-polygon with no
-tolerance, and the coarse 50m coastline drops Stockholm's Baltic archipelago (and other
-coastal cities) *outside* the country polygon — a capital resolving to `nil` is
-unacceptable. The 10m rings are ~8× heavier, so each ring is RDP-simplified at
-`SIMPLIFY_EPS = 0.01°` (~1.1 km) — RDP fills bays inclusively and only trims convex
-tips (where cities rarely sit); `research/intl/rdp_probe.rb` verifies no city
-regressions/leaks across the tested capitals + majors. Intl geojson: 61 KB → 164 KB.
-**Known limit:** exact PIP against *any* coastline still misses cities a few km offshore
-of NE's line — e.g. Tromsø (3.8 km out, on Tromsøya) and Luleå (1.2 km, head of the
-Gulf of Bothnia) resolve to `nil` (→ IANA default). A future outward-buffer / near-edge
-tolerance pass would recover these; deferred (tiny far-north populations).
+**Coastline resolution (10m + Douglas–Peucker + near-edge tolerance).** The builder
+sources Natural Earth **10m** admin_0 (not 50m): the runtime does ray-cast
+point-in-polygon, and the coarse 50m coastline drops Stockholm's Baltic archipelago
+*outside* the country polygon. The 10m rings are ~8× heavier, so each ring is
+RDP-simplified at `SIMPLIFY_EPS = 0.01°` (~1.1 km) — RDP fills bays inclusively and only
+trims convex tips (where cities rarely sit); `research/intl/rdp_probe.rb` verifies no
+regressions. Intl geojson: 61 KB → ~180 KB. But 10m alone is *not* enough — **Copenhagen
+falls 1.24 km outside even the 10m coast** (a genuine sea-gap; a capital resolving to
+`nil` is unacceptable). So `lib/tz_history/lookup.rb` adds an **`INTL_COAST_TOL` ≈ 2.8 km
+near-edge tolerance** for the international overrides ONLY: a point strictly inside *or*
+within tol of the outer ring counts as in-country. Open sea separates these countries, so
+this is safe; it recovers Copenhagen, Stockholm, Luleå and Tromsø alike. The US county
+corpus tiles continuously (shared borders between different-zone counties), so it keeps
+`tol = 0` — an exact test, unchanged. **Only cost:** a ~2.8 km rural strip can leak across
+a *land* border to a neighbour that itself defers to IANA (e.g. Padborg on Denmark's short
+Jutland border with Germany); Flensburg (13 km) and farther cities defer correctly.
+
+**Denmark notes.** Printed p.121 = PDF 145 (the page carries the tail of Czechoslovakia's
+city listings above, then **DANMARK / DÄNEMARK**). Denmark took a national standard on
+1890-01-01 — **Copenhagen Mean Time +0:50:20** (atlas header "Begin Standard 12E35") —
+then **CET** ("15E00") from 1894-01-01. Summer time in 1916 (14 May–30 Sep), a continuous
+occupation CEST 1940-05-15 → 1942-11-02, then annual Danish DST 1943–1948, then none until
+the 1980 EU regime. Default Links `Europe/Copenhagen → Europe/Berlin`, so it is off in the
+sub-hour CMT era (1890–1894), 1917–18, 1940 and 1945–**1949** (Germany kept DST that last
+summer, Denmark did not). No Shanks-vs-backzone conflict — DK_1 matches backzone Copenhagen
+**960/960**. Window 1890 .. 1950. NE maps Greenland and the Faroes as their own features,
+so the country polygon is mainland + isles (incl. Bornholm). **Pre-1890 town LMT deferred**
+(Phase-2 nearest-city, like Norway/Sweden).
 
 **Sweden notes.** Printed p.377 = PDF 401 packs Swaziland / Sweden (Sweden is the
 middle entry). Sweden was the FIRST country with a national standard time (law 1878,
@@ -89,7 +107,8 @@ divergence worklist: `research/intl/iana_divergence.tsv`, 108 zones / 94 countri
 | Northern Ireland (`Europe/Belfast`, 25:21) | UK sub-national split | Default Links Belfast → London, losing pre-1916 Irish time; ROI (Dublin) already correct, so this is a within-UK boundary, not a country override | Ireland triage |
 | Norway pre-1895 town LMT | nearest-city | Before uniform CET (1895) every Norwegian town kept its own LMT (Oslo +0:43, Ålesund +0:24:36, Alta +1:32:48…); the atlas geocodes them — a Phase-2 nearest-city split, not a polygon | Norway (NO_1) |
 | Sweden pre-1879 town LMT | nearest-city | Before national Swedish Time (1879) every town kept its own LMT (the atlas geocodes each) — a Phase-2 nearest-city split, like Norway | Sweden (SE_1) |
-| Coastal-fringe PIP misses | outward-buffer / near-edge tolerance | Exact ray-cast PIP against NE's 10m coastline still drops cities a few km offshore of the line (Tromsø 3.8 km, Luleå 1.2 km → `nil`/IANA); a small outward buffer or "within-ε-of-edge" runtime test would recover them | Sweden/Norway coastline |
+| Denmark pre-1890 town LMT | nearest-city | Before national Copenhagen MT (1890) every Danish town kept its own LMT (Aalborg +0:39:44, Aarhus +0:40:52, …); the atlas geocodes them — a Phase-2 nearest-city split, like Norway/Sweden | Denmark (DK_1) |
+| ~~Coastal-fringe PIP misses~~ | ✅ RESOLVED | The `INTL_COAST_TOL` ≈ 2.8 km near-edge tolerance (`lookup.rb`, intl-only) now recovers cities just offshore of NE's line (Copenhagen 1.24 km, Stockholm, Luleå, Tromsø). Residual: a ~2.8 km land-border strip can leak to an IANA-deferring neighbour (documented) | Denmark (DK_1) coastline |
 | Netherlands tables #2–9 | regional-variant refinement | NL#1 (Amsterdam/whole-country) ships; the finer regional variants are lower-value refinements | NL pilot |
 
 **Known Shanks errors (defer to IANA, do not ship):**

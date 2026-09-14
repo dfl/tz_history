@@ -172,4 +172,18 @@ class ZoneTest < Minitest::Test
     assert_equal(3600, offset_of(shanks, "1950-07-15")) # CET -- no DST 1946-1958
     assert_equal(7200, offset_of(shanks, "1960-07-15")) # CEST +2:00 (1959-1965 summer time)
   end
+
+  # Denmark DK #1 (whole country) -- Copenhagen Mean Time (+0:50:20) from 1890, CET from
+  # 1894, with summer time in 1916 and 1940-1948 (occupation/postwar). The DEFAULT IANA
+  # build LINKS Europe/Copenhagen -> Europe/Berlin, whose DST years differ, so it is off
+  # in 1917-1918, 1940 and 1945-1949. DK_1 == backzone Copenhagen 960/960 mid-months.
+  def test_dk1_denmark_cmt_then_cet
+    shanks = TzHistory::Zone.tzinfo("DK_1")
+    assert_equal(3020, offset_of(shanks, "1892-01-15")) # Copenhagen MT +0:50:20 (meridian 12E35)
+    assert_equal(3600, offset_of(shanks, "1910-01-15")) # CET +1:00 from 1894
+    assert_equal(7200, offset_of(shanks, "1916-07-15")) # CEST +2:00 (Denmark's 1916 summer time)
+    assert_equal(3600, offset_of(shanks, "1917-07-15")) # CET -- NO summer 1917 (Berlin would be +2:00)
+    assert_equal(7200, offset_of(shanks, "1941-07-15")) # occupation CEST +2:00 (continuous 1940-1942)
+    assert_equal(3600, offset_of(shanks, "1949-07-15")) # CET -- no Danish DST 1949 (Berlin kept it)
+  end
 end

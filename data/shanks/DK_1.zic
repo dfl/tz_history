@@ -1,0 +1,24 @@
+# Shanks International Atlas TIME TABLE, Denmark (whole country): Copenhagen MT +0:50:20 (1890-1894), CET from 1894; summer time 1916, 1940-1948 occupation/postwar.
+# Atlas printed p.121 (PDF p.145), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Europe/Copenhagen (backzone; Danish + C-Eur rules).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/DK_1 0:50:20  -    LMT  1890 Jan  1  0:00
+                 0:50:20  -    CMT  1894 Jan  1  0:00
+                 1:00     -    CET  1916 May 14 23:00
+                 1:00     1:00 CEST 1916 Sep 30 23:00
+                 1:00     -    CET  1940 May 15  0:00
+                 1:00     1:00 CEST 1942 Nov  2  3:00
+                 1:00     -    CET  1943 Mar 29  2:00
+                 1:00     1:00 CEST 1943 Oct  4  3:00
+                 1:00     -    CET  1944 Apr  3  2:00
+                 1:00     1:00 CEST 1944 Oct  2  3:00
+                 1:00     -    CET  1945 Apr  2  2:00
+                 1:00     1:00 CEST 1945 Aug 15  3:00
+                 1:00     -    CET  1946 May  1  2:00
+                 1:00     1:00 CEST 1946 Sep  1  3:00
+                 1:00     -    CET  1947 May  4  2:00
+                 1:00     1:00 CEST 1947 Aug 10  3:00
+                 1:00     -    CET  1948 May  9  2:00
+                 1:00     1:00 CEST 1948 Aug  8  3:00
+                 1:00     -    CET

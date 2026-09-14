@@ -24,6 +24,18 @@ module TzHistory
       File.join(DATA_DIR, "intl_historical_zones.geojson")
     ].freeze
 
+    # Coastline tolerance (degrees, ~2.8 km) for the INTERNATIONAL country-polygon
+    # overrides ONLY. Exact ray-cast point-in-polygon against Natural Earth's coastline
+    # drops cities that sit a km or two seaward of the drawn line -- Copenhagen falls
+    # 1.24 km outside even the 10m coast, Luleaa 1.2 km. Because open sea separates these
+    # countries, we accept a point that is strictly inside OR within this tolerance of the
+    # polygon edge. The US county corpus tiles continuously (no sea gaps, borders shared
+    # by two different-zone counties), so it keeps tol = 0 -- an exact test, unchanged.
+    # Cost: only a few-km rural strip can leak across a LAND border to a neighbour that
+    # itself defers to IANA (e.g. Denmark's short Jutland border with Germany); documented
+    # in docs/INTL_COVERAGE.md. Islands farther out (Tromso 3.8 km) still defer -> Phase 2.
+    INTL_COAST_TOL = 0.025
+
     # Friendly labels for the US zones we substitute.
     ZONE_LABELS = {
       "America/Chicago" => "Central", "America/New_York" => "Eastern",
@@ -42,9 +54,11 @@ module TzHistory
         iso = date.is_a?(String) ? date : date.strftime("%Y-%m-%d")
         lon = lon.to_f
         lat = lat.to_f
+        coslat = Math.cos(lat * Math::PI / 180)
         f = features.select do |feat|
           (feat[:from_date].nil? || iso >= feat[:from_date]) && iso < feat[:until_date] &&
-            feat[:bbox].cover?(lon, lat) && point_in_geometry?(lon, lat, feat[:geometry])
+            feat[:bbox].cover?(lon, lat, feat[:tol]) &&
+            point_in_geometry?(lon, lat, feat[:geometry], feat[:tol], coslat)
         end.min_by { |feat| feat[:priority] }
         f && f[:kind] == "split" ? resolve_split(f, lon, lat, iso) : f
       end
@@ -140,16 +154,54 @@ module TzHistory
             end,
             geometry: polygons,
             bbox: BoundingBox.new(polygons),
-            priority: priority(props["kind"], props["note"])
+            priority: priority(props["kind"], props["note"]),
+            # International Atlas country overrides get a coastline tolerance; the US
+            # county corpus (atlas "American") stays exact.
+            tol: (props["atlas"] == "International" ? INTL_COAST_TOL : 0.0)
           }
         end
       end
 
-      # geometry is an array of polygons; each polygon is [outer_ring, *holes].
-      def point_in_geometry?(x, y, polygons)
-        polygons.any? do |rings|
+      # geometry is an array of polygons; each polygon is [outer_ring, *holes]. `tol`
+      # (>0 only for intl overrides) accepts a point within `tol` degrees of the outer
+      # ring -- see INTL_COAST_TOL. `coslat` corrects longitude degrees to ~equal metres.
+      def point_in_geometry?(x, y, polygons, tol = 0.0, coslat = 1.0)
+        strict = polygons.any? do |rings|
           in_ring?(x, y, rings.first) && rings.drop(1).none? { |hole| in_ring?(x, y, hole) }
         end
+        return true if strict
+        return false unless tol.positive?
+
+        tol2 = tol * tol
+        polygons.any? { |rings| min_edge_dist2(x, y, rings.first, coslat) <= tol2 }
+      end
+
+      # Squared distance (in cos-lat-corrected degrees) from (x,y) to the nearest edge
+      # of a ring -- how far a just-offshore point sits from the drawn coastline.
+      def min_edge_dist2(x, y, ring, coslat)
+        best = Float::INFINITY
+        j = ring.length - 1
+        ring.each_index do |i|
+          d = seg_dist2(x, y, ring[i], ring[j], coslat)
+          best = d if d < best
+          j = i
+        end
+        best
+      end
+
+      # Squared point-to-segment distance, longitude scaled by coslat so degrees are
+      # ~isometric in metres at this latitude.
+      def seg_dist2(px, py, a, b, k)
+        ax = a[0] * k; ay = a[1]
+        bx = b[0] * k; by = b[1]
+        qx = px * k; qy = py
+        dx = bx - ax; dy = by - ay
+        return ((qx - ax)**2) + ((qy - ay)**2) if dx.zero? && dy.zero?
+
+        t = (((qx - ax) * dx) + ((qy - ay) * dy)) / ((dx * dx) + (dy * dy))
+        t = 0.0 if t < 0
+        t = 1.0 if t > 1
+        ((qx - (ax + t * dx))**2) + ((qy - (ay + t * dy))**2)
       end
 
       # Ray-casting point-in-polygon on a ring of [lon, lat] pairs.
@@ -175,8 +227,10 @@ module TzHistory
         @miny, @maxy = ys.minmax
       end
 
-      def cover?(x, y)
-        x.between?(@minx, @maxx) && y.between?(@miny, @maxy)
+      # `margin` (degrees) widens the box so a point within the coastline tolerance of
+      # an edge still passes this cheap first-pass reject (intl overrides pass tol > 0).
+      def cover?(x, y, margin = 0.0)
+        x.between?(@minx - margin, @maxx + margin) && y.between?(@miny - margin, @maxy + margin)
       end
     end
   end
