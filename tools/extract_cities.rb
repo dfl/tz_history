@@ -285,6 +285,21 @@ def parse_legend(text)
   legend
 end
 
+# --dump-text=FILE preserves the raw per-crop OCR (a facts-derived artifact, no atlas image)
+# so the parse can be re-run/audited without re-rendering from the copyrighted PDF. Same
+# "===CROP <path>===" section format as research/index/<ST>/tt_ocr_cols.txt.
+dump_path = flags["dump-text"]
+dump = [] if dump_path
+
+# Cache OCR per crop so a --dump-text run OCRs each crop exactly once (the same call also
+# feeds the parser below).
+ocr_cache = {}
+ocr_once = lambda do |f|
+  ocr_cache[f] ||= ocr(f).tap do |txt|
+    dump << "===CROP #{File.basename(File.dirname(f))}/#{File.basename(f)}===\n#{txt}" if dump
+  end
+end
+
 all_rows = []
 legend = {}
 dirs.each do |dir|
@@ -302,11 +317,16 @@ dirs.each do |dir|
   # whole in at least one band; cross-band dedup by name+coord removes the repeat).
   by_col = crops.group_by { |f| File.basename(f)[/col(\d+)/, 1].to_i }
   by_col.each_value do |col_crops|
-    text = col_crops.map { |f| ocr(f) }.join("\n")
+    text = col_crops.map { |f| ocr_once.call(f) }.join("\n")
     legend = legend.merge(parse_legend(text)) { |_k, a, _b| a } if want_legend
     tokens = text.split(/\s+/)
     all_rows.concat(parse_stream(tokens))
   end
+end
+
+if dump_path
+  File.write(dump_path, dump.join("\n"))
+  warn "dump-text: wrote #{dump.size} crop OCR sections -> #{dump_path}"
 end
 
 # Repair county# outliers (majority-learned) when a county-FIPS geojson was supplied.
