@@ -1,0 +1,9 @@
+# Shanks International Atlas TIME TABLE, Niger (Niamey / western division, Shanks Time Table #2): -1:00 from 1912, GMT from 26 Feb 1934, then WAT (+1:00) from 1 Jan 1960.
+# Atlas printed p.283 (PDF p.307), table #2.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Africa/Niamey (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/NE_1 0:08:28  -    LMT  1912 Jan  1  0:00
+                 -1:00    -    -01  1934 Feb 26  0:00
+                 0:00     -    GMT  1960 Jan  1  0:00
+                 1:00     -    WAT

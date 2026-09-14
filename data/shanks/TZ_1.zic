@@ -1,0 +1,9 @@
+# Shanks International Atlas TIME TABLE, Tanzania (mainland / Dar es Salaam, Shanks Time Table #2): EAT (+3:00) from 1931, +2:45 from 1 Jan 1948, then EAT (+3:00) from 1 Jan 1961.
+# Atlas printed p.385 (PDF p.409), table #2.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Africa/Dar_es_Salaam (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/TZ_1 2:37:08  -    LMT  1931 Jan  1  0:00
+                 3:00     -    EAT  1948 Jan  1  0:00
+                 2:45     -    +0245 1961 Jan  1  0:00
+                 3:00     -    EAT

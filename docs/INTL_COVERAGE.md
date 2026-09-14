@@ -18,6 +18,9 @@ only) · `pending` (not yet worked). **Resolution** — `polygon` (country-wide)
 | Sweden | 377 | 401 | 1 | override | polygon | `backzone` Europe/Stockholm — **1092/1092** mid-months 1879–1949 | ✅ done (SE_1) |
 | Denmark | 121 | 145 | 1 | override | polygon | `backzone` Europe/Copenhagen — **960/960** mid-months 1890–1969 | ✅ done (DK_1) |
 | Netherlands Antilles (Aruba + Curaçao) | 280 | 304 | 3 (TT#3 anchor) | override | polygon | `backzone` America/Curaçao **& America/Aruba** — **695/696** mid-months (1912–1969; sole miss = Jan-1912 island LMT, out of window) | ✅ done (CW_1); SSS + Bonaire → Phase 2 |
+| Equatorial Guinea | 137 | 161 | 1 | override | polygon | `backzone` Africa/Malabo — **696/696** mid-months 1912–1969 | ✅ done (GQ_1); GMT 1912→WAT 15 Dec 1963; default links to Lagos (WAT from 1919) |
+| Niger (Niamey / western div) | 283 | 307 | 3 (TT#2 anchor) | override | polygon | `backzone` Africa/Niamey — **696/696** mid-months 1912–1969 | ✅ done (NE_1); TT#2 −01→GMT→WAT; east(+1)/central(GMT→1960) divs → Phase 2 |
+| Tanzania (mainland / Dar es Salaam) | 385 | 409 | 2 (TT#2 anchor) | override | polygon | `backzone` Africa/Dar_es_Salaam — **468/468** mid-months 1931–1969 | ✅ done (TZ_1); TT#2 EAT/+2:45; Zanzibar TT#1 (+2:30 1931–40) → Phase 2 |
 
 **Phase-1 sub-hour European mean-time cluster** (worklist order): Iceland ✅ · Ireland
 ❌ no-op · Luxembourg ✅ · Norway ✅ · Sweden ✅ · Denmark ✅. Page map in

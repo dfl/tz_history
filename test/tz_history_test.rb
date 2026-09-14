@@ -1541,4 +1541,64 @@ class TzHistoryTest < Minitest::Test
     assert_match(/International Atlas/i, note)
     assert_match(/Puerto Rico|AST|-4:00/i, note)
   end
+
+  # --- Equatorial Guinea: GMT 1912-1963, then WAT (International Atlas) ---
+  # The DEFAULT IANA build links Africa/Malabo to Africa/Lagos (WAT +1:00 from 1919),
+  # so it is a full hour fast across 1919-1963; GQ_1 restores GMT.
+  MALABO = { lat: 3.7523, lon: 8.7742 }.freeze # Bioko I., Equatorial Guinea
+
+  def test_equatorial_guinea_resolves_gmt
+    tz = TzHistory.for(**MALABO, date: "1930-06-15")
+    assert_equal "Shanks/GQ_1", tz&.identifier
+    assert_equal(0, tz.period_for_local(Time.utc(1930, 6, 15, 12)).observed_utc_offset,
+                 "Equatorial Guinea should be GMT, not Lagos's WAT (+1:00)")
+  end
+
+  def test_equatorial_guinea_defers_outside_window
+    assert_nil TzHistory.for(**MALABO, date: "1970-06-15")  # after 15 Dec 1963 -> IANA (WAT)
+    assert_nil TzHistory.for(**MALABO, date: "1905-06-15")  # pre-1912 island LMT -> deferred
+    note = TzHistory.note(**MALABO, date: "1930-06-15")
+    assert_match(/International Atlas/i, note)
+    assert_match(/Lagos|WAT/i, note)
+  end
+
+  # --- Niger: -1:00 (1912-1934) then GMT (1934-1960) (International Atlas) ---
+  # The DEFAULT IANA build links Africa/Niamey to Africa/Lagos, so it is 1.5-2 h off
+  # across 1912-1934 and a full hour off across 1934-1960; NE_1 (Shanks TT#2) fixes it.
+  NIAMEY = { lat: 13.5137, lon: 2.1098 }.freeze
+
+  def test_niger_resolves_minus_one_then_gmt
+    tz = TzHistory.for(**NIAMEY, date: "1920-06-15")
+    assert_equal "Shanks/NE_1", tz&.identifier
+    assert_equal(-3600, tz.period_for_local(Time.utc(1920, 6, 15, 12)).observed_utc_offset,
+                 "Niger should be -1:00, not Lagos's +0:30/WAT")
+    tz2 = TzHistory.for(**NIAMEY, date: "1950-06-15")
+    assert_equal(0, tz2.period_for_local(Time.utc(1950, 6, 15, 12)).observed_utc_offset,
+                 "Niger should be GMT 1934-1960, not Lagos's WAT (+1:00)")
+  end
+
+  def test_niger_defers_outside_window
+    assert_nil TzHistory.for(**NIAMEY, date: "1970-06-15")  # after 1960 -> IANA (WAT)
+    assert_nil TzHistory.for(**NIAMEY, date: "1905-06-15")  # pre-1912 town LMT -> deferred
+  end
+
+  # --- Tanzania: EAT (+3:00) 1931-1948, +2:45 1948-1961 (International Atlas) ---
+  # The DEFAULT IANA build links Africa/Dar_es_Salaam to Africa/Nairobi (+2:30 1936-1942,
+  # +3:00 else), so it is 30 min slow across 1937-1942 and 15 min fast across 1948-1961.
+  DAR = { lat: -6.7924, lon: 39.2083 }.freeze # Dar es Salaam
+
+  def test_tanzania_resolves_eat_then_quarter_to
+    tz = TzHistory.for(**DAR, date: "1940-06-15")
+    assert_equal "Shanks/TZ_1", tz&.identifier
+    assert_equal(10800, tz.period_for_local(Time.utc(1940, 6, 15, 12)).observed_utc_offset,
+                 "Tanzania should be EAT (+3:00), not Nairobi's +2:30")
+    tz2 = TzHistory.for(**DAR, date: "1950-06-15")
+    assert_equal(9900, tz2.period_for_local(Time.utc(1950, 6, 15, 12)).observed_utc_offset,
+                 "Tanzania should be +2:45 1948-1961, not Nairobi's +3:00")
+  end
+
+  def test_tanzania_defers_outside_window
+    assert_nil TzHistory.for(**DAR, date: "1970-06-15")  # after 1961 -> IANA (EAT)
+    assert_nil TzHistory.for(**DAR, date: "1925-06-15")  # pre-1931 town LMT -> deferred
+  end
 end

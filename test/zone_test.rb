@@ -201,4 +201,36 @@ class ZoneTest < Minitest::Test
     assert_equal(-16200, offset_of(shanks, "1964-12-15")) # -4:30 through end of 1964
     assert_equal(-14400, offset_of(shanks, "1965-06-15")) # -4:00 (AST) from 1 Jan 1965
   end
+
+  # Equatorial Guinea GQ #1 (whole country) -- GMT from 1912, WAT (+1:00) from 15 Dec 1963.
+  # The DEFAULT IANA build LINKS Africa/Malabo to Africa/Lagos (WAT +1:00 from 1919), so it
+  # is a full hour fast across 1919-1963. GQ_1 == backzone Africa/Malabo 696/696 mid-months.
+  def test_gq1_equatorial_guinea_gmt
+    shanks = TzHistory::Zone.tzinfo("GQ_1")
+    assert_equal(0,    offset_of(shanks, "1930-06-15")) # GMT (default Lagos = WAT +1:00)
+    assert_equal(0,    offset_of(shanks, "1963-06-15")) # still GMT through most of 1963
+    assert_equal(3600, offset_of(shanks, "1964-06-15")) # WAT (+1:00) from 15 Dec 1963
+  end
+
+  # Niger NE #1 (Niamey / western division, Shanks Time Table #2) -- -1:00 from 1912, GMT
+  # from 26 Feb 1934, WAT (+1:00) from 1960. The DEFAULT IANA build LINKS Africa/Niamey to
+  # Africa/Lagos, so it is 1.5-2 h off across 1912-1934 and a full hour off across 1934-1960.
+  # NE_1 == backzone Africa/Niamey 696/696 mid-months 1912-1969.
+  def test_ne1_niger_niamey
+    shanks = TzHistory::Zone.tzinfo("NE_1")
+    assert_equal(-3600, offset_of(shanks, "1920-06-15")) # -1:00 (default Lagos = +0:30/WAT)
+    assert_equal(0,     offset_of(shanks, "1950-06-15")) # GMT (default Lagos = WAT +1:00)
+    assert_equal(3600,  offset_of(shanks, "1961-06-15")) # WAT (+1:00) from 1960
+  end
+
+  # Tanzania TZ #1 (mainland / Dar es Salaam, Shanks Time Table #2) -- EAT (+3:00) 1931-1948,
+  # +2:45 1948-1961, then EAT again. The DEFAULT IANA build LINKS Africa/Dar_es_Salaam to
+  # Africa/Nairobi (+2:30 1936-1942, +3:00 else), so it is 30 min slow across 1937-1942 and
+  # 15 min fast across 1948-1961. TZ_1 == backzone Africa/Dar_es_Salaam 468/468 mid-months.
+  def test_tz1_tanzania_dar_es_salaam
+    shanks = TzHistory::Zone.tzinfo("TZ_1")
+    assert_equal(10800, offset_of(shanks, "1940-06-15")) # EAT +3:00 (default Nairobi = +2:30)
+    assert_equal(9900,  offset_of(shanks, "1950-06-15")) # +2:45 (default Nairobi = +3:00)
+    assert_equal(10800, offset_of(shanks, "1962-06-15")) # EAT +3:00 from 1961
+  end
 end
