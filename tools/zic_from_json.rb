@@ -51,8 +51,9 @@ def hhmmss(seconds)
 end
 
 table = spec.fetch("table")
+atlas_name = spec["atlas"] == "international" ? "International" : "American"
 lines = []
-lines << "# Shanks American Atlas TIME TABLE, #{spec['region']}."
+lines << "# Shanks #{atlas_name} Atlas TIME TABLE, #{spec['region']}."
 lines << "# Atlas printed p.#{spec['printed_page']} (PDF p.#{spec['pdf_page']}), table ##{spec['table_no']}."
 lines << "# A dated transition list re-expressed as a zic source (the reference tzdata"
 lines << "# compiler input). Cross-check: #{spec['cross_check']}."

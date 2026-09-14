@@ -16,7 +16,13 @@ module TzHistory
   # note for a contested boundary we deliberately do NOT correct (flag, don't
   # silently guess -- the Olson/Terran-Atlas principle).
   module Lookup
-    GEOJSON_PATH = File.join(DATA_DIR, "us_historical_zones.geojson")
+    # US county-polygon corpus plus the international country-polygon corpus (Shanks
+    # International Atlas). Features share one schema and one lookup path; the two
+    # datasets are geographically disjoint, so concatenation order is immaterial.
+    GEOJSON_PATHS = [
+      File.join(DATA_DIR, "us_historical_zones.geojson"),
+      File.join(DATA_DIR, "intl_historical_zones.geojson")
+    ].freeze
 
     # Friendly labels for the US zones we substitute.
     ZONE_LABELS = {
@@ -85,7 +91,7 @@ module TzHistory
 
         base = if f[:shanks]
                  "This location's early clock history (through ~#{f[:until_date][0, 4]}) " \
-                   "follows the Shanks American Atlas, which IANA does not encode here. " \
+                   "follows the Shanks #{f[:atlas]} Atlas, which IANA does not encode here. " \
                    "Applied the historical zone -- verify the birth record."
                elsif f[:from_date]
                  "This location kept standard time (no daylight saving) around " \
@@ -111,7 +117,9 @@ module TzHistory
       # Parsed once. Each feature precompiles to its rings plus a bounding box for
       # a cheap first-pass reject.
       def features
-        @features ||= JSON.parse(File.read(GEOJSON_PATH))["features"].map do |f|
+        @features ||= GEOJSON_PATHS.select { |p| File.exist?(p) }.flat_map do |path|
+          JSON.parse(File.read(path))["features"]
+        end.map do |f|
           polygons = case f.dig("geometry", "type")
                      when "Polygon" then [f["geometry"]["coordinates"]]
                      when "MultiPolygon" then f["geometry"]["coordinates"]
@@ -122,6 +130,7 @@ module TzHistory
             kind: props["kind"],
             zone: props["zone"],
             shanks: props["shanks"],
+            atlas: props["atlas"] || "American",
             note: props["note"],
             from_date: props["from_date"],
             until_date: props["until_date"],

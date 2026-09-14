@@ -21,6 +21,7 @@ Gem::Specification.new do |spec|
   spec.files = Dir[
     "lib/**/*.rb",
     "data/us_historical_zones.geojson",
+    "data/intl_historical_zones.geojson",
     "data/shanks/*.zic",
     "data/shanks/zoneinfo/**/*",
     "README.md",

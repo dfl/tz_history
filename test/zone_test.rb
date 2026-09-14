@@ -107,4 +107,22 @@ class ZoneTest < Minitest::Test
     assert_equal(-21_600, offset_of(shanks, "1930-07-15")) # no DST 1920-1940
     assert_equal(-18_000, offset_of(shanks, "1943-07-01")) # CWT war-time daylight
   end
+
+  # Netherlands NL #1 (Amsterdam / whole country) -- the first INTERNATIONAL Atlas table.
+  # Amsterdam Mean Time = +0:19:32 (meridian 4E53), the sub-hour offset a flat Etc/GMT
+  # zone cannot hold, redefined to exactly +0:20 (meridian 5E00) on 1937-07-01. The
+  # DEFAULT IANA Europe/Amsterdam is merely a Link to Europe/Brussels (WET/+0:00) pre-1940,
+  # so a plain geographic lookup is wrong for EVERY pre-1940 Dutch birth. IANA keeps the
+  # real history only in the opt-in `backzone` file; Shanks/NL_1 reproduces that backzone
+  # zone to the second (575/575 mid-months 1892-1940 -- reproduce via research/intl/), but
+  # backzone is not in the system tzdata, so the offsets are pinned here by hand.
+  def test_nl1_netherlands_amsterdam_mean_time
+    shanks = TzHistory::Zone.tzinfo("NL_1")
+    assert_equal(1172, offset_of(shanks, "1910-07-15")) # AMT +0:19:32, no summer time yet
+    assert_equal(1172, offset_of(shanks, "1900-01-15")) # AMT winter
+    assert_equal(4772, offset_of(shanks, "1925-07-15")) # NST = AMT + 1:00 summer (+1:19:32)
+    assert_equal(1172, offset_of(shanks, "1935-01-15")) # AMT winter
+    assert_equal(4800, offset_of(shanks, "1938-07-15")) # summer on the +0:20 base (+1:20:00)
+    assert_equal(1200, offset_of(shanks, "1939-01-15")) # Dutch Time +0:20 exactly
+  end
 end

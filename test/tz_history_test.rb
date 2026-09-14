@@ -1351,4 +1351,34 @@ class TzHistoryTest < Minitest::Test
     note = TzHistory.note(lat: 32.6927, lon: -114.6277, date: "1940-07-15")
     assert note && note =~ /Pacific/i, "far-west AZ should surface a Pacific-time warn note"
   end
+
+  # --- Netherlands: the first INTERNATIONAL Atlas country (Amsterdam Mean Time) ---
+  # A Dutch coordinate pre-1940 resolves to Shanks/NL_1 (+0:19:32 AMT, +0:20 from 1937),
+  # which the DEFAULT IANA Europe/Amsterdam (a Link to Brussels = GMT/WET this era) gets
+  # wrong for every pre-1940 birth. Outside the 1892-05-01..1940-05-16 window, and outside
+  # the European Netherlands, we defer to IANA.
+  AMS = { lat: 52.3676, lon: 4.9041 }.freeze # Amsterdam
+
+  def test_netherlands_resolves_amsterdam_mean_time
+    tz = TzHistory.for(**AMS, date: "1925-07-15")
+    assert_equal "Shanks/NL_1", tz.identifier
+    assert_equal 4772, tz.period_for_local(Time.utc(1925, 7, 15, 12)).observed_utc_offset # +1:19:32 summer
+    winter = TzHistory.for(**AMS, date: "1900-01-15")
+    assert_equal 1172, winter.period_for_local(Time.utc(1900, 1, 15, 12)).observed_utc_offset # +0:19:32
+    rotterdam = TzHistory.for(lat: 51.9244, lon: 4.4777, date: "1938-07-15")
+    assert_equal 4800, rotterdam.period_for_local(Time.utc(1938, 7, 15, 12)).observed_utc_offset # +1:20 on the +0:20 base
+  end
+
+  def test_netherlands_defers_outside_window_and_borders
+    assert_nil TzHistory.for(**AMS, date: "1890-01-15")            # before standard time began
+    assert_nil TzHistory.for(**AMS, date: "1950-07-15")            # after the occupation switch -> IANA
+    assert_nil TzHistory.for(lat: 50.8503, lon: 4.3517, date: "1925-07-15") # Brussels, BE -> not in NL polygon
+    assert_nil TzHistory.for(lat: 50.9375, lon: 6.9603, date: "1925-07-15") # Cologne, DE -> not in NL polygon
+  end
+
+  def test_netherlands_note_names_the_international_atlas
+    note = TzHistory.note(**AMS, date: "1925-07-15")
+    assert_match(/International Atlas/i, note)
+    assert_match(/Amsterdam Mean Time|Brussels/i, note)
+  end
 end

@@ -1,0 +1,58 @@
+# Shanks International Atlas TIME TABLE, Netherlands Time Table #1 (Amsterdam / whole country): Amsterdam Mean Time.
+# Atlas printed p.277 (PDF p.301), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Europe/Amsterdam (backzone/packrat).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/NL_1 0:19:32  -    LMT  1892 May  1  0:00
+                 0:19:32  -    AMT  1916 May  1  0:00
+                 0:19:32  1:00 NST  1916 Oct  1  0:00
+                 0:19:32  -    AMT  1917 Apr 16  2:00
+                 0:19:32  1:00 NST  1917 Sep 17  3:00
+                 0:19:32  -    AMT  1918 Apr  1  2:00
+                 0:19:32  1:00 NST  1918 Sep 30  3:00
+                 0:19:32  -    AMT  1919 Apr  7  2:00
+                 0:19:32  1:00 NST  1919 Sep 29  3:00
+                 0:19:32  -    AMT  1920 Apr  5  2:00
+                 0:19:32  1:00 NST  1920 Sep 27  3:00
+                 0:19:32  -    AMT  1921 Apr  4  2:00
+                 0:19:32  1:00 NST  1921 Sep 26  3:00
+                 0:19:32  -    AMT  1922 Mar 26  2:00
+                 0:19:32  1:00 NST  1922 Oct  8  3:00
+                 0:19:32  -    AMT  1923 Jun  1  2:00
+                 0:19:32  1:00 NST  1923 Oct  7  3:00
+                 0:19:32  -    AMT  1924 Mar 30  2:00
+                 0:19:32  1:00 NST  1924 Oct  5  3:00
+                 0:19:32  -    AMT  1925 Jun  5  2:00
+                 0:19:32  1:00 NST  1925 Oct  4  3:00
+                 0:19:32  -    AMT  1926 May 15  2:00
+                 0:19:32  1:00 NST  1926 Oct  3  3:00
+                 0:19:32  -    AMT  1927 May 15  2:00
+                 0:19:32  1:00 NST  1927 Oct  2  3:00
+                 0:19:32  -    AMT  1928 May 15  2:00
+                 0:19:32  1:00 NST  1928 Oct  7  3:00
+                 0:19:32  -    AMT  1929 May 15  2:00
+                 0:19:32  1:00 NST  1929 Oct  6  3:00
+                 0:19:32  -    AMT  1930 May 15  2:00
+                 0:19:32  1:00 NST  1930 Oct  5  3:00
+                 0:19:32  -    AMT  1931 May 15  2:00
+                 0:19:32  1:00 NST  1931 Oct  4  3:00
+                 0:19:32  -    AMT  1932 May 22  2:00
+                 0:19:32  1:00 NST  1932 Oct  2  3:00
+                 0:19:32  -    AMT  1933 May 15  2:00
+                 0:19:32  1:00 NST  1933 Oct  8  3:00
+                 0:19:32  -    AMT  1934 May 15  2:00
+                 0:19:32  1:00 NST  1934 Oct  7  3:00
+                 0:19:32  -    AMT  1935 May 15  2:00
+                 0:19:32  1:00 NST  1935 Oct  6  3:00
+                 0:19:32  -    AMT  1936 May 15  2:00
+                 0:19:32  1:00 NST  1936 Oct  4  3:00
+                 0:19:32  -    AMT  1937 May 22  2:00
+                 0:19:32  1:00 NST  1937 Jul  1  0:00
+                 0:20     1:00 NST  1937 Oct  3  3:00
+                 0:20     -    NET  1938 May 15  2:00
+                 0:20     1:00 NST  1938 Oct  2  3:00
+                 0:20     -    NET  1939 May 15  2:00
+                 0:20     1:00 NST  1939 Oct  8  3:00
+                 0:20     -    NET  1940 May 16  0:40
+                 0:20     1:00 NST  1940 May 16  2:00
+                 1:00     -    CET

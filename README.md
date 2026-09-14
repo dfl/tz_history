@@ -87,6 +87,19 @@ patterns are:
 Known residual minorities and a few dedicated multi-zone projects still open
 (Illinois, Indiana, Michigan) are tracked in [`docs/DEFERRED.md`](docs/DEFERRED.md).
 
+### International (in progress)
+
+Extension to the Shanks *International Atlas* has begun. Internationally IANA is
+*not* silent — it models the whole world pre-1970 — but it distrusts its own
+pre-1970 data (much of it from the same astrology atlases) and has demoted a lot of
+it out of the default build: e.g. `Europe/Amsterdam` is merely a `Link` to
+`Europe/Brussels` (GMT/WET) before 1940, so a plain geographic lookup is wrong for
+every pre-1940 Dutch birth. The real Amsterdam Mean Time history survives only in
+IANA's opt-in `backzone`. The first country shipped is the **Netherlands**
+(`Shanks/NL_1` = Amsterdam Mean Time `+0:19:32`, then `+0:20` from 1937), verified
+offset-for-offset against IANA's backzone Amsterdam. Country polygons come from the
+public-domain Natural Earth dataset (`data/intl_historical_zones.geojson`).
+
 ## How it works
 
 Two kinds of correction share one point-in-polygon lookup over a FeatureCollection
