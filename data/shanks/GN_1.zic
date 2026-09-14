@@ -1,0 +1,9 @@
+# Shanks International Atlas TIME TABLE, Guinea (whole country): GMT from 1912, -1:00 from 26 Feb 1934, then GMT from 1 Jan 1960.
+# Atlas printed p.191 (PDF p.215), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Africa/Conakry (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/GN_1 -0:54:52 -    LMT  1912 Jan  1  0:00
+                 0:00     -    GMT  1934 Feb 26  0:00
+                 -1:00    -    -01  1960 Jan  1  0:00
+                 0:00     -    GMT

@@ -1,0 +1,9 @@
+# Shanks International Atlas TIME TABLE, Mali (Bamako / southern division, Shanks Time Table #2): GMT from 1912, -1:00 from 26 Feb 1934, then GMT from 20 Jun 1960.
+# Atlas printed p.260 (PDF p.284), table #2.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Africa/Bamako (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/ML_1 -0:32:00 -    LMT  1912 Jan  1  0:00
+                 0:00     -    GMT  1934 Feb 26  0:00
+                 -1:00    -    -01  1960 Jun 20  0:00
+                 0:00     -    GMT

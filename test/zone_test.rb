@@ -233,4 +233,59 @@ class ZoneTest < Minitest::Test
     assert_equal(9900,  offset_of(shanks, "1950-06-15")) # +2:45 (default Nairobi = +3:00)
     assert_equal(10800, offset_of(shanks, "1962-06-15")) # EAT +3:00 from 1961
   end
+
+  # --- West-Africa whole-hour cluster (all default-Linked to Africa/Abidjan = GMT) ------
+
+  # Senegal SN #1 (whole country) -- -1:00 from 1912, GMT from 1 Jun 1941. The DEFAULT
+  # IANA build LINKS Africa/Dakar to Africa/Abidjan (GMT), so it is a full hour fast
+  # across 1912-1941. SN_1 == backzone Africa/Dakar 696/696 mid-months 1912-1969.
+  def test_sn1_senegal
+    shanks = TzHistory::Zone.tzinfo("SN_1")
+    assert_equal(-3600, offset_of(shanks, "1930-06-15")) # -1:00 (default Abidjan = GMT)
+    assert_equal(-3600, offset_of(shanks, "1941-01-15")) # still -1:00 early 1941
+    assert_equal(0,     offset_of(shanks, "1942-06-15")) # GMT from 1 Jun 1941
+  end
+
+  # Guinea GN #1 (whole country) -- GMT 1912-1934, -1:00 1934-1960, then GMT. The DEFAULT
+  # IANA build LINKS Africa/Conakry to Africa/Abidjan (GMT), so it is a full hour fast
+  # across 1934-1960. GN_1 == backzone Africa/Conakry 696/696 mid-months 1912-1969.
+  def test_gn1_guinea
+    shanks = TzHistory::Zone.tzinfo("GN_1")
+    assert_equal(0,     offset_of(shanks, "1920-06-15")) # GMT phase (matches default)
+    assert_equal(-3600, offset_of(shanks, "1950-06-15")) # -1:00 (default Abidjan = GMT)
+    assert_equal(0,     offset_of(shanks, "1961-06-15")) # GMT from 1 Jan 1960
+  end
+
+  # Mauritania MR #1 (whole country) -- GMT 1912-1934, -1:00 1934-1960, then GMT from
+  # 28 Nov 1960. The DEFAULT IANA build LINKS Africa/Nouakchott to Africa/Abidjan (GMT),
+  # so it is a full hour fast across 1934-1960. MR_1 == backzone 696/696 mid-months.
+  def test_mr1_mauritania
+    shanks = TzHistory::Zone.tzinfo("MR_1")
+    assert_equal(0,     offset_of(shanks, "1920-06-15")) # GMT phase (matches default)
+    assert_equal(-3600, offset_of(shanks, "1950-06-15")) # -1:00 (default Abidjan = GMT)
+    assert_equal(0,     offset_of(shanks, "1961-06-15")) # GMT from 28 Nov 1960
+  end
+
+  # Mali ML #1 (Bamako / southern division, Shanks Time Table #2) -- GMT 1912-1934,
+  # -1:00 1934-1960, then GMT from 20 Jun 1960. IANA models all of Mali as Africa/Bamako
+  # (default Linked to Africa/Abidjan = GMT), so it is a full hour fast across 1934-1960.
+  # ML_1 == backzone Africa/Bamako 696/696 mid-months 1912-1969.
+  def test_ml1_mali_bamako
+    shanks = TzHistory::Zone.tzinfo("ML_1")
+    assert_equal(0,     offset_of(shanks, "1920-06-15")) # GMT phase (matches default)
+    assert_equal(-3600, offset_of(shanks, "1950-06-15")) # -1:00 (default Abidjan = GMT)
+    assert_equal(0,     offset_of(shanks, "1961-06-15")) # GMT from 20 Jun 1960
+  end
+
+  # The Gambia GM #1 (whole country) -- Banjul Mean Time -1:06:36 (1912-1933), -1:00
+  # (1933-1942), then GMT. The DEFAULT IANA build LINKS Africa/Banjul to Africa/Abidjan
+  # (GMT), so it is >1 h off across 1912-1933 and a full hour off across 1933-1942. The
+  # two transition dates are IANA's ordinance-sourced values (P Chan 2020; Shanks prints
+  # 1935/1964). GM_1 == backzone Africa/Banjul 696/696 mid-months 1912-1969.
+  def test_gm1_gambia
+    shanks = TzHistory::Zone.tzinfo("GM_1")
+    assert_equal(-3996, offset_of(shanks, "1920-06-15")) # Banjul Mean Time -1:06:36
+    assert_equal(-3600, offset_of(shanks, "1938-06-15")) # -1:00 from 1 Apr 1933
+    assert_equal(0,     offset_of(shanks, "1943-06-15")) # GMT from 1 Feb 1942
+  end
 end

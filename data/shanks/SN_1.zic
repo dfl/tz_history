@@ -1,0 +1,8 @@
+# Shanks International Atlas TIME TABLE, Senegal (whole country): -1:00 from 1912, then GMT from 1 Jun 1941.
+# Atlas printed p.314 (PDF p.338), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Africa/Dakar (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/SN_1 -1:09:44 -    LMT  1912 Jan  1  0:00
+                 -1:00    -    -01  1941 Jun  1  0:00
+                 0:00     -    GMT

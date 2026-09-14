@@ -21,6 +21,12 @@ only) · `pending` (not yet worked). **Resolution** — `polygon` (country-wide)
 | Equatorial Guinea | 137 | 161 | 1 | override | polygon | `backzone` Africa/Malabo — **696/696** mid-months 1912–1969 | ✅ done (GQ_1); GMT 1912→WAT 15 Dec 1963; default links to Lagos (WAT from 1919) |
 | Niger (Niamey / western div) | 283 | 307 | 3 (TT#2 anchor) | override | polygon | `backzone` Africa/Niamey — **696/696** mid-months 1912–1969 | ✅ done (NE_1); TT#2 −01→GMT→WAT; east(+1)/central(GMT→1960) divs → Phase 2 |
 | Tanzania (mainland / Dar es Salaam) | 385 | 409 | 2 (TT#2 anchor) | override | polygon | `backzone` Africa/Dar_es_Salaam — **468/468** mid-months 1931–1969 | ✅ done (TZ_1); TT#2 EAT/+2:45; Zanzibar TT#1 (+2:30 1931–40) → Phase 2 |
+| Senegal | 314 | 338 | 1 | override | polygon | `backzone` Africa/Dakar — **696/696** mid-months 1912–1969 | ✅ done (SN_1); −1:00 1912 → GMT 1 Jun 1941; default links to Abidjan (GMT) |
+| Guinea | 191 | 215 | 1 | override | polygon | `backzone` Africa/Conakry — **696/696** mid-months 1912–1969 | ✅ done (GN_1); GMT 1912 → −1:00 26 Feb 1934 → GMT 1 Jan 1960; default links to Abidjan |
+| Mauritania | 262 | 286 | 1 | override | polygon | `backzone` Africa/Nouakchott — **696/696** mid-months 1912–1969 | ✅ done (MR_1); GMT 1912 → −1:00 26 Feb 1934 → GMT 28 Nov 1960; default links to Abidjan |
+| Mali (Bamako / southern div) | 260 | 284 | 2 (TT#2 anchor) | override | polygon | `backzone` Africa/Bamako — **696/696** mid-months 1912–1969 | ✅ done (ML_1); TT#2 GMT→−1:00(1934)→GMT(20 Jun 1960); northern TT#1 (GMT throughout = default) needs no fix; IANA models all Mali as Bamako |
+| The Gambia | 165 | 189 | 1 | override | polygon | `backzone` Africa/Banjul — **696/696** mid-months 1912–1969 | ✅ done (GM_1); BMT −1:06:36 1912 → −1:00 (1 Apr 1933) → GMT (1 Feb 1942), IANA ordinance dates (Shanks 1935/1964 = errors, deferred) |
+| Sierra Leone | 314 | 338 | 1 | defer | — | `backzone` Africa/Freetown — Shanks DST (save 0:40, Jun–Oct) contradicted by almanac-sourced IANA rules (save 0:20) + WWII GMT-1941 vs Shanks 1957 | ⏳ deferred (Phase 2); see backlog |
 
 **Phase-1 sub-hour European mean-time cluster** (worklist order): Iceland ✅ · Ireland
 ❌ no-op · Luxembourg ✅ · Norway ✅ · Sweden ✅ · Denmark ✅. Page map in
@@ -133,8 +139,20 @@ divergence worklist: `research/intl/iana_divergence.tsv`, 108 zones / 94 countri
 | Denmark pre-1890 town LMT | nearest-city | Before national Copenhagen MT (1890) every Danish town kept its own LMT (Aalborg +0:39:44, Aarhus +0:40:52, …); the atlas geocodes them — a Phase-2 nearest-city split, like Norway/Sweden | Denmark (DK_1) |
 | ~~Coastal-fringe PIP misses~~ | ✅ RESOLVED | The `INTL_COAST_TOL` ≈ 2.8 km near-edge tolerance (`lookup.rb`, intl-only) now recovers cities just offshore of NE's line (Copenhagen 1.24 km, Stockholm, Luleå, Tromsø). Residual: a ~2.8 km land-border strip can leak to an IANA-deferring neighbour (documented) | Denmark (DK_1) coastline |
 | Netherlands tables #2–9 | regional-variant refinement | NL#1 (Amsterdam/whole-country) ships; the finer regional variants are lower-value refinements | NL pilot |
+| Sierra Leone | country override | Shanks Time Table (p.314/PDF 338) has FMT −0:53 → −1:00 (1913) with a +40-min summer DST every year 1935–1942 (Jun→−0:20, Oct→−1:00) → GMT 1957. IANA `backzone` Africa/Freetown instead carries almanac-sourced `Rule SL` (save **0:20**, i.e. −0:40, in the dry season ~Sep–Mar, 1932–1939) and a WWII switch to plain −01 (1939) then **GMT from 6 Dec 1941** — explicitly noted as superseding Shanks. So Shanks conflicts on DST amount, season *and* the end date. The clean whole-hour −1:00 base (1913–1941) is real value vs the GMT default, but a faithful override must replicate the disputed sub-hour `SL` rules → a Phase-2 job (transcribe backzone, not Shanks). | W-Africa cluster (Sierra Leone) |
+| Mali northern division (TT#1) | admin_1 refinement | Shanks splits Mali into TT#2 (southern, Bamako = shipped ML_1) and TT#1 (northern/Saharan: Timbuktu, Gao, Kidal — GMT throughout). IANA models *all* Mali as Bamako, so the polygon override applies TT#2 everywhere (matching IANA); TT#1's GMT-throughout equals the default anyway, so nothing is lost. Recorded only for completeness. | Mali (ML_1) |
 
 **Known Shanks errors (defer to IANA, do not ship):**
+- **The Gambia transition dates.** Shanks prints BMT → −1:00 on **1/Jan/1935** and −1:00 →
+  GMT on **1/Jan/1964**. IANA carries P Chan's (2020) ordinance-sourced dates instead:
+  GMT−1 from **1933-04-01** (Interpretation Ordinance 1933, No. 10) and GMT from
+  **1942-02-01** (Notice No. 5 of 1942, a war-time measure made permanent by the 1946
+  Amendment Ordinance). `GM_1` ships the *sourced* dates (structure + BMT offset are
+  Shanks-faithful, matching backzone 696/696); the window ends 1942-02-01 so 1942–1964 is
+  correctly GMT (= default). "IANA has a sourced primary contradicting Shanks → defer."
+- **Sierra Leone summer time.** Shanks's +40-min Jun–Oct DST (1935–1942) is contradicted by
+  contemporaneous almanacs (see backzone `Rule SL`, save 0:20, ~Sep–Mar) — deferred entirely
+  (see backlog above).
 - **Netherlands, summer 1945.** Shanks TT#1 ends daylight time on **20 May 1945** (clocks
   → CET); the correct date is **16 September 1945** (the liberated Netherlands stayed on
   +2:00/CEST through the summer, in step with Germany, then kept CET permanently). IANA is
@@ -157,8 +175,10 @@ By divergence magnitude: **67 whole-hour+ · 23 sub-hour (Amsterdam-class) · 18
 dominant zone; grouped):
 - **Sub-hour mean-time gaps** (highest interpretive value, Amsterdam-class): Netherlands ✅,
   Ireland/Dublin (Belfast 25m), Luxembourg, Iceland (71m), Stockholm/Sweden, Oslo/Norway.
-- **Whole-hour West-Africa cluster** (WAT −1 or LMT vs GMT default): Senegal, Mali, Guinea,
-  Sierra Leone, Gambia, Mauritania, Niger, Benin, Ghana, Togo, Burkina Faso, Côte d'Ivoire.
+- **Whole-hour West-Africa cluster** (WAT −1 or LMT vs GMT default): Senegal ✅, Mali ✅,
+  Guinea ✅, Gambia ✅, Mauritania ✅, Niger ✅; Sierra Leone ⏳ (deferred — DST conflict);
+  still open: Benin, Ghana, Togo, Burkina Faso, Côte d'Ivoire (Abidjan itself is the
+  default GMT anchor — verify each is a real gap, several may be iana-sufficient).
 - **Caribbean cluster** (LMT/AST gaps vs GMT/EST default): Curaçao, Aruba, Bahamas, Antigua,
   St Kitts, Trinidad, St Vincent, St Lucia, Dominica, Grenada, Guadeloupe, Montserrat, both
   Virgin Islands, Cayman.

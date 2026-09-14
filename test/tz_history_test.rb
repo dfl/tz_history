@@ -1601,4 +1601,50 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(**DAR, date: "1970-06-15")  # after 1961 -> IANA (EAT)
     assert_nil TzHistory.for(**DAR, date: "1925-06-15")  # pre-1931 town LMT -> deferred
   end
+
+  # --- West-Africa whole-hour cluster (all default-Linked to Africa/Abidjan = GMT) ---
+  DAKAR      = { lat: 14.6928, lon: -17.4467 }.freeze # Senegal
+  CONAKRY    = { lat: 9.6412,  lon: -13.5784 }.freeze # Guinea
+  NOUAKCHOTT = { lat: 18.0735, lon: -15.9582 }.freeze # Mauritania
+  BAMAKO     = { lat: 12.6392, lon: -8.0029  }.freeze # Mali (southern, div 2)
+  TIMBUKTU   = { lat: 16.7666, lon: -3.0026  }.freeze # Mali (north, div 1)
+  BANJUL     = { lat: 13.4549, lon: -16.5790 }.freeze # The Gambia
+
+  def test_senegal_resolves_minus_one_then_defers
+    tz = TzHistory.for(**DAKAR, date: "1930-06-15")
+    assert_equal "Shanks/SN_1", tz&.identifier
+    assert_equal(-3600, tz.period_for_local(Time.utc(1930, 6, 15, 12)).observed_utc_offset,
+                 "Senegal should be -1:00 1912-1941, not Abidjan's GMT")
+    assert_nil TzHistory.for(**DAKAR, date: "1950-06-15") # after 1 Jun 1941 -> IANA (GMT)
+    assert_nil TzHistory.for(**DAKAR, date: "1905-06-15") # pre-1912 town LMT -> deferred
+  end
+
+  def test_guinea_mauritania_minus_one_in_1934_1960_window
+    [CONAKRY, NOUAKCHOTT, BAMAKO].each do |place|
+      tz = TzHistory.for(**place, date: "1950-06-15")
+      assert_equal(-3600, tz.period_for_local(Time.utc(1950, 6, 15, 12)).observed_utc_offset,
+                   "#{place} should be -1:00 1934-1960, not Abidjan's GMT")
+    end
+    assert_nil TzHistory.for(**CONAKRY, date: "1965-06-15")    # after 1960 -> IANA (GMT)
+    assert_nil TzHistory.for(**NOUAKCHOTT, date: "1965-06-15") # after Nov 1960 -> IANA (GMT)
+  end
+
+  def test_mali_polygon_applies_table2_to_north_like_iana
+    # IANA models ALL of Mali as Africa/Bamako, so northern Timbuktu resolves to ML_1 too.
+    tz = TzHistory.for(**TIMBUKTU, date: "1950-06-15")
+    assert_equal "Shanks/ML_1", tz&.identifier
+    assert_equal(-3600, tz.period_for_local(Time.utc(1950, 6, 15, 12)).observed_utc_offset)
+    assert_nil TzHistory.for(**BAMAKO, date: "1965-06-15") # after 20 Jun 1960 -> IANA (GMT)
+  end
+
+  def test_gambia_banjul_mean_time_then_minus_one_then_defers
+    tz = TzHistory.for(**BANJUL, date: "1920-06-15")
+    assert_equal "Shanks/GM_1", tz&.identifier
+    assert_equal(-3996, tz.period_for_local(Time.utc(1920, 6, 15, 12)).observed_utc_offset,
+                 "The Gambia should be Banjul Mean Time (-1:06:36) 1912-1933")
+    tz2 = TzHistory.for(**BANJUL, date: "1938-06-15")
+    assert_equal(-3600, tz2.period_for_local(Time.utc(1938, 6, 15, 12)).observed_utc_offset,
+                 "The Gambia should be -1:00 1933-1942")
+    assert_nil TzHistory.for(**BANJUL, date: "1950-06-15") # after 1 Feb 1942 -> IANA (GMT)
+  end
 end

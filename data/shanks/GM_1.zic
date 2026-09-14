@@ -1,0 +1,9 @@
+# Shanks International Atlas TIME TABLE, The Gambia (whole country): Banjul Mean Time -1:06:36 from 1912, -1:00 from 1 Apr 1933, then GMT from 1 Feb 1942 (IANA ordinance-sourced dates; Shanks prints 1935/1964).
+# Atlas printed p.165 (PDF p.189), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Africa/Banjul (backzone; P Chan 2020 ordinance-sourced, supersedes Shanks's dates).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/GM_1 -1:06:36 -    LMT  1912 Jan  1  0:00
+                 -1:06:36 -    BMT  1933 Apr  1  0:00
+                 -1:00    -    -01  1942 Feb  1  0:00
+                 0:00     -    GMT
