@@ -125,4 +125,51 @@ class ZoneTest < Minitest::Test
     assert_equal(4800, offset_of(shanks, "1938-07-15")) # summer on the +0:20 base (+1:20:00)
     assert_equal(1200, offset_of(shanks, "1939-01-15")) # Dutch Time +0:20 exactly
   end
+
+  # Iceland IS #1 (whole country) -- Iceland stood 1 HOUR BEHIND GMT (meridian 15W,
+  # -1:00) from 1908, summer time raising the clock to GMT (+00), until permanent GMT
+  # in 1968. Before 1908: Reykjavik mean solar time, -1:28. The DEFAULT IANA build LINKS
+  # Atlantic/Reykjavik -> Africa/Abidjan (GMT +0), off by a full hour every 1908-1968
+  # winter; the real history is Almanak-sourced but only in the opt-in `backzone`.
+  # Shanks p.195 is the primary; three Shanks gaps (omitted 1939/1940 summer time,
+  # spurious July 1941/1942 fall-backs) are corrected from the sourced Almanak -- the
+  # 1940 and 1941 summer assertions below are the regression guards for those fixes.
+  def test_is1_iceland_one_hour_behind_gmt
+    shanks = TzHistory::Zone.tzinfo("IS_1")
+    assert_equal(-5280, offset_of(shanks, "1900-01-15")) # Reykjavik MST -1:28 (pre-1908)
+    assert_equal(-3600, offset_of(shanks, "1910-07-15")) # std -1:00, no summer time yet
+    assert_equal(-3600, offset_of(shanks, "1925-07-15")) # std -1:00 (no DST 1922-1938)
+    assert_equal(0,     offset_of(shanks, "1940-07-15")) # summer +00 (Shanks omitted 1940 DST; Almanak-sourced)
+    assert_equal(0,     offset_of(shanks, "1941-08-15")) # summer +00 (Shanks fell back 2/Jul; Almanak keeps it to autumn)
+    assert_equal(-3600, offset_of(shanks, "1965-01-15")) # winter std -1:00
+    assert_equal(0,     offset_of(shanks, "1965-07-15")) # summer +00
+    assert_equal(0,     offset_of(shanks, "1968-07-15")) # permanent GMT from 1968-04-07
+  end
+
+  # Luxembourg LU #1 (whole country) -- Luxembourg kept CENTRAL European Time (+1:00,
+  # summer +2:00) from 1904, switched to WESTERN European Time (0:00, summer +1:00) in
+  # 1918, then back to CET at the 1940 occupation. The DEFAULT IANA build LINKS
+  # Europe/Luxembourg -> Europe/Brussels (WET), so it is a full hour low across 1904-1918.
+  def test_lu1_luxembourg_cet_then_wet
+    shanks = TzHistory::Zone.tzinfo("LU_1")
+    assert_equal(3600, offset_of(shanks, "1910-01-15")) # CET +1:00 (default Brussels would say 0)
+    assert_equal(7200, offset_of(shanks, "1916-07-15")) # CEST +2:00 (WWI summer time)
+    assert_equal(0,    offset_of(shanks, "1925-01-15")) # WET 0:00 (switched 1918)
+    assert_equal(3600, offset_of(shanks, "1925-07-15")) # WEST +1:00 summer
+    assert_equal(7200, offset_of(shanks, "1941-07-15")) # occupation CEST +2:00 (continuous 1940-1942)
+  end
+
+  # Norway NO #1 (whole country) -- uniform CET (+1:00) from 1895, with summer time ONLY
+  # in 1916, 1940-1945 and 1959-1965. The DEFAULT IANA build LINKS Europe/Oslo ->
+  # Europe/Berlin, whose DST years differ, so it is an hour off in 1917-1918/1945-1949/
+  # 1959-1965. The 1917 (no DST) and 1960 (DST) assertions are the divergence guards.
+  def test_no1_norway_uniform_cet
+    shanks = TzHistory::Zone.tzinfo("NO_1")
+    assert_equal(3600, offset_of(shanks, "1910-01-15")) # CET +1:00
+    assert_equal(7200, offset_of(shanks, "1916-07-15")) # CEST +2:00 (Norway's 1916 summer time)
+    assert_equal(3600, offset_of(shanks, "1917-07-15")) # CET -- NO summer 1917 (Berlin would be +2:00)
+    assert_equal(7200, offset_of(shanks, "1943-07-15")) # occupation CEST +2:00
+    assert_equal(3600, offset_of(shanks, "1950-07-15")) # CET -- no DST 1946-1958
+    assert_equal(7200, offset_of(shanks, "1960-07-15")) # CEST +2:00 (1959-1965 summer time)
+  end
 end

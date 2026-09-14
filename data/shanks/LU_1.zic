@@ -1,0 +1,66 @@
+# Shanks International Atlas TIME TABLE, Luxembourg (whole country): CET 1904-1918, WET 1918-1940, CET (occupation) from 1940.
+# Atlas printed p.256 (PDF p.280), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Europe/Luxembourg (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/LU_1 0:24:36  -    LMT  1904 Jun  1  0:00
+                 1:00     -    CET  1916 May 14 23:00
+                 1:00     1:00 CEST 1916 Oct  1  1:00
+                 1:00     -    CET  1917 Apr 28 23:00
+                 1:00     1:00 CEST 1917 Sep 17  1:00
+                 1:00     -    CET  1918 Apr 15  2:00
+                 1:00     1:00 CEST 1918 Sep 16  3:00
+                 1:00     -    CET  1918 Nov 25  1:00
+                 0:00     -    WET  1919 Mar  1 23:00
+                 0:00     1:00 WEST 1919 Oct  5  3:00
+                 0:00     -    WET  1920 Feb 14 23:00
+                 0:00     1:00 WEST 1920 Oct 23  2:00
+                 0:00     -    WET  1921 Mar 14 23:00
+                 0:00     1:00 WEST 1921 Oct 26  2:00
+                 0:00     -    WET  1922 Mar 25 23:00
+                 0:00     1:00 WEST 1922 Oct  8  1:00
+                 0:00     -    WET  1923 Apr 21 23:00
+                 0:00     1:00 WEST 1923 Oct  7  2:00
+                 0:00     -    WET  1924 Mar 29 23:00
+                 0:00     1:00 WEST 1924 Oct  5  1:00
+                 0:00     -    WET  1925 Apr  4 23:00
+                 0:00     1:00 WEST 1925 Oct  4  1:00
+                 0:00     -    WET  1926 Apr 17 23:00
+                 0:00     1:00 WEST 1926 Oct  3  1:00
+                 0:00     -    WET  1927 Apr  9 23:00
+                 0:00     1:00 WEST 1927 Oct  2  1:00
+                 0:00     -    WET  1928 Apr 14 23:00
+                 0:00     1:00 WEST 1928 Oct  7  1:00
+                 0:00     -    WET  1929 Apr 20 23:00
+                 0:00     1:00 WEST 1929 Oct  6  3:00
+                 0:00     -    WET  1930 Apr 13  2:00
+                 0:00     1:00 WEST 1930 Oct  5  3:00
+                 0:00     -    WET  1931 Apr 19  2:00
+                 0:00     1:00 WEST 1931 Oct  4  3:00
+                 0:00     -    WET  1932 Apr  3  2:00
+                 0:00     1:00 WEST 1932 Oct  2  3:00
+                 0:00     -    WET  1933 Mar 26  2:00
+                 0:00     1:00 WEST 1933 Oct  8  3:00
+                 0:00     -    WET  1934 Apr  8  2:00
+                 0:00     1:00 WEST 1934 Oct  7  3:00
+                 0:00     -    WET  1935 Mar 31  2:00
+                 0:00     1:00 WEST 1935 Oct  6  3:00
+                 0:00     -    WET  1936 Apr 19  2:00
+                 0:00     1:00 WEST 1936 Oct  4  3:00
+                 0:00     -    WET  1937 Apr  4  2:00
+                 0:00     1:00 WEST 1937 Oct  3  3:00
+                 0:00     -    WET  1938 Mar 27  2:00
+                 0:00     1:00 WEST 1938 Oct  2  3:00
+                 0:00     -    WET  1939 Apr 16  2:00
+                 0:00     1:00 WEST 1939 Nov 19  3:00
+                 0:00     -    WET  1940 May 14  3:00
+                 1:00     1:00 CEST 1942 Nov  2  3:00
+                 1:00     -    CET  1943 Mar 29  2:00
+                 1:00     1:00 CEST 1943 Oct  4  3:00
+                 1:00     -    CET  1944 Apr  3  2:00
+                 1:00     1:00 CEST 1944 Sep 18  3:00
+                 1:00     -    CET  1945 Apr  2  2:00
+                 1:00     1:00 CEST 1945 Sep 16  3:00
+                 1:00     -    CET  1946 May 19  2:00
+                 1:00     1:00 CEST 1946 Oct  7  2:00
+                 1:00     -    CET

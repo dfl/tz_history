@@ -1,0 +1,31 @@
+# Shanks International Atlas TIME TABLE, Norway (whole country): uniform CET from 1895, summer time 1916 / 1940-1945 / 1959-1965.
+# Atlas printed p.286 (PDF p.310), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Europe/Oslo (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/NO_1 0:43:00  -    LMT  1895 Jan  1  0:00
+                 1:00     -    CET  1916 May 22  1:00
+                 1:00     1:00 CEST 1916 Sep 30  3:00
+                 1:00     -    CET  1940 Aug 10 23:00
+                 1:00     1:00 CEST 1942 Nov  2  3:00
+                 1:00     -    CET  1943 Mar 29  2:00
+                 1:00     1:00 CEST 1943 Oct  4  3:00
+                 1:00     -    CET  1944 Apr  3  2:00
+                 1:00     1:00 CEST 1944 Oct  2  3:00
+                 1:00     -    CET  1945 Apr  2  2:00
+                 1:00     1:00 CEST 1945 Oct  1  3:00
+                 1:00     -    CET  1959 Mar 15  2:00
+                 1:00     1:00 CEST 1959 Sep 20  3:00
+                 1:00     -    CET  1960 Mar 20  2:00
+                 1:00     1:00 CEST 1960 Sep 18  3:00
+                 1:00     -    CET  1961 Mar 19  2:00
+                 1:00     1:00 CEST 1961 Sep 17  3:00
+                 1:00     -    CET  1962 Mar 18  2:00
+                 1:00     1:00 CEST 1962 Sep 16  3:00
+                 1:00     -    CET  1963 Mar 17  2:00
+                 1:00     1:00 CEST 1963 Sep 15  3:00
+                 1:00     -    CET  1964 Mar 15  2:00
+                 1:00     1:00 CEST 1964 Sep 20  3:00
+                 1:00     -    CET  1965 Apr 25  2:00
+                 1:00     1:00 CEST 1965 Sep 19  3:00
+                 1:00     -    CET

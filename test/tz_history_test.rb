@@ -1381,4 +1381,101 @@ class TzHistoryTest < Minitest::Test
     assert_match(/International Atlas/i, note)
     assert_match(/Amsterdam Mean Time|Brussels/i, note)
   end
+
+  # --- Iceland: 1 hour behind GMT with summer time, 1908-1968 (International Atlas) ---
+  # A Reykjavik coordinate pre-1968 resolves to Shanks/IS_1 (-1:00 std, +00 summer),
+  # which the DEFAULT IANA Atlantic/Reykjavik (a Link to Africa/Abidjan = GMT) gets
+  # wrong by a full hour every winter. Outside the 1837..1968-04-07 window, and outside
+  # Iceland, we defer to IANA.
+  REYK = { lat: 64.1466, lon: -21.9426 }.freeze # Reykjavik
+
+  def test_iceland_resolves_one_hour_behind_gmt
+    tz = TzHistory.for(**REYK, date: "1930-01-15")
+    assert_equal "Shanks/IS_1", tz.identifier
+    assert_equal(-3600, tz.period_for_local(Time.utc(1930, 1, 15, 12)).observed_utc_offset) # winter -1:00
+    summer = TzHistory.for(**REYK, date: "1950-07-15")
+    assert_equal(0, summer.period_for_local(Time.utc(1950, 7, 15, 12)).observed_utc_offset) # summer +00
+  end
+
+  def test_iceland_defers_outside_window_and_borders
+    assert_nil TzHistory.for(**REYK, date: "1836-01-15")            # before the documented window
+    assert_nil TzHistory.for(**REYK, date: "1975-07-15")            # after permanent GMT -> IANA
+    assert_nil TzHistory.for(lat: 55.6761, lon: 12.5683, date: "1930-01-15") # Copenhagen, DK -> not in IS polygon
+  end
+
+  def test_iceland_note_names_the_international_atlas
+    note = TzHistory.note(**REYK, date: "1930-01-15")
+    assert_match(/International Atlas/i, note)
+    assert_match(/GMT|Abidjan/i, note)
+  end
+
+  # --- Luxembourg: Central European Time from 1904 (International Atlas) ---
+  # A Luxembourg coordinate in 1904-1918 resolves to Shanks/LU_1 (CET +1:00), which the
+  # DEFAULT IANA Europe/Luxembourg (a Link to Brussels = WET) gets an hour wrong.
+  # Outside 1904-06-01..1940-05-14, and outside Luxembourg, we defer to IANA.
+  LUX = { lat: 49.6116, lon: 6.1319 }.freeze # Luxembourg City
+
+  def test_luxembourg_resolves_central_european_time
+    tz = TzHistory.for(**LUX, date: "1910-01-15")
+    assert_equal "Shanks/LU_1", tz.identifier
+    assert_equal(3600, tz.period_for_local(Time.utc(1910, 1, 15, 12)).observed_utc_offset) # CET +1, not Brussels' 0
+  end
+
+  def test_luxembourg_defers_outside_window_and_borders
+    assert_nil TzHistory.for(**LUX, date: "1903-01-15")            # before the CET switch
+    assert_nil TzHistory.for(**LUX, date: "1945-07-15")            # after the 1940 occupation -> IANA
+    assert_nil TzHistory.for(lat: 50.8503, lon: 4.3517, date: "1910-01-15") # Brussels, BE -> not in LU polygon
+  end
+
+  def test_luxembourg_note_names_the_international_atlas
+    note = TzHistory.note(**LUX, date: "1910-01-15")
+    assert_match(/International Atlas/i, note)
+    assert_match(/Central European Time|Brussels|WET/i, note)
+  end
+
+  # --- Norway: uniform CET from 1895, summer-time years unlike Germany's (Intl Atlas) ---
+  # An Oslo coordinate in a Norway-but-not-Germany summer (1917 summer had NO DST in
+  # Norway) resolves to Shanks/NO_1 = CET, where the DEFAULT Europe/Oslo (Link to Berlin)
+  # applies Berlin's CEST -- an hour too much. Pre-1895 (town LMT) and post-1965 defer.
+  OSLO = { lat: 59.9139, lon: 10.7522 }.freeze
+
+  def test_norway_resolves_uniform_cet
+    tz = TzHistory.for(**OSLO, date: "1917-07-15")
+    assert_equal "Shanks/NO_1", tz.identifier
+    assert_equal(3600, tz.period_for_local(Time.utc(1917, 7, 15, 12)).observed_utc_offset) # CET, not Berlin's CEST
+  end
+
+  def test_norway_defers_outside_window_and_borders
+    assert_nil TzHistory.for(**OSLO, date: "1894-07-15")            # pre-1895 town LMT -> Phase 2
+    assert_nil TzHistory.for(**OSLO, date: "1970-07-15")            # after 1965 -> IANA (agrees with Berlin)
+    # Stockholm must NOT leak into Norway's polygon -- it resolves to its own Sweden
+    # override (SE_1), not NO_1 (and not nil: the 10m coastline now includes it).
+    assert_equal "Shanks/SE_1", TzHistory.for(lat: 59.3293, lon: 18.0686, date: "1917-07-15").identifier
+  end
+
+  # --- Sweden: Swedish Time +1:00:14 (1879-1900) then CET, summer time only 1916 ---
+  # In 1917 (no Swedish DST) an in-country coordinate resolves to Shanks/SE_1 = CET,
+  # where the DEFAULT Europe/Stockholm (Link to Berlin) applies Berlin's CEST.
+  STOCKHOLM = { lat: 59.3293, lon: 18.0686 }.freeze
+
+  def test_sweden_resolves_cet
+    tz = TzHistory.for(**STOCKHOLM, date: "1917-07-15")
+    assert_equal "Shanks/SE_1", tz.identifier
+    assert_equal(3600, tz.period_for_local(Time.utc(1917, 7, 15, 12)).observed_utc_offset) # CET, not Berlin's CEST
+  end
+
+  # Coastline regression: the coarse 50m Natural Earth polygon dropped these Baltic
+  # coastal cities OUTSIDE Sweden (Stockholm -> nil bug); the 10m + RDP build includes
+  # them. Guards against a future re-coarsening of the source geometry.
+  def test_sweden_coastal_cities_resolve
+    { "Goteborg" => [57.7089, 11.9746], "Malmo" => [55.6050, 13.0038] }.each do |name, (lat, lon)|
+      tz = TzHistory.for(lat:, lon:, date: "1917-07-15")
+      assert_equal "Shanks/SE_1", tz&.identifier, "#{name} should resolve to Sweden (SE_1)"
+    end
+  end
+
+  def test_sweden_defers_outside_window
+    assert_nil TzHistory.for(**STOCKHOLM, date: "1878-07-15") # pre-1879 town LMT -> Phase 2
+    assert_nil TzHistory.for(**STOCKHOLM, date: "1960-07-15") # after 1950 -> IANA
+  end
 end

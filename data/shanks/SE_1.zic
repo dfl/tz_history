@@ -1,0 +1,10 @@
+# Shanks International Atlas TIME TABLE, Sweden (whole country): Swedish Time +1:00:14 (1879-1900), CET from 1900, summer time only 1916.
+# Atlas printed p.377 (PDF p.401), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Europe/Stockholm (backzone; law-sourced, supersedes Shanks for 1879-1900).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/SE_1 1:12:12  -    LMT  1879 Jan  1  0:00
+                 1:00:14  -    SET  1900 Jan  1  0:00
+                 1:00     -    CET  1916 May 14 23:00
+                 1:00     1:00 CEST 1916 Oct  1  0:00
+                 1:00     -    CET
