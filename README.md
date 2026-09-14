@@ -116,15 +116,14 @@ rake shanks:build
 ## Provenance & scope
 
 Time-zone transition dates are **facts**, not creative expression, and facts are
-not copyrightable (*Feist v. Rural*; cf. *Astrolabe v. Olson*, which upheld the
-public tz database). This gem re-expresses those facts as its own TZif and GeoJSON
-and cross-checks them against the public-domain IANA database wherever the two
-overlap (see the Kentucky #69 gold-standard equivalence test). No verbatim atlas
-tables are shipped.
-
-Every zone shipped is cross-checked against IANA wherever the two overlap and
-gated behind a visual crop-verify of the atlas page it came from. No verbatim
-atlas tables are shipped.
+not copyrightable (*Feist v. Rural*; cf. *Astrolabe v. Olson*, which the tz-database
+maintainers survived — the rights-holder to the same Shanks atlases sued over exactly
+this activity and withdrew). This gem re-expresses those facts as its own TZif and
+GeoJSON, cross-checks them against the public-domain IANA database wherever the two
+overlap (see the Kentucky #69 gold-standard equivalence test), and gates every shipped
+zone behind a visual crop-verify of the atlas page it came from. The atlas itself and any
+verbatim OCR of it are referenced, never redistributed — see
+[`docs/PROVENANCE.md`](docs/PROVENANCE.md) for the full sourcing and copyright posture.
 
 ## License
 

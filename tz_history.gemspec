@@ -25,6 +25,7 @@ Gem::Specification.new do |spec|
     "data/shanks/zoneinfo/**/*",
     "README.md",
     "CHANGELOG.md",
+    "docs/PROVENANCE.md",
     "LICENSE.txt"
   ]
   spec.require_paths = ["lib"]
