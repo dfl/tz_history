@@ -3,6 +3,23 @@
 All notable changes to `tz_history` are documented here. This project adheres to
 [Semantic Versioning](https://semver.org).
 
+## [0.2.1] - 2026-09-13
+
+Data-quality fix for the Ohio city index. No timezone offsets change — every birth
+date/location resolves to the same zone as in 0.2.0; this corrects town **names** in the
+shipped geojson and the coordinate coverage they came from.
+
+### Fixed
+- **Ohio city listings re-extracted from the 3-column atlas layout.** The city index had
+  been OCR'd as a single column, fusing adjacent-column town names into one token stream
+  (`"A Arabia"` = a stray `A` + `Arabia`; `"Altamor Abbeyville"` = two towns; `"-leasant
+  Hill"` = Pleasant Hill). ~50% of the 2883 Ohio entries were affected. Re-rendered pages
+  413–431 with true per-page column-gutter detection and re-extracted: **2883 → 2941 clean
+  towns** (recovered towns whose coordinates the old mis-split had clipped), zero merge
+  artifacts.
+- Recovered 4 remaining crop-verified garble names (`Rossburg`, `Mifflin`, `Wolfcale`,
+  `Constitution`) and dropped 1 phantom band-overlap duplicate (of `Boughtonville`).
+
 ## [0.2.0] - 2026-09-11
 
 Full contiguous-US coverage. Every one of the **48 CONUS states** has been worked
