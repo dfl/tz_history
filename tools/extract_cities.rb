@@ -227,7 +227,26 @@ def parse_stream(tokens)
       name_toks.unshift(tokens[j].gsub(/[^A-Za-z.'()\-]/, ""))
       j -= 1
     end
+    # Strip a leading bleed fragment: when a neighbouring column's coord tail clips into the
+    # strip it OCRs as a junk token ("J", "et", "-lOVUO") that prepends to the real name.
+    # With correct gutters (render_state --autocols) this is rare, but catch the residue:
+    # drop a leading token that is a single letter, or starts lowercase / non-letter, ONLY
+    # when a real Capitalized name-word follows -- never touch legit 2-char caps (Le/La/Mc/
+    # Mt/St) or a lone single-word name.
+    if name_toks.size == 2 && name_toks[1] =~ /\A[A-Z][a-z]/ &&
+       name_toks[0] !~ /\A(?:Le|La|Mc|Mac|Mt|St|De|Du|El|Van|New|Old|Big|Ft|Fort|Port)\z/ &&
+       (name_toks[0].length <= 2 || name_toks[0] =~ /\A[^A-Z]/ || name_toks[0] =~ /[A-Z][a-z]*[A-Z]/)
+      name_toks.shift
+    end
     name = name_toks.join(" ").strip
+    # Title-case an all-lowercase name: OCR sometimes lowercases a real town's initial
+    # ("springfield" -> "Springfield", "troy" -> "Troy"). Mixed-case names are left alone.
+    name = name.split.map { |wd| wd =~ /\A[a-z]+\z/ ? wd.capitalize : wd }.join(" ") if name == name.downcase
+    # Drop the one unambiguous OCR-garble shape: a lone-letter "name" ("J", "f") left by a
+    # coord-tail bleed. Everything else is kept -- real names carry legitimate internal caps
+    # (McArthur, DeForest, La Rue) that no case/vowel heuristic can tell from garble, and the
+    # residual multi-letter blobs ("hs die") are harmless deferred nearest-town points.
+    garble = name =~ /\A[A-Za-z]\z/
     # Repair longitude from the highly-reliable LMT column when they disagree.
     lmt_lon = lon_from_lmt(tokens[i + 2].to_s)
     conf = "ok"
@@ -240,7 +259,7 @@ def parse_stream(tokens)
       conf = "no-lmt"
     end
     rows << { "name" => name, "county_num" => cnum, "table" => tnum,
-              "lat" => lat.round(4), "lon" => lon.round(4), "conf" => conf } unless name.empty?
+              "lat" => lat.round(4), "lon" => lon.round(4), "conf" => conf } unless name.empty? || garble
     i += 3
   end
   rows

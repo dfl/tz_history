@@ -76,12 +76,72 @@ y0 = (h * top_frac).to_i
 region_h = (h * (bot_frac - top_frac)).to_i
 abort "empty region (top=#{top_frac} bot=#{bot_frac})" if region_h <= 0
 
-# 2. Column strips over the region, each tiled top-to-bottom into overlapping bands.
-col_w = w / num_cols
-crop_w = [(col_w * colw_mult).to_i, w].min
+# 2. Column boundaries.
+#    Default: even page-thirds, each strip widened by colw_mult to catch the coord tail.
+#    --autocols: detect the true inter-column GUTTERS from a vertical ink projection so a
+#    strip never starts inside its left neighbour (that clip leaks the neighbour's coord
+#    tail as a 1-2 char fragment glued to the name -- "J Horton", "A Arabia"). We collapse
+#    the region to a 1px-tall grayscale row, find the (num_cols-1) widest bright valleys in
+#    the interior, and split there. Boundaries become [0, g1, .., w]; each strip runs to the
+#    NEXT gutter (+overlap) so it holds its column's full coords and stops before the next.
+def detect_gutters(full, w, y0, region_h, num_cols)
+  # Project the city region (not headers) onto a 1px row: bright = whitespace gutter.
+  region = "#{w}x#{region_h}+0+#{y0}"
+  raw, ok = Open3.capture2("convert", full, "-crop", region, "+repage",
+                           "-colorspace", "Gray", "-resize", "#{w}x1!", "-depth", "8", "gray:-")
+  return nil unless ok.success? && raw.bytesize == w
+
+  prof = raw.bytes
+  # Candidate gutters: columns brighter than the 92nd percentile (near-empty of ink).
+  thresh = prof.sort[(prof.size * 0.92).to_i]
+  # Group contiguous bright runs into valleys; keep those in the interior 8%..92% band.
+  valleys = []
+  run = nil
+  prof.each_index do |x|
+    if prof[x] >= thresh
+      run ||= [x, x]
+      run[1] = x
+    elsif run
+      valleys << run
+      run = nil
+    end
+  end
+  valleys << run if run
+  lo = (w * 0.08).to_i
+  hi = (w * 0.92).to_i
+  ranges = valleys.select { |a, b| ((a + b) / 2).between?(lo, hi) }
+                  .sort_by { |a, b| -(b - a) }             # widest valleys first
+                  .first(num_cols - 1)
+                  .sort_by(&:first)
+  ranges.size == num_cols - 1 ? ranges : nil
+end
+
+gutters = flags.key?("autocols") ? detect_gutters(full, w, y0, region_h, num_cols) : nil
+if flags.key?("autocols")
+  warn gutters ? "autocols: detected gutters at x=#{gutters.map { |a, b| "#{a}..#{b}" }.join(', ')}" \
+               : "autocols: detection failed, falling back to even thirds"
+end
+
+# Turn gutter RANGES into [left, right] spans per column. Each column overlaps a little
+# into the gutter on BOTH sides -- its left starts at the preceding gutter's LEFT edge (so
+# a leading letter is never clipped) and its right ends at the following gutter's RIGHT edge
+# (so the coord/LMT tail is fully captured). extract_cities dedups the overlap by name+coord.
+spans =
+  if gutters
+    lefts  = [0, *gutters.map(&:first)]
+    rights = [*gutters.map(&:last), w]
+    (0...num_cols).map do |c|
+      left = lefts[c]
+      right = rights[c]
+      [left, right - left]
+    end
+  else
+    col_w = w / num_cols
+    (0...num_cols).map { |c| [col_w * c, [(col_w * colw_mult).to_i, w].min] }
+  end
+
 manifest = []
-(0...num_cols).each do |c|
-  x = col_w * c
+spans.each_with_index do |(x, cw), c|
   # Band start positions: step by (band_h - overlap); a final short band covers the tail.
   step = band_h.positive? ? [band_h - band_overlap, 1].max : region_h
   bands = band_h.positive? ? (0...region_h).step(step).to_a : [0]
@@ -90,11 +150,11 @@ manifest = []
     next if bh <= 0
 
     crop = File.join(out_dir, format("col%d_band%d.png", c, b))
-    geom = "#{crop_w}x#{bh}+#{x}+#{y0 + by}"
+    geom = "#{cw}x#{bh}+#{x}+#{y0 + by}"
     system("convert", full, "-crop", geom, "+repage", crop, err: File::NULL) or
       abort "convert failed for col #{c} band #{b}"
     manifest << { "col" => c, "band" => b, "path" => File.basename(crop),
-                  "x" => x, "y" => y0 + by, "w" => crop_w, "h" => bh }
+                  "x" => x, "y" => y0 + by, "w" => cw, "h" => bh }
   end
 end
 
