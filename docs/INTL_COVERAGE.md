@@ -44,6 +44,13 @@ only) · `pending` (not yet worked). **Resolution** — `polygon` (country-wide)
 | Trinidad & Tobago | 389 | 413 | 1 | override | polygon | `backzone` America/Port_of_Spain — **960/960** mid-months 1890–1969 | ✅ done (TT_1); LMT −4:06:04 (Port of Spain) → AST −4:00 (2 Mar 1912); both divisions share the table |
 | Virgin Islands (US) | 400 | 424 | 1 | override | polygon | `backzone` America/St_Thomas — **960/960** mid-months 1890–1969 | ✅ done (VI_1); LMT −4:19:44 (Charlotte Amalie / St Thomas) → AST −4:00 (1 Jul 1911) |
 | Virgin Islands (British) | 400 | 424 | 1 | override | polygon | `backzone` America/Tortola — **960/960** mid-months 1890–1969 | ✅ done (VG_1); LMT −4:18:28 (Road Town / Tortola) → AST −4:00 (1 Jul 1911) |
+| Cameroon | 44 | 68 | 1 | override | polygon | `backzone` Africa/Douala — **960/960** mid-months 1890–1969 | ✅ done (CM_1); LMT → WAT (+1:00) 1/Jan/1912; default links to Lagos (WAT only 1 Sep 1919) → 30–47 min slow 1912–1919 |
+| Central African Republic | 77 | 101 | 1 | override | polygon | `backzone` Africa/Bangui — **960/960** mid-months 1890–1969 | ✅ done (CF_1); LMT → WAT (+1:00) 1/Jan/1912; header UBANGI-SHARI; default links to Lagos |
+| Congo (Brazzaville) | 116 | 140 | 1 | override | polygon | `backzone` Africa/Brazzaville — **960/960** mid-months 1890–1969 | ✅ done (CG_1); LMT → WAT (+1:00) 1/Jan/1912; default links to Lagos |
+| Gabon | 165 | 189 | 1 | override | polygon | `backzone` Africa/Libreville — **960/960** mid-months 1890–1969 | ✅ done (GA_1); LMT → WAT (+1:00) 1/Jan/1912; default links to Lagos; shares p.189 with Gambia |
+| Angola | 3 | 27 | 1 | override | polygon | `backzone` Africa/Luanda — **953/960** mid-months 1890–1969 | ✅ done (AO_1); LMT → +0:52 Luanda MT (1892) → WAT (+1:00) 26/May/1911; default links to Lagos; 7 misses = Jun–Dec 1911 sub-hour sliver (Shanks 26/May vs backzone 31/Dec) |
+| Chad | 78 | 102 | 1 | iana-sufficient | — | `Africa/Ndjamena` is a FULL real zone (LMT +1:00:12 → WAT 1912) in the default build | ✅ verified no-op; only pre-1912 town LMT → Phase 2 |
+| Zaire (Congo-Kinshasa) | 404 | 428 | 3 | defer | — | two-zone: TT#1 west +1:00 from 1897; TT#2 SE +1→+2 (25 Apr 1920 = Africa/Lubumbashi); TT#3 NE +1→+2 (14 Jun 1935) — IANA has only 2 zones (Kinshasa +1, Lubumbashi +2) | ⏳ deferred; needs a west/east division split (like NE two-division) |
 
 **Phase-1 sub-hour European mean-time cluster** (worklist order): Iceland ✅ · Ireland
 ❌ no-op · Luxembourg ✅ · Norway ✅ · Sweden ✅ · Denmark ✅. Page map in
@@ -281,8 +288,15 @@ dominant zone; grouped):
   to America/Puerto_Rico (−3:00 war time 1942–45), all 960/960 vs backzone. Still open: **Bahamas**
   (EST/DST case, separate follow-up), **Cayman**, and the sub-hour/link-agreeing tail
   (St-Barth/St-Martin, Bonaire, the SSS islands).
-- **Central/East Africa** (LMT vs +1/+2 default): Congo (Kinshasa/Lubumbashi), Angola, Cameroon,
-  Gabon, CAR, Tanzania, Uganda, Ethiopia, Eritrea, Somalia, Madagascar, Réunion, Seychelles.
+- **Central-Africa whole-hour cluster** ✅ COMPLETE (WAT +1:00 vs the Lagos link, which
+  reached WAT only 1 Sep 1919 → default 30–47 min slow ~1912–1919): Cameroon ✅, CAR ✅,
+  Congo-Brazzaville ✅, Gabon ✅, Angola ✅ (early standardizer: +0:52 Luanda MT from 1892).
+  Equatorial Guinea ✅ (GQ_1, done earlier). Verified iana-sufficient no-op: **Chad**
+  (Africa/Ndjamena is a real zone). Deferred: **Zaire/Congo-Kinshasa** ⏳ — genuine two-zone
+  (+1:00 west, +2:00 east; 3 Shanks tables) → needs a west/east division split.
+- **East Africa (EAT cluster)** — still open (all default-Linked to Africa/Nairobi, mostly
+  SUB-HOUR 15–30 min gaps): Uganda, Ethiopia, Eritrea, Somalia, Djibouti, Madagascar, Comoros,
+  Réunion, Seychelles. Tanzania ✅ (TZ_1, done earlier). Kenya = Nairobi = the anchor (no-op).
 - **Asia/Pacific**: Laos, Cambodia, Brunei, Malaysia, Oman, Kuwait, Bahrain, Micronesia, Saipan.
 
 **Skip as noise** (dateline artifacts / uninhabited / alias mislabels): Midway, Wake, Enderbury,

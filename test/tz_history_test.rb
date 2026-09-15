@@ -1663,6 +1663,37 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 6.4541, lon: 3.3947, date: "1925-06-15") # Lagos, NG -> not in BJ polygon
   end
 
+  # --- Central Africa: WAT (+1:00) from 1912 vs the Lagos link (WAT only from 1919) ---
+  # Cameroon/CAR/Congo/Gabon kept WAT from 1/Jan/1912; Angola from 26 May 1911 (with an
+  # earlier +0:52 Luanda-MT era from 1892). IANA links each to Africa/Lagos, 30-47 min
+  # slow across 1912-1919. Windowed to 1919-09-01, when Lagos reaches WAT (both defer).
+  DOUALA = { lat: 4.05, lon: 9.70 }.freeze     # Cameroon
+  LUANDA = { lat: -8.80, lon: 13.23 }.freeze   # Angola
+
+  def test_cameroon_resolves_wat_then_defers
+    tz = TzHistory.for(**DOUALA, date: "1915-06-15")
+    assert_equal "Shanks/CM_1", tz&.identifier
+    assert_equal(3600, tz.period_for_local(Time.utc(1915, 6, 15, 12)).observed_utc_offset,
+                 "Cameroon should be WAT (+1:00), not the Lagos link's +0:30")
+    assert_nil TzHistory.for(**DOUALA, date: "1925-06-15") # after 1 Sep 1919 -> IANA (WAT)
+    assert_nil TzHistory.for(**DOUALA, date: "1905-06-15") # pre-1912 town LMT -> deferred
+    note = TzHistory.note(**DOUALA, date: "1915-06-15")
+    assert_match(/International Atlas/i, note)
+    assert_match(/Lagos|WAT/i, note)
+  end
+
+  def test_angola_resolves_luanda_mt_then_wat
+    tz = TzHistory.for(**LUANDA, date: "1900-06-15")
+    assert_equal "Shanks/AO_1", tz&.identifier
+    assert_equal(3124, tz.period_for_local(Time.utc(1900, 6, 15, 12)).observed_utc_offset,
+                 "Angola should be Luanda Mean Time (+0:52:04) in 1900, not the Lagos link")
+    tz2 = TzHistory.for(**LUANDA, date: "1915-06-15")
+    assert_equal(3600, tz2.period_for_local(Time.utc(1915, 6, 15, 12)).observed_utc_offset,
+                 "Angola should be WAT (+1:00) from 26 May 1911")
+    assert_nil TzHistory.for(**LUANDA, date: "1925-06-15") # after 1 Sep 1919 -> IANA (WAT)
+    assert_nil TzHistory.for(**LUANDA, date: "1880-06-15") # pre-1892 town LMT -> deferred
+  end
+
   # Eastern Caribbean: every island is default-Linked to America/Puerto_Rico, which observed
   # -3:00 Atlantic War Time 1942-1945 -- but none of these islands followed it, so a wartime
   # birth here is a full hour off under a plain IANA lookup. The overrides pin AST (-4:00).

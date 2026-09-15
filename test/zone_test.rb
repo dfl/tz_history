@@ -300,6 +300,44 @@ class ZoneTest < Minitest::Test
     assert_equal(3600, offset_of(shanks, "1935-06-15")) # WAT (+1:00) from 26 Feb 1934
   end
 
+  # --- Central-Africa whole-hour cluster (all default-Linked to Africa/Lagos) ----------
+
+  # Cameroon / CAR / Congo-Brazzaville / Gabon: town LMT until 1/Jan/1912, then WAT
+  # (+1:00) forever. IANA links each to Africa/Lagos, which reached WAT only 1 Sep 1919,
+  # so the default is 30-47 min slow across 1912-1919. Each == its backzone twin 960/960.
+  def test_cm1_cameroon
+    shanks = TzHistory::Zone.tzinfo("CM_1")
+    assert_equal(2328, offset_of(shanks, "1900-06-15")) # Douala LMT +0:38:48 (pre-1912)
+    assert_equal(3600, offset_of(shanks, "1915-06-15")) # WAT +1:00 (default Lagos still +0:30)
+  end
+
+  def test_cf1_central_african_republic
+    shanks = TzHistory::Zone.tzinfo("CF_1")
+    assert_equal(4460, offset_of(shanks, "1900-06-15")) # Bangui LMT +1:14:20 (pre-1912)
+    assert_equal(3600, offset_of(shanks, "1915-06-15")) # WAT +1:00
+  end
+
+  def test_cg1_congo_brazzaville
+    shanks = TzHistory::Zone.tzinfo("CG_1")
+    assert_equal(3668, offset_of(shanks, "1900-06-15")) # Brazzaville LMT +1:01:08 (pre-1912)
+    assert_equal(3600, offset_of(shanks, "1915-06-15")) # WAT +1:00
+  end
+
+  def test_ga1_gabon
+    shanks = TzHistory::Zone.tzinfo("GA_1")
+    assert_equal(2268, offset_of(shanks, "1900-06-15")) # Libreville LMT +0:37:48 (pre-1912)
+    assert_equal(3600, offset_of(shanks, "1915-06-15")) # WAT +1:00
+  end
+
+  # Angola AO #1 -- the early standardizer: Luanda Mean Time (+0:52:04) from 1892, then
+  # WAT (+1:00) from 26 May 1911. Default Africa/Luanda links to Lagos (LMT/GMT/+0:30 <1919).
+  # AO_1 == backzone Africa/Luanda 953/960 (the 7 misses are the Jun-Dec 1911 sub-hour sliver).
+  def test_ao1_angola
+    shanks = TzHistory::Zone.tzinfo("AO_1")
+    assert_equal(3124, offset_of(shanks, "1900-06-15")) # Luanda MT +0:52:04
+    assert_equal(3600, offset_of(shanks, "1915-06-15")) # WAT +1:00 from 26 May 1911
+  end
+
   # --- Eastern Caribbean cluster (all default-Linked to America/Puerto_Rico) -----------
 
   # The Leeward/Windward islands + Trinidad + both Virgin Islands: LMT -> AST (-4:00) at

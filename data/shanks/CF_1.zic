@@ -1,0 +1,7 @@
+# Shanks International Atlas TIME TABLE, C.A.R. (whole country): LMT then WAT (+1:00) from 1912-01-01; vs default link to Lagos (WAT only from 1919).
+# Atlas printed p.77 (PDF p.101), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Africa/Bangui (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/CF_1 1:14:20  -    LMT  1912 Jan  1  0:00
+                 1:00     -    WAT

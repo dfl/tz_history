@@ -1,0 +1,8 @@
+# Shanks International Atlas TIME TABLE, Angola (whole country): LMT then +0:52 from 1892-01-01, then WAT (+1:00) from 1911-05-26; vs default link to Lagos (WAT only from 1919).
+# Atlas printed p.3 (PDF p.27), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Africa/Luanda (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/AO_1 0:52:56  -    LMT  1892 Jan  1  0:00
+                 0:52:04  -    +0052 1911 May 26  0:00
+                 1:00     -    WAT

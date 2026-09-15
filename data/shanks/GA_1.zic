@@ -1,0 +1,7 @@
+# Shanks International Atlas TIME TABLE, Gabon (whole country): LMT then WAT (+1:00) from 1912-01-01; vs default link to Lagos (WAT only from 1919).
+# Atlas printed p.165 (PDF p.189), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Africa/Libreville (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/GA_1 0:37:48  -    LMT  1912 Jan  1  0:00
+                 1:00     -    WAT
