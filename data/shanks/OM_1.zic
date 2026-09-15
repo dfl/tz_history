@@ -1,0 +1,7 @@
+# Shanks International Atlas TIME TABLE, Oman (whole country) -- Masqat Mean Time (+3:54:24) until 1920, then +4:00; vs default link to Dubai (+3:41:12 until 1920, then +4:00).
+# Atlas printed p.287 (PDF p.311), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Asia/Muscat (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/OM_1 3:54:24  -    LMT  1920 Jan  1 00:00
+                 4:00     -    +04

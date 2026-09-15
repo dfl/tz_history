@@ -1,0 +1,18 @@
+# IANA backzone (archival), Bahrain (whole country) -- Al-Manamah Mean Time (+3:22:20)
+# until 1941-07-20, then +3:30, then +4:00 (1944-01-01); vs default link to Asia/Qatar
+# (+3:26:08 LMT -> +4:00 already at 1920), which is up to ~37 min fast across 1920-1944.
+#
+# NOT Shanks-sourced: Shanks's International Atlas prints Bahrain as LMT -> +4:00 at
+# 1/Jan/1920 (Al-Manamah 50E35 = -3:22:20). That 1920 jump is CONTRADICTED by IANA's
+# archival record -- British Library India Office Records IOR/R/15/2/1564 (Qatar Digital
+# Library), which finds "there was no real standard in Bahrain before 1941-07-20": the
+# government adopted +0330 on 1941-07-20 (political agent R.G. Alban), and BOAC then had
+# clocks moved to +04 on 1944-01-01. So we DEFER Shanks and reproduce IANA's Asia/Bahrain
+# to correct the default Qatar link (the Sierra Leone / Ghana / Indochina discipline:
+# sourced-primary beats Shanks -- here the sourced primary is IANA itself). Shanks's LMT
+# value (+3:22:20, Al-Manamah) is right and matches backzone; only its 1920 date is wrong.
+#
+# Rebuild the compiled TZif with:  rake shanks:build.  Cross-check: IANA:Asia/Bahrain.
+Zone Shanks/BH_1 3:22:20  -    LMT    1941 Jul 20  0:00
+                 3:30     -    +0330  1944 Jan  1  0:00
+                 4:00     -    +04

@@ -464,4 +464,25 @@ class ZoneTest < Minitest::Test
     assert_equal(11516, offset_of(shanks, "1940-06-15")) # +3:11:56 (default Riyadh = +3:06:52)
     assert_equal(10800, offset_of(shanks, "1960-06-15")) # +3:00 from 1950
   end
+
+  # Oman OM #1 -- Masqat Mean Time (+3:54:24) until 1920, then +4:00. Default links Oman ->
+  # Asia/Dubai (LMT +3:41:12 until 1920), so the default is ~13 min slow across the pre-1920
+  # LMT era. OM_1 == backzone Asia/Muscat 960/960 mid-months 1890-1969.
+  def test_om1_oman
+    shanks = TzHistory::Zone.tzinfo("OM_1")
+    assert_equal(14064, offset_of(shanks, "1910-06-15")) # +3:54:24 (default Dubai = +3:41:12)
+    assert_equal(14400, offset_of(shanks, "1925-06-15")) # +4:00 from 1920
+  end
+
+  # Bahrain BH #1 -- IANA-backzone (archival, NOT Shanks): Al-Manamah MT (+3:22:20) until
+  # 1941-07-20, then +3:30, then +4:00 (1944-01-01). Default links Bahrain -> Asia/Qatar,
+  # which jumps to +4:00 already at 1920, so the default is up to ~37 min fast across
+  # 1920-1944. Shanks's own 1920->+4:00 is deferred (British Library IOR/R/15/2/1564
+  # contradicts it). BH_1 == backzone Asia/Bahrain 960/960 mid-months 1890-1969.
+  def test_bh1_bahrain
+    shanks = TzHistory::Zone.tzinfo("BH_1")
+    assert_equal(12140, offset_of(shanks, "1930-06-15")) # +3:22:20 LMT (default Qatar = +4:00, 37 min fast)
+    assert_equal(12600, offset_of(shanks, "1942-06-15")) # +3:30 from 1941-07-20
+    assert_equal(14400, offset_of(shanks, "1960-06-15")) # +4:00 from 1944
+  end
 end

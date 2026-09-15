@@ -309,15 +309,23 @@ dominant zone; grouped):
   SUB-HOUR 15–30 min gaps): Uganda, Ethiopia, Eritrea, Somalia, Djibouti, Madagascar, Comoros,
   Réunion, Seychelles. Tanzania ✅ (TZ_1, done earlier). Kenya = Nairobi = the anchor (no-op).
 - **Asia/Pacific**: Brunei ✅ (BN_1, +7:30/+8 vs Kuching link), Kuwait ✅ (KW_1, sub-hour
-  Al-Kuwayt MT +3:11:56 vs Riyadh link). Deferred: **Laos ⏳ / Cambodia (Kampuchea) ⏳** — both
-  Shanks tables invent a +8:00 (120E00) peacetime span 1/May/1912–1/May/1931 that IANA's
-  authoritative primary-sourced Indochina history (Trần Tiến Bình 2005 + government gazette
-  decrees, in the `asia` file) contradicts (continuous +7 1911–1942), and omit the documented
-  WWII +8/+9 (1942–1945) → sourced-primary-beats-Shanks defer, like Sierra Leone/Ghana. Still
-  open: **Oman** (Muscat +3:54:24 vs Dubai link, sub-hour), **Bahrain** (+3:22:20, backzone has
-  1941/1944 ordinance dates — verify vs Shanks), **Malaysia** (multi-transition +7:xx→+7:30→…,
-  Singapore-link, complex), Micronesia (Pohnpei/Chuuk, Guadalcanal/Port-Moresby links), **Saipan**
-  (Guam link, +9 WWII — but IANA notes Shanks's Saipan +09 is doubted → verify carefully).
+  Al-Kuwayt MT +3:11:56 vs Riyadh link), **Oman ✅** (OM_1, Masqat MT +3:54:24 → +4:00 1920 vs
+  Dubai link ~13 min slow pre-1920; 960/960 vs backzone Asia/Muscat), **Bahrain ✅** (BH_1 —
+  IANA-BACKZONE, not Shanks: Al-Manamah MT +3:22:20 → +3:30 1941-07-20 → +4:00 1944-01-01;
+  fixes the default Qatar link, which is up to ~37 min fast across 1920–1944; 960/960 vs
+  backzone Asia/Bahrain. Shanks's own table (LMT → +4:00 at 1/Jan/1920) is DEFERRED — its
+  1920 jump is contradicted by British Library IOR/R/15/2/1564 / Qatar Digital Library, which
+  finds "no real standard before 1941-07-20"; sourced-primary-beats-Shanks, here the primary
+  being IANA itself). Deferred: **Laos ⏳ / Cambodia (Kampuchea) ⏳** — both Shanks tables
+  invent a +8:00 (120E00) peacetime span 1/May/1912–1/May/1931 that IANA's authoritative
+  primary-sourced Indochina history (Trần Tiến Bình 2005 + government gazette decrees, in the
+  `asia` file) contradicts (continuous +7 1911–1942), and omit the documented WWII +8/+9
+  (1942–1945) → sourced-primary-beats-Shanks defer, like Sierra Leone/Ghana. **Malaysia ⏳**
+  (multi-zone: peninsular backzone Kuala_Lumpur SMT→+7→+7:20 vs Borneo/Kuching; Singapore
+  link; only ~8.6-min max divergence → Phase-2 multi-division, low priority). **Saipan** /
+  **Guam** / **Micronesia** (Chuuk/Pohnpei/Kosrae) = **IANA-sufficient no-ops** — real,
+  well-sourced zones in the `australasia` file (not backzone), where IANA explicitly prefers
+  IATA/Thorsen over Shanks and *doubts* Shanks's WWII +09 dates for Saipan/Guam.
 
 **Skip as noise** (dateline artifacts / uninhabited / alias mislabels): Midway, Wake, Enderbury,
 Kerguelen, Jan Mayen, Johnston, Christmas/Cocos (verify), and any <20m LMT-residue rows that
