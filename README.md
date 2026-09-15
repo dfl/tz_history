@@ -106,8 +106,15 @@ Guinea, Mauritania, Mali, Gambia, Niger, Benin, Equatorial Guinea, Tanzania), an
 **Eastern Caribbean** — twelve territories (Anguilla, Antigua & Barbuda, Dominica,
 Grenada, Guadeloupe, Montserrat, St Kitts & Nevis, St Lucia, St Vincent, Trinidad &
 Tobago, and both Virgin Islands) that IANA links to `America/Puerto_Rico` and so
-mis-clocks by a full hour during 1942–45 Atlantic War Time. Each override is checked
-offset-for-offset against its IANA backzone twin; see `docs/INTL_COVERAGE.md`.
+mis-clocks by a full hour during 1942–45 Atlantic War Time. Two African clusters
+follow: a **Central-African** WAT group (Cameroon, Central African Republic, Congo-
+Brazzaville, Gabon, Angola) that IANA links to `Africa/Lagos` (30–47 min slow before
+Lagos reached WAT in 1919), and an **East-African / Indian-Ocean** group (Ethiopia,
+Eritrea, Somalia, Djibouti, Uganda, Madagascar, Comoros, Mayotte, Réunion, Seychelles)
+that IANA links to `Africa/Nairobi` — or `Asia/Dubai` for the +4 islands — and so
+mis-clocks by a sub-hour amount (Ethiopia's `+2:35:20` Adis Dera Mean Time, Madagascar's
+1954 summer daylight time, and the like). Each override is checked offset-for-offset
+against its IANA backzone twin; see `docs/INTL_COVERAGE.md`.
 
 ## How it works
 

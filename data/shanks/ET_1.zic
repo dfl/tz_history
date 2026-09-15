@@ -1,0 +1,8 @@
+# Shanks International Atlas TIME TABLE, Ethiopia (Addis Ababa, Shanks Time Table #3) -- ADMT (+2:35:20) then EAT (+3:00) from 5 May 1936; vs default link to Nairobi.
+# Atlas printed p.138 (PDF p.162), table #3.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Africa/Addis_Ababa (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/ET_1 2:34:48  -    LMT  1870 Jan  1  0:00
+                 2:35:20  -    ADMT 1936 May  5  0:00
+                 3:00     -    EAT

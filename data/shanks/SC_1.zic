@@ -1,0 +1,7 @@
+# Shanks International Atlas TIME TABLE, Seychelles (Victoria) -- LMT then +4:00 from 1 Jan 1907 (IANA ordinance date; Shanks prints 1 Jun 1906); vs default link to Dubai (+4:00 only from 1920).
+# Atlas printed p.314 (PDF p.338), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Indian/Mahe (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/SC_1 3:41:48  -    LMT  1907 Jan  1  0:00
+                 4:00     -    +04

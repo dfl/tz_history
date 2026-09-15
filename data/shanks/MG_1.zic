@@ -1,0 +1,9 @@
+# Shanks International Atlas TIME TABLE, Madagascar (whole country) -- LMT then EAT (+3:00) from 1 Jul 1911, with a summer DST (+4:00) 27 Feb - 30 May 1954; vs default link to Nairobi.
+# Atlas printed p.257 (PDF p.281), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Indian/Antananarivo (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/MG_1 3:10:04  -    LMT  1911 Jul  1  0:00
+                 3:00     -    EAT  1954 Feb 27 23:00
+                 3:00     1:00 EAST 1954 May 30  0:00
+                 3:00     -    EAT

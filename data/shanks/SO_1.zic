@@ -1,0 +1,9 @@
+# Shanks International Atlas TIME TABLE, Somalia (whole country, Mogadishu) -- EAT (+3:00) from 1 Nov 1893, +2:30 from 1 Jan 1931, then EAT (+3:00) from 1 Jan 1957; vs default link to Nairobi.
+# Atlas printed p.315 (PDF p.339), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Africa/Mogadishu (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/SO_1 3:01:28  -    LMT  1893 Nov  1  0:00
+                 3:00     -    EAT  1931 Jan  1  0:00
+                 2:30     -    +0230 1957 Jan  1  0:00
+                 3:00     -    EAT

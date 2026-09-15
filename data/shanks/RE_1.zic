@@ -1,0 +1,7 @@
+# Shanks International Atlas TIME TABLE, Réunion (Saint-Denis) -- LMT then +4:00 from 1 Jun 1911; vs default link to Dubai (+4:00 only from 1920).
+# Atlas printed p.306 (PDF p.330), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Indian/Reunion (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/RE_1 3:41:52  -    LMT  1911 Jun  1  0:00
+                 4:00     -    +04

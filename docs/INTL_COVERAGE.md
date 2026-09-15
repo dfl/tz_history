@@ -51,6 +51,17 @@ only) · `pending` (not yet worked). **Resolution** — `polygon` (country-wide)
 | Angola | 3 | 27 | 1 | override | polygon | `backzone` Africa/Luanda — **953/960** mid-months 1890–1969 | ✅ done (AO_1); LMT → +0:52 Luanda MT (1892) → WAT (+1:00) 26/May/1911; default links to Lagos; 7 misses = Jun–Dec 1911 sub-hour sliver (Shanks 26/May vs backzone 31/Dec) |
 | Chad | 78 | 102 | 1 | iana-sufficient | — | `Africa/Ndjamena` is a FULL real zone (LMT +1:00:12 → WAT 1912) in the default build | ✅ verified no-op; only pre-1912 town LMT → Phase 2 |
 | Zaire (Congo-Kinshasa) | 404 | 428 | 3 | defer | — | two-zone: TT#1 west +1:00 from 1897; TT#2 SE +1→+2 (25 Apr 1920 = Africa/Lubumbashi); TT#3 NE +1→+2 (14 Jun 1935) — IANA has only 2 zones (Kinshasa +1, Lubumbashi +2) | ⏳ deferred; needs a west/east division split (like NE two-division) |
+| Ethiopia | 138 | 162 | 3 (TT#3 Addis) | override | polygon | `backzone` Africa/Addis_Ababa — **1200/1200** mid-months 1870–1969 | ✅ done (ET_1); ADMT +2:35:20 (38E50) → EAT 5 May 1936; default links to Nairobi (≤30 min off 1928–1942) |
+| Eritrea | 138 | 162 | 1 (TT#1 Asmara) | override | polygon | `backzone` Africa/Asmara — **1200/1200** mid-months 1870–1969 | ✅ done (ER_1); AMT +2:35:32 → ADMT +2:35:20 (1890) → EAT 1936; part of Ethiopia in the 1985 atlas; default links to Nairobi |
+| Somalia (+ Somaliland) | 315 | 339 | 1 | override | polygon | `backzone` Africa/Mogadishu — **1200/1200** mid-months 1870–1969 | ✅ done (SO_1); EAT 1893 → +2:30 (1931) → EAT (1957); SO_1 also covers the separate NE "Somaliland" polygon; default links to Nairobi |
+| Djibouti | 123 | 147 | 1 | override | polygon | `backzone` Africa/Djibouti — **1200/1200** mid-months 1870–1969 | ✅ done (DJ_1); LMT → EAT (+3:00) 1 Jul 1911; default links to Nairobi (≤30 min slow 1911–1942) |
+| Uganda | 395 | 419 | 1 | override | polygon | `backzone` Africa/Kampala — **1200/1200** mid-months 1870–1969 | ✅ done (UG_1); EAT (1928) → +2:30 (1930) → +2:45 (1948) → EAT (1957); default links to Nairobi |
+| Madagascar | 257 | 281 | 1 | override | polygon | `backzone` Indian/Antananarivo — **1200/1200** mid-months 1870–1969 | ✅ done (MG_1); EAT from 1911 + a single summer DST (+4:00) 27 Feb–30 May 1954; default links to Nairobi (no DST) |
+| Comoros | 115 | 139 | 1 | override | polygon | `backzone` Indian/Comoro — **1200/1200** mid-months 1870–1969 | ✅ done (KM_1); LMT (Moroni) → EAT 1 Jul 1911; default links to Nairobi |
+| Mayotte | 115 | 139 | 1 | override | polygon (bbox) | `backzone` Indian/Mayotte — **1200/1200** mid-months 1870–1969 | ✅ done (YT_1); same Comoros-archipelago table (Mamoudzou LMT); geometry carved from France by bbox; default links to Nairobi |
+| Réunion | 306 | 330 | 1 | override | polygon (bbox) | `backzone` Indian/Reunion — **1200/1200** mid-months 1870–1969 | ✅ done (RE_1); +4:00 from 1 Jun 1911; default links to **Dubai** (+4 only from 1920) → ~19 min slow 1911–1920; carved from France by bbox |
+| Seychelles | 314 | 338 | 1 | override | polygon | `backzone` Indian/Mahe — **1200/1200** mid-months 1870–1969 | ✅ done (SC_1); +4:00; shipped IANA ordinance date 1 Jan 1907 (Shanks prints 1 Jun 1906 → deferred); default links to **Dubai** |
+| Kenya | 250 | 274 | — | iana-sufficient | — | `Africa/Nairobi` is a FULL real zone and the cluster's link ANCHOR | ✅ verified no-op |
 
 **Phase-1 sub-hour European mean-time cluster** (worklist order): Iceland ✅ · Ireland
 ❌ no-op · Luxembourg ✅ · Norway ✅ · Sweden ✅ · Denmark ✅. Page map in

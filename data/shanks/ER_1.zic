@@ -1,0 +1,9 @@
+# Shanks International Atlas TIME TABLE, Eritrea (Asmara, Shanks Time Table #1) -- AMT (+2:35:32) then ADMT (+2:35:20) from 1890, then EAT (+3:00) from 5 May 1936; vs default link to Nairobi.
+# Atlas printed p.138 (PDF p.162), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Africa/Asmara (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/ER_1 2:35:32  -    LMT  1870 Jan  1  0:00
+                 2:35:32  -    AMT  1890 Jan  1  0:00
+                 2:35:20  -    ADMT 1936 May  5  0:00
+                 3:00     -    EAT

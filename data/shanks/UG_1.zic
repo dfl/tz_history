@@ -1,0 +1,10 @@
+# Shanks International Atlas TIME TABLE, Uganda (whole country, Kampala) -- EAT (+3:00) from 1 Jul 1928, +2:30 from 1 Jan 1930, +2:45 from 1 Jan 1948, then EAT (+3:00) from 1 Jan 1957; vs default link to Nairobi.
+# Atlas printed p.395 (PDF p.419), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Africa/Kampala (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/UG_1 2:09:40  -    LMT  1928 Jul  1  0:00
+                 3:00     -    EAT  1930 Jan  1  0:00
+                 2:30     -    +0230 1948 Jan  1  0:00
+                 2:45     -    +0245 1957 Jan  1  0:00
+                 3:00     -    EAT

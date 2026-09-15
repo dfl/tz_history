@@ -377,4 +377,72 @@ class ZoneTest < Minitest::Test
     assert_equal(-18000, offset_of(shanks, "1943-06-15")) # still EST -5:00 (default PR = -3:00 AWT)
     assert_equal(-14400, offset_of(shanks, "1960-06-15")) # AST -4:00 from 1 Jan 1951
   end
+
+  # --- East-Africa / Indian-Ocean EAT cluster (SUB-HOUR divergence) --------------------
+
+  # Ethiopia ET #3 (Addis Ababa) -- Adis Dera Mean Time (+2:35:20, IANA "ADMT") until
+  # 5 May 1936, then EAT (+3:00). Default links Addis to Africa/Nairobi (+2:30/+2:45/+3:00),
+  # so it is up to 30 min off across 1928-1942. ET_1 == backzone Africa/Addis_Ababa 1200/1200.
+  def test_et1_ethiopia_addis_admt
+    shanks = TzHistory::Zone.tzinfo("ET_1")
+    assert_equal(9320,  offset_of(shanks, "1900-06-15")) # ADMT +2:35:20 (default Nairobi = +2:30)
+    assert_equal(10800, offset_of(shanks, "1938-06-15")) # EAT +3:00 from 5 May 1936
+  end
+
+  # Eritrea ER #1 (Asmara) -- AMT (+2:35:32) then ADMT (+2:35:20) from 1890, EAT from 1936.
+  # ER_1 == backzone Africa/Asmara 1200/1200 mid-months 1870-1969.
+  def test_er1_eritrea_asmara
+    shanks = TzHistory::Zone.tzinfo("ER_1")
+    assert_equal(9332,  offset_of(shanks, "1885-06-15")) # AMT +2:35:32
+    assert_equal(9320,  offset_of(shanks, "1910-06-15")) # ADMT +2:35:20 from 1890
+    assert_equal(10800, offset_of(shanks, "1940-06-15")) # EAT +3:00 from 1936
+  end
+
+  # Somalia SO #1 (Mogadishu) -- EAT (+3:00) from 1893, +2:30 (1931-1957), then EAT. Default
+  # links to Africa/Nairobi. SO_1 == backzone Africa/Mogadishu 1200/1200 mid-months.
+  def test_so1_somalia_mogadishu
+    shanks = TzHistory::Zone.tzinfo("SO_1")
+    assert_equal(10800, offset_of(shanks, "1920-06-15")) # EAT +3:00 (early, from 1893)
+    assert_equal(9000,  offset_of(shanks, "1940-06-15")) # +2:30 1931-1957 (default Nairobi = +3:00)
+    assert_equal(10800, offset_of(shanks, "1960-06-15")) # EAT +3:00 from 1957
+  end
+
+  # Uganda UG #1 (Kampala) -- EAT (1928), +2:30 (1930), +2:45 (1948), EAT (1957). Default
+  # links to Africa/Nairobi. UG_1 == backzone Africa/Kampala 1200/1200 mid-months.
+  def test_ug1_uganda_kampala
+    shanks = TzHistory::Zone.tzinfo("UG_1")
+    assert_equal(9000, offset_of(shanks, "1940-06-15")) # +2:30 (default Nairobi = +2:45)
+    assert_equal(9900, offset_of(shanks, "1950-06-15")) # +2:45 (default Nairobi = +3:00)
+  end
+
+  # Djibouti DJ #1 -- straight to EAT (+3:00) on 1 Jul 1911; default links to Africa/Nairobi
+  # (+2:30/+2:45 through 1942). DJ_1 == backzone Africa/Djibouti 1200/1200 mid-months.
+  def test_dj1_djibouti
+    shanks = TzHistory::Zone.tzinfo("DJ_1")
+    assert_equal(10800, offset_of(shanks, "1920-06-15")) # EAT +3:00 (default Nairobi = +2:30)
+  end
+
+  # Madagascar MG #1 -- EAT (+3:00) from 1911 with a single summer DST (+4:00) 27 Feb -
+  # 30 May 1954. Default links to Africa/Nairobi (no DST). MG_1 == backzone Indian/Antananarivo.
+  def test_mg1_madagascar_1954_dst
+    shanks = TzHistory::Zone.tzinfo("MG_1")
+    assert_equal(10800, offset_of(shanks, "1930-06-15")) # EAT +3:00
+    assert_equal(14400, offset_of(shanks, "1954-04-15")) # summer DST +4:00 (default Nairobi = +3:00)
+    assert_equal(10800, offset_of(shanks, "1954-08-15")) # back to EAT +3:00
+  end
+
+  # Comoros KM #1 (Moroni) & Mayotte YT #1 (Mamoudzou) -- EAT (+3:00) from 1 Jul 1911; same
+  # archipelago history, distinct capital LMT. Both == their backzone twin 1200/1200.
+  def test_km1_yt1_comoros_mayotte
+    assert_equal(10800, offset_of(TzHistory::Zone.tzinfo("KM_1"), "1930-06-15")) # EAT +3:00
+    assert_equal(10800, offset_of(TzHistory::Zone.tzinfo("YT_1"), "1930-06-15")) # EAT +3:00
+  end
+
+  # Réunion RE #1 & Seychelles SC #1 -- +4:00 from 1911/1907; default links to Asia/Dubai,
+  # which kept LMT (+3:41) until 1920, so the default is ~19 min slow before then. Each ==
+  # its backzone twin (Indian/Reunion, Indian/Mahe) 1200/1200 mid-months.
+  def test_re1_sc1_indian_ocean_plus4
+    assert_equal(14400, offset_of(TzHistory::Zone.tzinfo("RE_1"), "1915-06-15")) # +4:00 (default Dubai = +3:41)
+    assert_equal(14400, offset_of(TzHistory::Zone.tzinfo("SC_1"), "1912-06-15")) # +4:00 (default Dubai = +3:41)
+  end
 end

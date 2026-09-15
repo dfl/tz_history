@@ -1,0 +1,7 @@
+# Shanks International Atlas TIME TABLE, Mayotte (Mamoudzou; listed in the Comoros archipelago table) -- LMT then EAT (+3:00) from 1 Jul 1911; vs default link to Nairobi.
+# Atlas printed p.115 (PDF p.139), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Indian/Mayotte (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/YT_1 3:00:56  -    LMT  1911 Jul  1  0:00
+                 3:00     -    EAT

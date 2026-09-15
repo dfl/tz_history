@@ -1732,4 +1732,49 @@ class TzHistoryTest < Minitest::Test
                  "Antigua should be EST -5:00 in 1943, two hours off Puerto Rico's -3:00 war time")
     assert_nil TzHistory.for(**ST_JOHNS, date: "1960-06-15") # after 1 Jan 1951 -> AST = IANA default
   end
+
+  # --- East-Africa / Indian-Ocean EAT cluster (International Atlas, SUB-HOUR) ----------
+  # All bare Links in IANA's default build (Nairobi, or Dubai for the +4 islands), each
+  # diverging by 5-30 min. Every table is 1200/1200 vs its backzone twin.
+  ADDIS       = { lat: 9.03,   lon: 38.74  }.freeze # Ethiopia
+  ASMARA      = { lat: 15.34,  lon: 38.93  }.freeze # Eritrea
+  MOGADISHU   = { lat: 2.04,   lon: 45.34  }.freeze # Somalia
+  KAMPALA     = { lat: 0.3136, lon: 32.581 }.freeze # Uganda
+  ANTANANARIVO = { lat: -18.88, lon: 47.51 }.freeze # Madagascar
+  SAINT_DENIS = { lat: -20.88, lon: 55.45  }.freeze # Réunion
+  VICTORIA_SC = { lat: -4.62,  lon: 55.45  }.freeze # Seychelles (Mahé)
+
+  def test_ethiopia_resolves_adis_dera_mean_time_then_defers
+    tz = TzHistory.for(**ADDIS, date: "1900-06-15")
+    assert_equal "Shanks/ET_1", tz&.identifier
+    assert_equal(9320, tz.period_for_local(Time.utc(1900, 6, 15, 12)).observed_utc_offset,
+                 "Ethiopia should be ADMT +2:35:20, not Nairobi's +2:30")
+    assert_nil TzHistory.for(**ADDIS, date: "1960-06-15")  # both EAT after 1942 -> IANA default
+    note = TzHistory.note(**ADDIS, date: "1930-06-15")
+    assert_match(/International Atlas/i, note)
+    assert_match(/Nairobi/i, note)
+  end
+
+  def test_east_africa_capitals_resolve
+    assert_equal "Shanks/ER_1", TzHistory.for(**ASMARA,    date: "1910-06-15")&.identifier
+    assert_equal "Shanks/SO_1", TzHistory.for(**MOGADISHU, date: "1940-06-15")&.identifier
+    assert_equal "Shanks/UG_1", TzHistory.for(**KAMPALA,   date: "1950-06-15")&.identifier
+  end
+
+  def test_madagascar_resolves_1954_summer_dst
+    tz = TzHistory.for(**ANTANANARIVO, date: "1954-04-15")
+    assert_equal "Shanks/MG_1", tz&.identifier
+    assert_equal(14400, tz.period_for_local(Time.utc(1954, 4, 15, 12)).observed_utc_offset,
+                 "Madagascar observed a summer DST (+4:00) in 1954; Nairobi default has none")
+  end
+
+  def test_indian_ocean_plus4_islands_vs_dubai_link
+    re = TzHistory.for(**SAINT_DENIS, date: "1915-06-15")
+    assert_equal "Shanks/RE_1", re&.identifier
+    assert_equal(14400, re.period_for_local(Time.utc(1915, 6, 15, 12)).observed_utc_offset,
+                 "Réunion should be +4:00, not Dubai's LMT +3:41 (pre-1920)")
+    sc = TzHistory.for(**VICTORIA_SC, date: "1912-06-15")
+    assert_equal "Shanks/SC_1", sc&.identifier
+    assert_nil TzHistory.for(**SAINT_DENIS, date: "1930-06-15") # both +4:00 after 1920 -> IANA default
+  end
 end
