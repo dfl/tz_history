@@ -1,0 +1,8 @@
+# Shanks International Atlas TIME TABLE, Zaire / DR Congo (eastern division, Lubumbashi) -- WAT (+1:00) 1897-1920 then CAT (+2:00); vs default link to Maputo (CAT already from 1909).
+# Atlas printed p.404 (PDF p.428), table #2.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Africa/Lubumbashi (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/CD_2 1:49:52  -    LMT  1897 Nov  9  0:00
+                 1:00     -    WAT  1920 Apr 25  0:00
+                 2:00     -    CAT

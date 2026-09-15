@@ -1820,4 +1820,33 @@ class TzHistoryTest < Minitest::Test
     assert_match(/International Atlas/i, note)
     assert_match(/Riyadh/i, note)
   end
+
+  # --- Zaire / DR Congo: the first two-zone country, split west/east by province --------
+  # IANA models it as two zones, both bare Links in the default build (Kinshasa -> Lagos,
+  # Lubumbashi -> Maputo). The override splits the country along IANA's own boundary using
+  # the Natural Earth admin_1 provinces; each half is 960/960 vs its backzone twin.
+  KINSHASA   = { lat: -4.32, lon: 15.32 }.freeze  # western DRC (Kinshasa City province)
+  LUBUMBASHI = { lat: -11.66, lon: 27.48 }.freeze # eastern DRC (Katanga province)
+  BUKAVU     = { lat: -2.51, lon: 28.84 }.freeze  # eastern DRC (Sud-Kivu province)
+
+  def test_congo_west_resolves_wat_vs_lagos_link
+    tz = TzHistory.for(**KINSHASA, date: "1910-06-15")
+    assert_equal "Shanks/CD_1", tz&.identifier
+    assert_equal(3600, tz.period_for_local(Time.utc(1910, 6, 15, 12)).observed_utc_offset,
+                 "western DRC should be WAT +1:00, not Lagos's +0:30 link")
+    assert_nil TzHistory.for(**KINSHASA, date: "1925-06-15") # Lagos reached WAT 1919 -> IANA default
+  end
+
+  def test_congo_east_resolves_wat_then_cat_vs_maputo_link
+    tz = TzHistory.for(**LUBUMBASHI, date: "1915-06-15")
+    assert_equal "Shanks/CD_2", tz&.identifier
+    assert_equal(3600, tz.period_for_local(Time.utc(1915, 6, 15, 12)).observed_utc_offset,
+                 "eastern DRC should be WAT +1:00 before 1920, not Maputo's +2:00 link")
+    # Bukavu (Kivu) sits in IANA's eastern zone too (Shanks TT#3's 1935 NE split is deferred).
+    assert_equal "Shanks/CD_2", TzHistory.for(**BUKAVU, date: "1915-06-15")&.identifier
+    assert_nil TzHistory.for(**LUBUMBASHI, date: "1925-06-15") # both +2:00 after 1920-04-25 -> IANA
+    note = TzHistory.note(**LUBUMBASHI, date: "1915-06-15")
+    assert_match(/International Atlas/i, note)
+    assert_match(/Lubumbashi|Maputo/i, note)
+  end
 end

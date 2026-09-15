@@ -50,7 +50,7 @@ only) · `pending` (not yet worked). **Resolution** — `polygon` (country-wide)
 | Gabon | 165 | 189 | 1 | override | polygon | `backzone` Africa/Libreville — **960/960** mid-months 1890–1969 | ✅ done (GA_1); LMT → WAT (+1:00) 1/Jan/1912; default links to Lagos; shares p.189 with Gambia |
 | Angola | 3 | 27 | 1 | override | polygon | `backzone` Africa/Luanda — **953/960** mid-months 1890–1969 | ✅ done (AO_1); LMT → +0:52 Luanda MT (1892) → WAT (+1:00) 26/May/1911; default links to Lagos; 7 misses = Jun–Dec 1911 sub-hour sliver (Shanks 26/May vs backzone 31/Dec) |
 | Chad | 78 | 102 | 1 | iana-sufficient | — | `Africa/Ndjamena` is a FULL real zone (LMT +1:00:12 → WAT 1912) in the default build | ✅ verified no-op; only pre-1912 town LMT → Phase 2 |
-| Zaire (Congo-Kinshasa) | 404 | 428 | 3 | defer | — | two-zone: TT#1 west +1:00 from 1897; TT#2 SE +1→+2 (25 Apr 1920 = Africa/Lubumbashi); TT#3 NE +1→+2 (14 Jun 1935) — IANA has only 2 zones (Kinshasa +1, Lubumbashi +2) | ⏳ deferred; needs a west/east division split (like NE two-division) |
+| Zaire (Congo-Kinshasa) | 404 | 428 | 1 (west) + 2 (east) | override | admin_1 split | `backzone` Africa/Kinshasa **960/960** + Africa/Lubumbashi **960/960** mid-months 1890–1969 | ✅ done (CD_1 west + CD_2 east); the first TWO-ZONE country, split by province. TT#1 west +1:00 from 9 Nov 1897 (default links Kinshasa→Lagos, WAT only from 1919 → 30–60 min slow 1897–1919); TT#2 SE +1→+2 (25 Apr 1920 = Lubumbashi; default links →Maputo, CAT already from 1909 → 1 h fast ~1909–1920). West = Kinshasa/Bas-Congo/Bandundu/Équateur/Kasaï-Occ/Kasaï-Or; East = Orientale/N-Kivu/S-Kivu/Maniema/Katanga. TT#3 NE +1→+2 (14 Jun 1935) = extra granularity beyond IANA's 2 zones → deferred (Phase 2). First use of Natural Earth **admin_1** province split (giants' template). |
 | Ethiopia | 138 | 162 | 3 (TT#3 Addis) | override | polygon | `backzone` Africa/Addis_Ababa — **1200/1200** mid-months 1870–1969 | ✅ done (ET_1); ADMT +2:35:20 (38E50) → EAT 5 May 1936; default links to Nairobi (≤30 min off 1928–1942) |
 | Eritrea | 138 | 162 | 1 (TT#1 Asmara) | override | polygon | `backzone` Africa/Asmara — **1200/1200** mid-months 1870–1969 | ✅ done (ER_1); AMT +2:35:32 → ADMT +2:35:20 (1890) → EAT 1936; part of Ethiopia in the 1985 atlas; default links to Nairobi |
 | Somalia (+ Somaliland) | 315 | 339 | 1 | override | polygon | `backzone` Africa/Mogadishu — **1200/1200** mid-months 1870–1969 | ✅ done (SO_1); EAT 1893 → +2:30 (1931) → EAT (1957); SO_1 also covers the separate NE "Somaliland" polygon; default links to Nairobi |
@@ -325,9 +325,17 @@ dominant zone; grouped):
   invent a +8:00 (120E00) peacetime span 1/May/1912–1/May/1931 that IANA's authoritative
   primary-sourced Indochina history (Trần Tiến Bình 2005 + government gazette decrees, in the
   `asia` file) contradicts (continuous +7 1911–1942), and omit the documented WWII +8/+9
-  (1942–1945) → sourced-primary-beats-Shanks defer, like Sierra Leone/Ghana. **Malaysia ⏳**
-  (multi-zone: peninsular backzone Kuala_Lumpur SMT→+7→+7:20 vs Borneo/Kuching; Singapore
-  link; only ~8.6-min max divergence → Phase-2 multi-division, low priority). **Saipan** /
+  (1942–1945) → sourced-primary-beats-Shanks defer, like Sierra Leone/Ghana. **Malaysia =
+  IANA-sufficient / defer (triaged, nothing ships)** — printed 258 / PDF 282, 3 divisions
+  (1 Malaya = TT#2, 2 Sarawak + 3 Labuan = TT#3). EAST Malaysia (Borneo, div 2/3) →
+  `Asia/Kuching`, a REAL default zone (LMT→+7:30 1926→+8 1933 + North-Borneo +8:20 summers +
+  Japanese +9), which Shanks TT#3 reproduces exactly → no Link gap. PENINSULAR (div 1) →
+  `Asia/Kuala_Lumpur`, a bare Link to Singapore; backzone says it "agrees with Singapore
+  since 1905-06-01", so the ONLY divergence is the pre-1905 Kuala Lumpur town LMT (+6:46:46
+  vs the Singapore link, ~8.6 min = the tsv's 519 s), a deferred pre-standardization town-LMT
+  sliver — AND Shanks's own pre-1905 account (−6:55 from 1880) conflicts with IANA's
+  primary-sourced Mok Ly Yng history (LMT until 1901 → SMT 1905) → defer to IANA. Peninsular
+  pre-1901 LMT → Phase-2 nearest-city. **Saipan** /
   **Guam** / **Micronesia** (Chuuk/Pohnpei/Kosrae) = **IANA-sufficient no-ops** — real,
   well-sourced zones in the `australasia` file (not backzone), where IANA explicitly prefers
   IATA/Thorsen over Shanks and *doubts* Shanks's WWII +09 dates for Saipan/Guam.

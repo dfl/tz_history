@@ -1,0 +1,7 @@
+# Shanks International Atlas TIME TABLE, Zaire / DR Congo (western division, Kinshasa) -- WAT (+1:00) from 1897; vs default link to Lagos (WAT only from 1919).
+# Atlas printed p.404 (PDF p.428), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Africa/Kinshasa (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/CD_1 1:01:12  -    LMT  1897 Nov  9  0:00
+                 1:00     -    WAT

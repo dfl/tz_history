@@ -495,4 +495,23 @@ class ZoneTest < Minitest::Test
     assert_equal(10794, offset_of(shanks, "1930-06-15")) # +2:59:54 (default Riyadh = +3:06:52)
     assert_equal(10800, offset_of(shanks, "1960-06-15")) # +3:00 from 1950
   end
+
+  # --- Zaire / DR Congo: the first two-zone country (west/east province split) ---------
+
+  # Western DRC CD #1 (Kinshasa) -- WAT (+1:00) from 1897-11-09. Default links Kinshasa ->
+  # Africa/Lagos (LMT/GMT/+0:30 until WAT on 1919-09-01). CD_1 == backzone Africa/Kinshasa
+  # 960/960 mid-months 1890-1969.
+  def test_cd1_congo_west
+    shanks = TzHistory::Zone.tzinfo("CD_1")
+    assert_equal(3600, offset_of(shanks, "1910-06-15")) # +1:00 (default Lagos = +0:30, 30 min slow)
+  end
+
+  # Eastern DRC CD #2 (Lubumbashi) -- WAT (+1:00) 1897-1920, then CAT (+2:00) from
+  # 1920-04-25. Default links Lubumbashi -> Africa/Maputo (CAT already from 1909, so a full
+  # hour fast across ~1909-1920). CD_2 == backzone Africa/Lubumbashi 960/960 mid-months.
+  def test_cd2_congo_east
+    shanks = TzHistory::Zone.tzinfo("CD_2")
+    assert_equal(3600, offset_of(shanks, "1915-06-15")) # +1:00 WAT (default Maputo = +2:00, 1 h fast)
+    assert_equal(7200, offset_of(shanks, "1925-06-15")) # +2:00 CAT from 1920-04-25
+  end
 end
