@@ -308,7 +308,16 @@ dominant zone; grouped):
 - **East Africa (EAT cluster)** — still open (all default-Linked to Africa/Nairobi, mostly
   SUB-HOUR 15–30 min gaps): Uganda, Ethiopia, Eritrea, Somalia, Djibouti, Madagascar, Comoros,
   Réunion, Seychelles. Tanzania ✅ (TZ_1, done earlier). Kenya = Nairobi = the anchor (no-op).
-- **Asia/Pacific**: Laos, Cambodia, Brunei, Malaysia, Oman, Kuwait, Bahrain, Micronesia, Saipan.
+- **Asia/Pacific**: Brunei ✅ (BN_1, +7:30/+8 vs Kuching link), Kuwait ✅ (KW_1, sub-hour
+  Al-Kuwayt MT +3:11:56 vs Riyadh link). Deferred: **Laos ⏳ / Cambodia (Kampuchea) ⏳** — both
+  Shanks tables invent a +8:00 (120E00) peacetime span 1/May/1912–1/May/1931 that IANA's
+  authoritative primary-sourced Indochina history (Trần Tiến Bình 2005 + government gazette
+  decrees, in the `asia` file) contradicts (continuous +7 1911–1942), and omit the documented
+  WWII +8/+9 (1942–1945) → sourced-primary-beats-Shanks defer, like Sierra Leone/Ghana. Still
+  open: **Oman** (Muscat +3:54:24 vs Dubai link, sub-hour), **Bahrain** (+3:22:20, backzone has
+  1941/1944 ordinance dates — verify vs Shanks), **Malaysia** (multi-transition +7:xx→+7:30→…,
+  Singapore-link, complex), Micronesia (Pohnpei/Chuuk, Guadalcanal/Port-Moresby links), **Saipan**
+  (Guam link, +9 WWII — but IANA notes Shanks's Saipan +09 is doubted → verify carefully).
 
 **Skip as noise** (dateline artifacts / uninhabited / alias mislabels): Midway, Wake, Enderbury,
 Kerguelen, Jan Mayen, Johnston, Christmas/Cocos (verify), and any <20m LMT-residue rows that

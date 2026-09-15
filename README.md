@@ -113,8 +113,12 @@ Lagos reached WAT in 1919), and an **East-African / Indian-Ocean** group (Ethiop
 Eritrea, Somalia, Djibouti, Uganda, Madagascar, Comoros, Mayotte, Réunion, Seychelles)
 that IANA links to `Africa/Nairobi` — or `Asia/Dubai` for the +4 islands — and so
 mis-clocks by a sub-hour amount (Ethiopia's `+2:35:20` Adis Dera Mean Time, Madagascar's
-1954 summer daylight time, and the like). Each override is checked offset-for-offset
-against its IANA backzone twin; see `docs/INTL_COVERAGE.md`.
+1954 summer daylight time, and the like). An **Asian** pair follows: **Brunei** (`+7:30`
+then `+8:00`, which IANA links to `Asia/Kuching` — off by up to an hour during that zone's
+1935–41 daylight time and the 1942–45 Japanese `+9`) and **Kuwait** (Al-Kuwayt Mean Time
+`+3:11:56` until 1950, which IANA links to `Asia/Riyadh` and so runs a few minutes slow).
+Each override is checked offset-for-offset against its IANA backzone twin; see
+`docs/INTL_COVERAGE.md`.
 
 ## How it works
 

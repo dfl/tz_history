@@ -1777,4 +1777,33 @@ class TzHistoryTest < Minitest::Test
     assert_equal "Shanks/SC_1", sc&.identifier
     assert_nil TzHistory.for(**SAINT_DENIS, date: "1930-06-15") # both +4:00 after 1920 -> IANA default
   end
+
+  # --- Asia single-zone cluster (International Atlas) ----------------------------------
+  # Both bare Links in IANA's default build (Brunei -> Kuching, Kuwait -> Riyadh); each
+  # 960/960 vs its backzone twin. Indochina (Cambodia/Laos) is deferred: Shanks invents a
+  # +8:00 1912-1931 span contradicted by IANA's primary-sourced Indochina history.
+  BANDAR_SERI_BEGAWAN = { lat: 4.933, lon: 114.917 }.freeze # Brunei
+  KUWAIT_CITY         = { lat: 29.333, lon: 47.983 }.freeze # Kuwait
+
+  def test_brunei_resolves_plus8_vs_kuching_link
+    tz = TzHistory.for(**BANDAR_SERI_BEGAWAN, date: "1938-06-15")
+    assert_equal "Shanks/BN_1", tz&.identifier
+    assert_equal(28800, tz.period_for_local(Time.utc(1938, 6, 15, 12)).observed_utc_offset,
+                 "Brunei should be a clean +8:00, not Kuching's +8:20 summer DST (1935-1941)")
+    tz2 = TzHistory.for(**BANDAR_SERI_BEGAWAN, date: "1930-06-15")
+    assert_equal(27000, tz2.period_for_local(Time.utc(1930, 6, 15, 12)).observed_utc_offset) # +7:30
+    assert_nil TzHistory.for(**BANDAR_SERI_BEGAWAN, date: "1925-06-15") # pre-1926 town LMT -> deferred
+    assert_nil TzHistory.for(**BANDAR_SERI_BEGAWAN, date: "1950-06-15") # both +8 after 1945 -> IANA default
+  end
+
+  def test_kuwait_resolves_al_kuwayt_mean_time_then_defers
+    tz = TzHistory.for(**KUWAIT_CITY, date: "1940-06-15")
+    assert_equal "Shanks/KW_1", tz&.identifier
+    assert_equal(11516, tz.period_for_local(Time.utc(1940, 6, 15, 12)).observed_utc_offset,
+                 "Kuwait should be Al-Kuwayt MT +3:11:56, not Riyadh's +3:06:52 link")
+    assert_nil TzHistory.for(**KUWAIT_CITY, date: "1955-06-15") # both +3:00 after 1950 -> IANA default
+    note = TzHistory.note(**KUWAIT_CITY, date: "1940-06-15")
+    assert_match(/International Atlas/i, note)
+    assert_match(/Riyadh/i, note)
+  end
 end

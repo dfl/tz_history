@@ -1,0 +1,8 @@
+# Shanks International Atlas TIME TABLE, Brunei (whole country) -- +7:30 (1926-1933) then +8:00; vs default link to Kuching (+8:20 DST 1935-1941, WWII +9 1942-1945).
+# Atlas printed p.40 (PDF p.64), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Asia/Brunei (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/BN_1 7:39:40  -    LMT  1926 Mar  1 00:00
+                 7:30     -    +0730 1933 Jan  1  0:00
+                 8:00     -    +08

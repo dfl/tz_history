@@ -445,4 +445,23 @@ class ZoneTest < Minitest::Test
     assert_equal(14400, offset_of(TzHistory::Zone.tzinfo("RE_1"), "1915-06-15")) # +4:00 (default Dubai = +3:41)
     assert_equal(14400, offset_of(TzHistory::Zone.tzinfo("SC_1"), "1912-06-15")) # +4:00 (default Dubai = +3:41)
   end
+
+  # --- Asia single-zone cluster (whole-hour + sub-hour) -------------------------------
+
+  # Brunei BN #1 -- +7:30 (1926-1933) then +8:00. Default links Brunei -> Asia/Kuching,
+  # which added North Borneo summer DST (+8:20, 1935-1941) and the WWII +9 (1942-1945).
+  # BN_1 == backzone Asia/Brunei 960/960 mid-months 1890-1969.
+  def test_bn1_brunei
+    shanks = TzHistory::Zone.tzinfo("BN_1")
+    assert_equal(27000, offset_of(shanks, "1930-06-15")) # +7:30
+    assert_equal(28800, offset_of(shanks, "1938-06-15")) # +8:00 (default Kuching = +8:20 summer DST)
+  end
+
+  # Kuwait KW #1 -- Al-Kuwayt Mean Time (+3:11:56) until 1950, then +3:00. Default links
+  # Kuwait -> Asia/Riyadh (LMT +3:06:52 until 1947). KW_1 == backzone Asia/Kuwait 960/960.
+  def test_kw1_kuwait
+    shanks = TzHistory::Zone.tzinfo("KW_1")
+    assert_equal(11516, offset_of(shanks, "1940-06-15")) # +3:11:56 (default Riyadh = +3:06:52)
+    assert_equal(10800, offset_of(shanks, "1960-06-15")) # +3:00 from 1950
+  end
 end
