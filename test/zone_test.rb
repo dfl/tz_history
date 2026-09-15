@@ -485,4 +485,14 @@ class ZoneTest < Minitest::Test
     assert_equal(12600, offset_of(shanks, "1942-06-15")) # +3:30 from 1941-07-20
     assert_equal(14400, offset_of(shanks, "1960-06-15")) # +4:00 from 1944
   end
+
+  # Yemen YE #1 -- Aden Mean Time (+2:59:54) until 1950, then +3:00. Default links Yemen ->
+  # Asia/Riyadh (LMT +3:06:52 until 1947), so the default is ~7 min fast across the pre-1947
+  # LMT era. One Shanks table covers the whole country (YAR + Aden/Hadhramaut/Socotra).
+  # YE_1 == backzone Asia/Aden 960/960 mid-months 1890-1969.
+  def test_ye1_yemen
+    shanks = TzHistory::Zone.tzinfo("YE_1")
+    assert_equal(10794, offset_of(shanks, "1930-06-15")) # +2:59:54 (default Riyadh = +3:06:52)
+    assert_equal(10800, offset_of(shanks, "1960-06-15")) # +3:00 from 1950
+  end
 end

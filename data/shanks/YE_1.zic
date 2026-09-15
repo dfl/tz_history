@@ -1,0 +1,7 @@
+# Shanks International Atlas TIME TABLE, Yemen (whole country) -- Aden Mean Time (+2:59:54) until 1950, then +3:00; vs default link to Riyadh (+3:06:52 until 1947, then +3:00).
+# Atlas printed p.402 (PDF p.426), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Asia/Aden (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/YE_1 2:59:54  -    LMT  1950 Jan  1 00:00
+                 3:00     -    +03

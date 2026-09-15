@@ -1784,6 +1784,7 @@ class TzHistoryTest < Minitest::Test
   # +8:00 1912-1931 span contradicted by IANA's primary-sourced Indochina history.
   BANDAR_SERI_BEGAWAN = { lat: 4.933, lon: 114.917 }.freeze # Brunei
   KUWAIT_CITY         = { lat: 29.333, lon: 47.983 }.freeze # Kuwait
+  ADEN                = { lat: 12.78, lon: 45.04 }.freeze   # Yemen (Aden)
 
   def test_brunei_resolves_plus8_vs_kuching_link
     tz = TzHistory.for(**BANDAR_SERI_BEGAWAN, date: "1938-06-15")
@@ -1803,6 +1804,19 @@ class TzHistoryTest < Minitest::Test
                  "Kuwait should be Al-Kuwayt MT +3:11:56, not Riyadh's +3:06:52 link")
     assert_nil TzHistory.for(**KUWAIT_CITY, date: "1955-06-15") # both +3:00 after 1950 -> IANA default
     note = TzHistory.note(**KUWAIT_CITY, date: "1940-06-15")
+    assert_match(/International Atlas/i, note)
+    assert_match(/Riyadh/i, note)
+  end
+
+  # Yemen -- one Shanks table (YE_1) covers the whole country incl Aden/Hadhramaut/Socotra,
+  # matching IANA's single Asia/Aden zone (a bare Link to Riyadh in the default build).
+  def test_yemen_resolves_aden_mean_time_then_defers
+    tz = TzHistory.for(**ADEN, date: "1930-06-15")
+    assert_equal "Shanks/YE_1", tz&.identifier
+    assert_equal(10794, tz.period_for_local(Time.utc(1930, 6, 15, 12)).observed_utc_offset,
+                 "Yemen should be Aden MT +2:59:54, not Riyadh's +3:06:52 link")
+    assert_nil TzHistory.for(**ADEN, date: "1955-06-15") # both +3:00 after 1950 -> IANA default
+    note = TzHistory.note(**ADEN, date: "1930-06-15")
     assert_match(/International Atlas/i, note)
     assert_match(/Riyadh/i, note)
   end

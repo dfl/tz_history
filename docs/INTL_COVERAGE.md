@@ -316,7 +316,12 @@ dominant zone; grouped):
   backzone Asia/Bahrain. Shanks's own table (LMT → +4:00 at 1/Jan/1920) is DEFERRED — its
   1920 jump is contradicted by British Library IOR/R/15/2/1564 / Qatar Digital Library, which
   finds "no real standard before 1941-07-20"; sourced-primary-beats-Shanks, here the primary
-  being IANA itself). Deferred: **Laos ⏳ / Cambodia (Kampuchea) ⏳** — both Shanks tables
+  being IANA itself). **Yemen ✅** (YE_1 — Aden Mean Time +2:59:54 → +3:00 1/Jan/1950 vs the
+  default Riyadh link +3:06:52 until 1947, ~7 min fast across the pre-1947 LMT era; one Shanks
+  table covers the whole country — YAR + Aden/Hadhramaut/Socotra cities in a single listing,
+  matching IANA's single Asia/Aden zone; Shanks's 'Adan 45E12 = +3:00:48 shipped as IANA's
+  +2:59:54 sub-arcminute finer value; 960/960 vs backzone Asia/Aden; the Kuwait inverted-LMT
+  pattern — divergence lives entirely in the LMT era, window [nil, 1950)). Deferred: **Laos ⏳ / Cambodia (Kampuchea) ⏳** — both Shanks tables
   invent a +8:00 (120E00) peacetime span 1/May/1912–1/May/1931 that IANA's authoritative
   primary-sourced Indochina history (Trần Tiến Bình 2005 + government gazette decrees, in the
   `asia` file) contradicts (continuous +7 1911–1942), and omit the documented WWII +8/+9
