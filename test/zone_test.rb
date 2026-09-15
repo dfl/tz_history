@@ -299,4 +299,44 @@ class ZoneTest < Minitest::Test
     assert_equal(0,    offset_of(shanks, "1934-01-15")) # still GMT early 1934
     assert_equal(3600, offset_of(shanks, "1935-06-15")) # WAT (+1:00) from 26 Feb 1934
   end
+
+  # --- Eastern Caribbean cluster (all default-Linked to America/Puerto_Rico) -----------
+
+  # The Leeward/Windward islands + Trinidad + both Virgin Islands: LMT -> AST (-4:00) at
+  # standardization (1911-1912), then flat -4:00 with NO daylight or war time. The DEFAULT
+  # IANA build LINKS every one to America/Puerto_Rico, which observed -3:00 Atlantic War
+  # Time 1942-1945 -- so the default is a FULL HOUR fast in the war years. Each table ==
+  # its backzone twin 960/960 mid-months 1890-1969. The distinguishing assertion is the
+  # war-year offset (-4:00, not the default's -3:00), plus the capital LMT before window.
+  def test_caribbean_ast_cluster
+    {
+      "AI_1" => -15136, # Anguilla, The Valley -4:12:16
+      "DM_1" => -14736, # Dominica, Roseau -4:05:36
+      "GD_1" => -14820, # Grenada, St George's -4:07:00
+      "GP_1" => -14768, # Guadeloupe, Pointe-a-Pitre -4:06:08
+      "MS_1" => -14932, # Montserrat, Plymouth -4:08:52
+      "KN_1" => -15052, # St Kitts, Basseterre -4:10:52
+      "LC_1" => -14640, # St Lucia, Castries -4:04:00
+      "VC_1" => -14696, # St Vincent, Kingstown -4:04:56
+      "TT_1" => -14764, # Trinidad, Port of Spain -4:06:04
+      "VI_1" => -15584, # US Virgin, Charlotte Amalie -4:19:44
+      "VG_1" => -15508, # British Virgin, Road Town -4:18:28
+    }.each do |table, lmt|
+      shanks = TzHistory::Zone.tzinfo(table)
+      assert_equal(-14400, offset_of(shanks, "1943-06-15"), "#{table} war-year AST -4:00 (default PR = -3:00)")
+      assert_equal(-14400, offset_of(shanks, "1925-06-15"), "#{table} AST -4:00")
+      assert_equal(lmt,    offset_of(shanks, "1905-06-15"), "#{table} pre-standardization capital LMT")
+    end
+  end
+
+  # Antigua & Barbuda AG #1 -- the cluster outlier: EST (-5:00) 1912-1951, then AST (-4:00).
+  # Default America/Antigua links to Puerto Rico (AST, -3:00 war time), so it is a full hour
+  # fast across the whole 1912-1951 EST era and TWO hours off in the war years. AG_1 ==
+  # backzone America/Antigua 960/960 mid-months.
+  def test_ag1_antigua_est_era
+    shanks = TzHistory::Zone.tzinfo("AG_1")
+    assert_equal(-18000, offset_of(shanks, "1925-06-15")) # EST -5:00 (default PR = -4:00)
+    assert_equal(-18000, offset_of(shanks, "1943-06-15")) # still EST -5:00 (default PR = -3:00 AWT)
+    assert_equal(-14400, offset_of(shanks, "1960-06-15")) # AST -4:00 from 1 Jan 1951
+  end
 end

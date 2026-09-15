@@ -1,0 +1,7 @@
+# Shanks International Atlas TIME TABLE, St Vincent -- LMT then AST (-4:00) from 1912-01-01; vs default link to Puerto Rico (AST, war time -3:00 1942-45).
+# Atlas printed p.309 (PDF p.333), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:America/St_Vincent (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/VC_1 -4:04:56 -    LMT  1912 Jan  1  0:00
+                 -4:00    -    AST

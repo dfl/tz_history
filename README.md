@@ -100,6 +100,15 @@ IANA's opt-in `backzone`. The first country shipped is the **Netherlands**
 offset-for-offset against IANA's backzone Amsterdam. Country polygons come from the
 public-domain Natural Earth dataset (`data/intl_historical_zones.geojson`).
 
+Coverage has since grown to a European sub-hour cluster (Iceland, Luxembourg, Norway,
+Sweden, Denmark), the Netherlands Antilles, a West-African whole-hour cluster (Senegal,
+Guinea, Mauritania, Mali, Gambia, Niger, Benin, Equatorial Guinea, Tanzania), and the
+**Eastern Caribbean** — twelve territories (Anguilla, Antigua & Barbuda, Dominica,
+Grenada, Guadeloupe, Montserrat, St Kitts & Nevis, St Lucia, St Vincent, Trinidad &
+Tobago, and both Virgin Islands) that IANA links to `America/Puerto_Rico` and so
+mis-clocks by a full hour during 1942–45 Atlantic War Time. Each override is checked
+offset-for-offset against its IANA backzone twin; see `docs/INTL_COVERAGE.md`.
+
 ## How it works
 
 Two kinds of correction share one point-in-polygon lookup over a FeatureCollection

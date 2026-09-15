@@ -1,0 +1,7 @@
+# Shanks International Atlas TIME TABLE, Dominica -- LMT then AST (-4:00) from 1911-07-01; vs default link to Puerto Rico (AST, war time -3:00 1942-45).
+# Atlas printed p.123 (PDF p.147), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:America/Dominica (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/DM_1 -4:05:36 -    LMT  1911 Jul  1  0:01
+                 -4:00    -    AST

@@ -1,0 +1,7 @@
+# Shanks International Atlas TIME TABLE, Grenada -- LMT then AST (-4:00) from 1911-07-01; vs default link to Puerto Rico (AST, war time -3:00 1942-45).
+# Atlas printed p.189 (PDF p.213), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:America/Grenada (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/GD_1 -4:07:00 -    LMT  1911 Jul  1  0:00
+                 -4:00    -    AST

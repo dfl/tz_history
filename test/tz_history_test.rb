@@ -1662,4 +1662,43 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(**PORTO_NOVO, date: "1905-06-15") # pre-1912 town LMT -> deferred
     assert_nil TzHistory.for(lat: 6.4541, lon: 3.3947, date: "1925-06-15") # Lagos, NG -> not in BJ polygon
   end
+
+  # Eastern Caribbean: every island is default-Linked to America/Puerto_Rico, which observed
+  # -3:00 Atlantic War Time 1942-1945 -- but none of these islands followed it, so a wartime
+  # birth here is a full hour off under a plain IANA lookup. The overrides pin AST (-4:00).
+  ROSEAU        = { lat: 15.30, lon: -61.40 }.freeze  # Dominica
+  PORT_OF_SPAIN = { lat: 10.65, lon: -61.52 }.freeze  # Trinidad
+  ST_JOHNS      = { lat: 17.12, lon: -61.85 }.freeze  # Antigua
+  POINTE_A_PITRE = { lat: 16.24, lon: -61.53 }.freeze # Guadeloupe
+
+  def test_eastern_caribbean_resolves_ast_through_war_years
+    # Dominica in the 1943 war year: AST -4:00 via Shanks, not the Puerto Rico link's -3:00.
+    tz = TzHistory.for(**ROSEAU, date: "1943-06-15")
+    assert_equal "Shanks/DM_1", tz&.identifier
+    assert_equal(-14400, tz.period_for_local(Time.utc(1943, 6, 15, 12)).observed_utc_offset,
+                 "Dominica should be AST -4:00 in 1943, not Puerto Rico's -3:00 war time")
+    # Trinidad likewise.
+    tt = TzHistory.for(**PORT_OF_SPAIN, date: "1943-06-15")
+    assert_equal "Shanks/TT_1", tt&.identifier
+    assert_equal(-14400, tt.period_for_local(Time.utc(1943, 6, 15, 12)).observed_utc_offset)
+    # Guadeloupe geometry is carved out of the France polygon by bbox.
+    gp = TzHistory.for(**POINTE_A_PITRE, date: "1943-06-15")
+    assert_equal "Shanks/GP_1", gp&.identifier
+    assert_equal(-14400, gp.period_for_local(Time.utc(1943, 6, 15, 12)).observed_utc_offset)
+    # Deferrals: pre-standardization LMT and the post-1970 modern era both hand off to IANA.
+    assert_nil TzHistory.for(**ROSEAU, date: "1905-06-15")
+    assert_nil TzHistory.for(**ROSEAU, date: "1980-06-15")
+    # Martinique (also inside the France polygon, lat < 15) is NOT in the Guadeloupe bbox.
+    assert_nil TzHistory.for(lat: 14.60, lon: -61.07, date: "1943-06-15")
+  end
+
+  # Antigua & Barbuda is the outlier: EST -5:00 (1912-1951), so it is a full hour SLOW vs the
+  # Puerto Rico link the whole time and TWO hours off in the war years, then AST -4:00 from 1951.
+  def test_antigua_resolves_eastern_standard_then_defers
+    tz = TzHistory.for(**ST_JOHNS, date: "1943-06-15")
+    assert_equal "Shanks/AG_1", tz&.identifier
+    assert_equal(-18000, tz.period_for_local(Time.utc(1943, 6, 15, 12)).observed_utc_offset,
+                 "Antigua should be EST -5:00 in 1943, two hours off Puerto Rico's -3:00 war time")
+    assert_nil TzHistory.for(**ST_JOHNS, date: "1960-06-15") # after 1 Jan 1951 -> AST = IANA default
+  end
 end

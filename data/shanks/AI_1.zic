@@ -1,0 +1,7 @@
+# Shanks International Atlas TIME TABLE, Anguilla -- LMT then AST (-4:00) from 1912-03-02; vs default link to Puerto Rico (AST, war time -3:00 1942-45).
+# Atlas printed p.5 (PDF p.29), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:America/Anguilla (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/AI_1 -4:12:16 -    LMT  1912 Mar  2  0:00
+                 -4:00    -    AST

@@ -32,6 +32,18 @@ only) · `pending` (not yet worked). **Resolution** — `polygon` (country-wide)
 | Côte d'Ivoire | 238 | 262 | 1 | iana-sufficient | — | `Africa/Abidjan` is a FULL real zone in the default build (LMT −0:16:08 → GMT 1912), and is itself the GMT anchor the whole cluster links to | ✅ verified no-op |
 | Togo | 388 | 412 | 1 | iana-sufficient | — | `backzone` Africa/Lome (LMT +0:04:52 → GMT **1893**) — no whole-hour gap; only ≤21 min pre-1912 LMT residue vs the Abidjan link | ✅ verified no-op; pre-1912 sub-hour LMT → Phase 2 |
 | Burkina Faso (Upper Volta) | — | — | 1 | iana-sufficient | — | `backzone` Africa/Ouagadougou (LMT −0:06:04 → GMT 1912) = the default from 1912; only 10 min pre-1912 LMT residue | ✅ verified no-op; pre-1912 sub-hour LMT → Phase 2 |
+| Anguilla | 5 | 29 | 1 | override | polygon | `backzone` America/Anguilla — **960/960** mid-months 1890–1969 | ✅ done (AI_1); LMT −4:12:16 → AST −4:00 (2 Mar 1912) |
+| Antigua & Barbuda | 5 | 29 | 1 | override | polygon | `backzone` America/Antigua — **960/960** mid-months 1890–1969 | ✅ done (AG_1); **EST −5:00 (1912) → AST −4:00 (1 Jan 1951)** — the cluster outlier |
+| Dominica | 123 | 147 | 1 | override | polygon | `backzone` America/Dominica — **960/960** mid-months 1890–1969 | ✅ done (DM_1); LMT −4:05:36 (Roseau) → AST −4:00 (1 Jul 1911) |
+| Grenada | 189 | 213 | 1 | override | polygon | `backzone` America/Grenada — **960/960** mid-months 1890–1969 | ✅ done (GD_1); LMT −4:07:00 (St George's) → AST −4:00 (1 Jul 1911) |
+| Guadeloupe | 189 | 213 | 1 | override | polygon (bbox) | `backzone` America/Guadeloupe — **960/960** mid-months 1890–1969 | ✅ done (GP_1); LMT −4:06:08 (Pointe-à-Pitre) → AST −4:00 (8 Jun 1911); geometry carved from France by bbox; St-Barth/St-Martin → Phase 2 |
+| Montserrat | 273 | 297 | 1 | override | polygon | `backzone` America/Montserrat — **960/960** mid-months 1890–1969 | ✅ done (MS_1); LMT −4:08:52 (Plymouth) → AST −4:00 (1 Jul 1911) |
+| St Kitts & Nevis | 308 | 332 | 1 | override | polygon | `backzone` America/St_Kitts — **960/960** mid-months 1890–1969 | ✅ done (KN_1); LMT −4:10:52 (Basseterre) → AST −4:00 (2 Mar 1912) |
+| St Lucia | 308 | 332 | 1 | override | polygon | `backzone` America/St_Lucia — **960/960** mid-months 1890–1969 | ✅ done (LC_1); Castries MT −4:04:00 → AST −4:00 (1 Jan 1912); the 1890 step is the same offset |
+| St Vincent | 309 | 333 | 1 | override | polygon | `backzone` America/St_Vincent — **960/960** mid-months 1890–1969 | ✅ done (VC_1); Kingstown MT −4:04:56 → AST −4:00 (1 Jan 1912) |
+| Trinidad & Tobago | 389 | 413 | 1 | override | polygon | `backzone` America/Port_of_Spain — **960/960** mid-months 1890–1969 | ✅ done (TT_1); LMT −4:06:04 (Port of Spain) → AST −4:00 (2 Mar 1912); both divisions share the table |
+| Virgin Islands (US) | 400 | 424 | 1 | override | polygon | `backzone` America/St_Thomas — **960/960** mid-months 1890–1969 | ✅ done (VI_1); LMT −4:19:44 (Charlotte Amalie / St Thomas) → AST −4:00 (1 Jul 1911) |
+| Virgin Islands (British) | 400 | 424 | 1 | override | polygon | `backzone` America/Tortola — **960/960** mid-months 1890–1969 | ✅ done (VG_1); LMT −4:18:28 (Road Town / Tortola) → AST −4:00 (1 Jul 1911) |
 
 **Phase-1 sub-hour European mean-time cluster** (worklist order): Iceland ✅ · Ireland
 ❌ no-op · Luxembourg ✅ · Norway ✅ · Sweden ✅ · Denmark ✅. Page map in
@@ -157,6 +169,49 @@ the **spurious July 1941 & 1942 fall-backs**. The two remaining mid-month cross-
 misses are Nov 1918/1919, where Shanks records the summer-end one day before the Almanak
 (a Shanks-primary date, not an offset error).
 
+**Eastern Caribbean cluster** (twelve territories, one shared story — the Netherlands
+Antilles pattern scaled up). Every Leeward/Windward island, Trinidad & Tobago, and both
+Virgin Islands kept a sub-hour capital LMT until standardization (1911–1912), then adopted
+**Atlantic Standard Time (AST, meridian 60W00 = −4:00)** with **no daylight or war time
+ever** after. IANA's DEFAULT build **Links every one to `America/Puerto_Rico`** (`backward`),
+which ran AST −4:00 from 1899 but then observed **−3:00 Atlantic War Time from 1942-05-03 to
+1946** (US war rules) — so the default is a **full hour fast across 1942–1945** for the whole
+cluster. Each island's Shanks Time Table matches its IANA `backzone` twin **960/960** mid-months
+1890–1969 (the tables carry the capital LMT, so the match holds across the LMT era too); the
+polygons are gated from each island's Shanks standardization date to 1970, and the
+sub-hour pre-standardization town LMT is deferred (Phase-2 nearest-city). Notes per island:
+
+- **Antigua & Barbuda (AG_1)** is the outlier: LMT → **EST −5:00 (75W00) 2 Mar 1912** →
+  **AST −4:00 on 1 Jan 1951**. So it is a full hour *slow* vs the Puerto Rico link across the
+  whole 1912–1951 EST era, and **two** hours off in the war years. Window ends 1951 (rejoins AST
+  = default). Antigua & Anguilla share printed p.5 / PDF 29 (below Angola/Andorra).
+- **St Lucia (LC_1)** and **St Vincent (VC_1)** print an extra 1890 "standard" step on a
+  near-island meridian (61W00 / 61W14), but it is the **same offset** as their capital LMT
+  (−4:04:00 Castries / −4:04:56 Kingstown) — IANA models it as CMT/KMT; no divergence. Both
+  reach −4:00 on 1 Jan 1912. St Kitts & St Lucia share PDF 332 (below Rwanda); St Vincent is on
+  PDF 333 (with Saint-Pierre & Miquelon).
+- **Guadeloupe (GP_1)** has **no standalone Natural Earth admin_0 feature** — it is bundled
+  into the "France" MultiPolygon (next to mainland France, Martinique and Réunion). `build_intl.rb`
+  now supports a `bbox:` on a registry row that carves the department out of the parent geometry
+  (Guadeloupe box `[-62.0, 15.7, -60.9, 16.7]` keeps Basse-Terre/Grande-Terre/Marie-Galante/Les
+  Saintes/La Désirade, excludes Martinique at lat < 15 and St-Barth/St-Martin at lat > 17.8).
+  Notably Guadeloupe observed **no** summer/war time here (unlike metropolitan France). Grenada &
+  Guadeloupe share PDF 213 (below Greenland). St-Barthélemy & St-Martin (the Northern Islands,
+  listed under Guadeloupe by Shanks) → Phase 2.
+- **Trinidad & Tobago (TT_1)** prints two divisions (1 Tobago, 2 Trinidad) that share one time
+  table; header is French (`TRINITÉ-ET-TOBAGO`), bottom of the Transkei page (PDF 413).
+- **Virgin Islands** are one combined atlas entry (PDF 424) with two divisions — 1 British
+  (Road Town/Tortola −4:18:28), 2 US (Charlotte Amalie/St Thomas −4:19:44) — shipped as two
+  polygons (`VG_1`, `VI_1`) with the same 1 Jul 1911 AST adoption.
+
+⭐ **Runbook confirmations:** the atlas is alphabetical by ENGLISH name (right-hand header),
+printed = PDF − 24, and these small island entries sit at the **bottom** of a page topped by a
+larger country (Denmark→Dominica, Greenland→Grenada, Mongolia→Montserrat, Rwanda→St Kitts,
+Transkei→Trinidad). The back-of-book index page numbers are **unreliable** (multilingual
+cross-refs, noisy OCR) — locate by alphabetical neighbour + header-band OCR instead. Bahamas is
+**not** in this cluster (it is EST-based, `Link America/Nassau → America/Toronto`, a DST-rule
+divergence, not the AST family) → separate follow-up.
+
 ## Phase-2 backlog (deferrals to pick up later)
 
 Sub-national splits, giants, and refinements surfaced while working Phase 1. Each stays
@@ -175,6 +230,9 @@ divergence worklist: `research/intl/iana_divergence.tsv`, 108 zones / 94 countri
 | Ghana | country override | Sub-hour throughout (+0:20 DST 1919/1920–1941, +0:30 war-time standard 1942–1946, +0:30 DST 1950–1956), all P Chan (2020) ordinance-sourced in `backzone` Africa/Accra — and Shanks conflicts (GMT adoption 1918 vs 1915-11-02; +0:20 window ~1936–1942 vs 1920–1941; Shanks lacks the +0:30 war-time & 1950s DST). No whole-hour gap, so never mis-zones a birth by an hour. A faithful override must transcribe the disputed sub-hour `Rule Ghana` (not Shanks) → Phase 2, like Sierra Leone. | W-Africa cluster (Ghana) |
 | Togo / Burkina Faso / Côte d'Ivoire pre-1912 town LMT | nearest-city | All three are GMT from standardization = the default (Togo GMT from 1893, Burkina & the Abidjan anchor GMT from 1912), so there is **no whole-hour gap** and no override ships. The only divergence is sub-hour pre-1912 town LMT (Lomé +0:04:52, Ouagadougou −0:06:04 vs the Abidjan link's −0:16:08 — ≤21 min), a Phase-2 nearest-city job like Norway/Sweden/Denmark. | W-Africa cluster (iana-sufficient trio) |
 | Mali northern division (TT#1) | admin_1 refinement | Shanks splits Mali into TT#2 (southern, Bamako = shipped ML_1) and TT#1 (northern/Saharan: Timbuktu, Gao, Kidal — GMT throughout). IANA models *all* Mali as Bamako, so the polygon override applies TT#2 everywhere (matching IANA); TT#1's GMT-throughout equals the default anyway, so nothing is lost. Recorded only for completeness. | Mali (ML_1) |
+| Bahamas | country override | `Link America/Nassau → America/Toronto` (`backward`) — so the default applies US/Canada DST rules to Nassau pre-1976, but the Bahamas is EST (−5:00) with its **own** DST history. This is an EST + DST-rule divergence (up to 1 h during mismatched DST windows), a different animal from the Eastern-Caribbean AST family — needs its own Shanks Time Table (with the Bahamian DST rules) rather than a flat offset. | Eastern Caribbean cluster triage |
+| St-Barthélemy & St-Martin (Northern Islands) | country override / nearest-city | Shanks lists Gustavia (St-Barth, −4:11:24) and Marigot (St-Martin, −4:12:24) under Guadeloupe, but they are geographically the Northern Islands (lat > 17.8, excluded from GP_1's bbox). IANA `backzone` links `America/Marigot` & `America/St_Barthelemy` → America/Port_of_Spain (−4:00). Their AST-adoption history needs its own read; low volume. | Guadeloupe (GP_1) bbox |
+| Eastern Caribbean pre-standardization town LMT | nearest-city | Before AST adoption (1911–1912) each island kept its capital/town LMT (sub-hour, e.g. Roseau −4:05:36, Charlotte Amalie −4:19:44). The shipped polygons are gated from the standardization date; the LMT era defers to IANA (the Puerto Rico link, itself sub-hour off) → a Phase-2 nearest-city refinement, like Norway/Sweden/Denmark. | Eastern Caribbean cluster |
 
 **Known Shanks errors (defer to IANA, do not ship):**
 - **The Gambia transition dates.** Shanks prints BMT → −1:00 on **1/Jan/1935** and −1:00 →
@@ -216,9 +274,13 @@ dominant zone; grouped):
   Verified iana-sufficient no-ops (Abidjan is the GMT anchor, no whole-hour gap): **Côte
   d'Ivoire** (Abidjan is itself a real zone), **Togo** (GMT from 1893), **Burkina Faso** (GMT
   from 1912) — their only divergence is sub-hour pre-1912 town LMT (→ Phase-2 nearest-city).
-- **Caribbean cluster** (LMT/AST gaps vs GMT/EST default): Curaçao, Aruba, Bahamas, Antigua,
-  St Kitts, Trinidad, St Vincent, St Lucia, Dominica, Grenada, Guadeloupe, Montserrat, both
-  Virgin Islands, Cayman.
+- **Caribbean cluster** (LMT/AST gaps vs GMT/EST default): Curaçao ✅, Aruba ✅ (CW_1), and the
+  **Eastern Caribbean AST family** ✅ COMPLETE — Anguilla ✅, Antigua & Barbuda ✅ (EST outlier),
+  Dominica ✅, Grenada ✅, Guadeloupe ✅ (bbox), Montserrat ✅, St Kitts ✅, St Lucia ✅,
+  St Vincent ✅, Trinidad & Tobago ✅, US Virgin Is. ✅, British Virgin Is. ✅ — all default-Linked
+  to America/Puerto_Rico (−3:00 war time 1942–45), all 960/960 vs backzone. Still open: **Bahamas**
+  (EST/DST case, separate follow-up), **Cayman**, and the sub-hour/link-agreeing tail
+  (St-Barth/St-Martin, Bonaire, the SSS islands).
 - **Central/East Africa** (LMT vs +1/+2 default): Congo (Kinshasa/Lubumbashi), Angola, Cameroon,
   Gabon, CAR, Tanzania, Uganda, Ethiopia, Eritrea, Somalia, Madagascar, Réunion, Seychelles.
 - **Asia/Pacific**: Laos, Cambodia, Brunei, Malaysia, Oman, Kuwait, Bahrain, Micronesia, Saipan.

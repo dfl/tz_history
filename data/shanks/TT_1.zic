@@ -1,0 +1,7 @@
+# Shanks International Atlas TIME TABLE, Trinidad -- LMT then AST (-4:00) from 1912-03-02; vs default link to Puerto Rico (AST, war time -3:00 1942-45).
+# Atlas printed p.389 (PDF p.413), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:America/Port_of_Spain (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/TT_1 -4:06:04 -    LMT  1912 Mar  2  0:00
+                 -4:00    -    AST
