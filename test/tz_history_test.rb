@@ -1647,4 +1647,19 @@ class TzHistoryTest < Minitest::Test
                  "The Gambia should be -1:00 1933-1942")
     assert_nil TzHistory.for(**BANJUL, date: "1950-06-15") # after 1 Feb 1942 -> IANA (GMT)
   end
+
+  # Benin (Dahomey) is default-Linked EAST to Africa/Lagos (WAT +1:00 from 1919), unlike
+  # its western neighbours -- so the default is a full hour FAST across 1919-1934, when
+  # Benin actually kept GMT (tzdb: "go with Shanks & Pottenger").
+  PORTO_NOVO = { lat: 6.4969, lon: 2.6289 }.freeze # Benin
+
+  def test_benin_resolves_gmt_then_defers
+    tz = TzHistory.for(**PORTO_NOVO, date: "1925-06-15")
+    assert_equal "Shanks/BJ_1", tz&.identifier
+    assert_equal(0, tz.period_for_local(Time.utc(1925, 6, 15, 12)).observed_utc_offset,
+                 "Benin should be GMT 1912-1934, not Lagos's WAT (+1:00)")
+    assert_nil TzHistory.for(**PORTO_NOVO, date: "1940-06-15") # after 26 Feb 1934 -> IANA (WAT)
+    assert_nil TzHistory.for(**PORTO_NOVO, date: "1905-06-15") # pre-1912 town LMT -> deferred
+    assert_nil TzHistory.for(lat: 6.4541, lon: 3.3947, date: "1925-06-15") # Lagos, NG -> not in BJ polygon
+  end
 end

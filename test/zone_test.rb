@@ -288,4 +288,15 @@ class ZoneTest < Minitest::Test
     assert_equal(-3600, offset_of(shanks, "1938-06-15")) # -1:00 from 1 Apr 1933
     assert_equal(0,     offset_of(shanks, "1943-06-15")) # GMT from 1 Feb 1942
   end
+
+  # Benin BJ #1 (whole country) -- GMT 1912-1934, then WAT (+1:00) from 26 Feb 1934. The
+  # DEFAULT IANA build LINKS Africa/Porto-Novo to Africa/Lagos (WAT +1:00 from 1919), so
+  # it is a full hour fast across 1919-1934; tzdb endorses the 1934 date ("go with Shanks
+  # & Pottenger"). BJ_1 == backzone Africa/Porto-Novo 696/696 mid-months 1912-1969.
+  def test_bj1_benin
+    shanks = TzHistory::Zone.tzinfo("BJ_1")
+    assert_equal(0,    offset_of(shanks, "1925-06-15")) # GMT (default Lagos = WAT +1:00)
+    assert_equal(0,    offset_of(shanks, "1934-01-15")) # still GMT early 1934
+    assert_equal(3600, offset_of(shanks, "1935-06-15")) # WAT (+1:00) from 26 Feb 1934
+  end
 end

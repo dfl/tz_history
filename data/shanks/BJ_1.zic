@@ -1,0 +1,8 @@
+# Shanks International Atlas TIME TABLE, Benin (whole country): GMT from 1912, then WAT (+1:00) from 26 Feb 1934.
+# Atlas printed p.27 (PDF p.51), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Africa/Porto-Novo (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/BJ_1 0:10:28  -    LMT  1912 Jan  1  0:00
+                 0:00     -    GMT  1934 Feb 26  0:00
+                 1:00     -    WAT
