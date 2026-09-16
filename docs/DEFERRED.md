@@ -107,19 +107,38 @@ page headers (don't trust that tt is one page); rebuild the index with the corre
 `--cities=<first>-<last>` and `extract_cities --max-table=<real max>`. The 40 single-tt-page
 states (span=1) are UNAFFECTED — their indices are clean.
 
-### NY long-tail tables (unclassified)
+### NY long-tail tables — ✅ RESOLVED (2026)
 
-The NY cohort nest classifies every table with **≥15 towns** (crop-verified EST-year sets:
-NY#1-36 + #41/#42/#45/#48/#75/#86/#105/#151/#153/#186/#211/#226), covering ~85% of the
-4817 indexed towns (~2650 correctable). The remaining ~180 tables (each <15 towns, ~15% of
-towns / ~730) are **not yet classified → they default to no zone = defer to IANA** (those
-EST summers read 1 h fast). Safe under-correction, never wrong. To extend: crop-verify the
-next tier of tables from `research/index/NY/timetables.json` (tt renders in scratch
-`ny_work/reocr/tt352-359`) and add their EST-year sets to `TABLE_EST` in
-`research/builders/build_ny.rb` (the window mechanism already handles arbitrary EST
-intervals). Also a handful of the classified messy tables lose 1-2 summers at window seams
-(e.g. NY#20 misses summer 1950, #15 misses 1940) from boundary coalescing — safe
-under-correction; refine with finer windows if a specific birth needs it.
+**All 226 NY tables are now crop-verified.** The remaining ~180 tables <15 towns (the old
+"long tail") were transcribed by re-reading the time tables (tt PDF 352-359, rendered at
+cols=3 so each strip is a full column) and converting each table's verbatim transition rows
+to an EST-year set via a **reference-resolving interpreter** (NY#4 = EST base, NY#1 =
+continuous DST, US#1/#2 = adopted DST; it follows `M/D/YYYY NY#k` chains). Raw rows persisted
+in `research/index/NY/tt_verified.json`; derived sets in `research/builders/ny_tail_est.json`
+(loaded + merged by `build_ny.rb`, which never overrides the 46 hand-verified KNOWN tables).
+Added **168 tail tables / 701 towns**; NY coverage **84.8% → 99.3%** (4785/4817). The
+before/after per-town diff was clean: **1104 EST segments added, 0 removed, 0 changes on any
+KNOWN table** (only newly-classified tables changed). **Safety gate:** pre-war EST (≤1941, the
+reliable NY#4→adopt-year pattern; validated 41/44 exact vs KNOWN) is always taken; postwar EST
+(≥1946) only from tables with a clean US#1/#2 terminal (no dropped adoption row), so a missed
+row can only under-correct. 3 regression tests (Boreas River NY#49, Fort Plain NY#62, Corfu NY#164).
+The ~32 still-unclassified towns are on continuous-DST tables (NY#38/#162 base = NY#1 = IANA,
+correctly deferred) or a few tiny/low-conf tables (NY#54/#175/#205/#222).
+
+**⚠ NEW FLAG — NY#2 possible pre-existing over-correction (not fixed; needs dedicated crop-verify):**
+the re-read shows NY#2 ran continuous EDT every summer 1921-1941 (like NY#1), but the shipped
+KNOWN `TABLE_EST[2]=1922..1927` asserts EST for those summers. If the re-read is right, NY#2
+towns are over-corrected 1922-1927. Left untouched (KNOWN tables were out of this pass's scope);
+crop-verify NY#2's exact band (it sits below the tall NY#1 in tt352 col0) before changing it.
+Also the original build slightly under-corrected the postwar tails of NY#28-36 (they kept EST
+1948-1954, not just to ~1947) — safe under-corrections, optionally refreshable from tt_verified.json.
+
+**Reusable recipe (this pass):** render tt at `--cols=3 --colw=1.05 --band-h=3000` (full-column
+strips, header+dates+zone together — the cols=6 layout splits date from zone); delegate reading
+to one subagent per page (image tokens stay out of the orchestrator; each returns verbatim rows
+as JSON) then convert centrally with a validated interpreter gated on reproducing the KNOWN
+tables. The tt OCR *draft* (`timetables.json`) is unusable here — it drops the NY#4/NY#1
+reference rows (reproduced only 2/46 known); the compact reference format must be read visually.
 
 ## How to work this backlog
 

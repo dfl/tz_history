@@ -899,6 +899,30 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 41.9983, lon: -73.9244, date: "1930-07-15")
   end
 
+  # --- New York long-tail cohort extension (2026): the ~180 tables <15 towns that the
+  # original nest left unclassified are now crop-verified (tt 352-359) and carry their own
+  # EST schedules. Same engine/windows -- these towns previously deferred to IANA. ---
+
+  def test_ny_tail_table49_prewar_est_then_defers_at_1937_adoption
+    # Boreas River (Essex Co., NY #49): EST via NY#4 until adopting DST in 1937.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 43.9414, lon: -73.9636, date: "1930-07-15").identifier
+    assert_nil TzHistory.for(lat: 43.9414, lon: -73.9636, date: "1938-07-15")
+  end
+
+  def test_ny_tail_table62_short_prewar_est_window
+    # Fort Plain (Montgomery Co., NY #62): EST only 1921-1924, adopts DST 1925.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 42.9314, lon: -74.6231, date: "1923-07-15").identifier
+    assert_nil TzHistory.for(lat: 42.9314, lon: -74.6231, date: "1930-07-15")
+  end
+
+  def test_ny_tail_table164_postwar_est_and_excluded_dst_summers
+    # Corfu (Genesee Co., NY #164): EST 1921-1939 + 1946-1954, but its own DST summers
+    # 1940-41 (EDT) are excluded, and it adopts continuous DST in 1955.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 42.96, lon: -78.4058, date: "1935-07-15").identifier
+    assert_nil TzHistory.for(lat: 42.96, lon: -78.4058, date: "1940-07-15") # its own EDT summer
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 42.96, lon: -78.4058, date: "1950-07-15").identifier
+  end
+
   # --- Missouri postwar CST cohort nest (tt PDF 300-301, tables MO#1-49) ---
   # Pre-war ALL tables were CST no-DST (flat Etc/GMT+6 already ships). Postwar every table
   # was CST from 1946 until it adopted DST at a table-specific year; the dominant rural MO#3
