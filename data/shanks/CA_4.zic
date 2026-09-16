@@ -1,0 +1,11 @@
+# Shanks International Atlas TIME TABLE, Rainy River, Ontario -- Central Time (CST -6:00), no peacetime DST; vs default link to Winnipeg (which observed DST summers 1916/1937/1946-1973).
+# Atlas printed p.45 (PDF p.69), table #3.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:America/Rainy_River (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/CA_4 -6:18:16 -    LMT  1895
+                 -6:00    -    CST  1918 Apr 14  2:00
+                 -6:00    1:00 CDT  1918 Oct 27  2:00
+                 -6:00    -    CST  1940 Sep 29  0:00
+                 -6:00    1:00 CDT  1945 Sep 30  2:00
+                 -6:00    -    CST

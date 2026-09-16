@@ -1,0 +1,6 @@
+# Shanks International Atlas TIME TABLE, Thunder Bay (Fort William / Port Arthur), Ontario -- Eastern Standard Time with NO peacetime daylight saving (EST -5:00) 1919-1969; vs default link to Toronto (spurious EDT every summer).
+# Atlas printed p.51 (PDF p.75), table #121.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:America/Thunder_Bay (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/CA_2 -5:00    -    EST

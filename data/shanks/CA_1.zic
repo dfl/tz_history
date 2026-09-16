@@ -1,0 +1,11 @@
+# Shanks International Atlas TIME TABLE, Atikokan / western Rainy River District, Ontario -- Central Time (CST -6:00) 1895-1940; vs default link to Panama (EST -5:00 from 1908).
+# Atlas printed p.45 (PDF p.69), table #3.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:America/Atikokan (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/CA_1 -6:06:28 -    LMT  1895
+                 -6:00    -    CST  1918 Apr 14  2:00
+                 -6:00    1:00 CDT  1918 Oct 27  2:00
+                 -6:00    -    CST  1940 Sep 29  0:00
+                 -6:00    1:00 CDT  1945 Sep 30  2:00
+                 -5:00    -    EST

@@ -1,0 +1,6 @@
+# Shanks International Atlas TIME TABLE, Nipigon, Ontario -- Eastern Standard Time with NO peacetime daylight saving (EST -5:00) 1919-1973; vs default link to Toronto (spurious EDT every summer).
+# Atlas printed p.45 (PDF p.69), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:America/Nipigon (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/CA_3 -5:00    -    EST

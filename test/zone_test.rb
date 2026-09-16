@@ -514,4 +514,76 @@ class ZoneTest < Minitest::Test
     assert_equal(3600, offset_of(shanks, "1915-06-15")) # +1:00 WAT (default Maputo = +2:00, 1 h fast)
     assert_equal(7200, offset_of(shanks, "1925-06-15")) # +2:00 CAT from 1920-04-25
   end
+
+  # --- Canada / Atikokan: the first sub-province district carve (rectangle geometry) ----
+
+  # Atikokan (NW Ontario) followed CENTRAL time -- Shanks Time Table #3 (90w00 = CST -6:00),
+  # which IANA models as America/Atikokan. It was CST 1895-1940, held CDT through WWII, then
+  # flipped permanently to EST on 1945-09-30. IANA's DEFAULT links Atikokan -> America/Panama
+  # (EST -5:00 from 1908), so the default is a full hour fast across 1895-1940. CA_1 ==
+  # backzone America/Atikokan 960/960 mid-months 1890-1969.
+  def test_ca1_atikokan_central
+    shanks = TzHistory::Zone.tzinfo("CA_1")
+    assert_equal(-21600, offset_of(shanks, "1910-06-15")) # CST -6:00 (default Panama = -5:00, 1 h fast)
+    assert_equal(-21600, offset_of(shanks, "1930-01-15")) # CST -6:00 winter (no DST 1919-1939)
+    assert_equal(-18000, offset_of(shanks, "1918-07-15")) # lone 1918 DST summer: CDT -5:00 (= Panama)
+    assert_equal(-18000, offset_of(shanks, "1950-06-15")) # permanent EST -5:00 from 1945 (converged)
+  end
+
+  # Thunder Bay (Fort William / Port Arthur): CONTESTED zone shipped as a NO-PEACETIME-DST
+  # correction only. Shanks TT#121 (Eastern from 1895) contradicts backzone (Central until
+  # 1910) on the base offset -> that era DEFERS. But Shanks AND backzone agree Thunder Bay
+  # had no peacetime DST, so a constant EST (Shanks/CA_2) applies over two peacetime windows
+  # (1919-1940, 1945-1970), correcting the default Toronto link's spurious EDT summers.
+  # 252/252 + 288/288 vs backzone America/Thunder_Bay across the two windows.
+  def test_ca2_thunder_bay_no_peacetime_dst
+    shanks = TzHistory::Zone.tzinfo("CA_2")
+    assert_equal(-18000, offset_of(shanks, "1930-07-15")) # EST -5:00 (default Toronto = EDT -4:00)
+    assert_equal(-18000, offset_of(shanks, "1955-07-15")) # EST -5:00 (default Toronto = EDT -4:00)
+    # Geographic windowing: correct the peacetime summers, defer every contested era.
+    tb = { lat: 48.38, lon: -89.25 } # Thunder Bay (Port Arthur)
+    zid = ->(d) { TzHistory.zone_id(lat: tb[:lat], lon: tb[:lon], date: Date.parse(d)) }
+    assert_equal("Shanks/CA_2", zid.call("1930-07-15")) # pre-war window: corrected
+    assert_equal("Shanks/CA_2", zid.call("1955-07-15")) # postwar window: corrected
+    assert_nil(zid.call("1905-06-15")) # contested 1895-1910 CST era -> defer
+    assert_nil(zid.call("1918-07-15")) # 1918 (Shanks had DST) -> defer
+    assert_nil(zid.call("1943-07-15")) # 1940-45 war -> defer
+    assert_nil(zid.call("1975-07-15")) # converged post-1970 -> defer
+  end
+
+  # Nipigon: the UNCONTESTED no-peacetime-DST case. Shanks TT#1 (Eastern from 1895) and
+  # backzone America/Nipigon agree completely (both Eastern from 1895 -- no CST era), so the
+  # constant EST (Shanks/CA_3) applies over two peacetime windows (1919-1940, 1945-1974)
+  # correcting the default Toronto link's EDT summers. Nipigon resumed DST in 1974 (not 1970
+  # like Thunder Bay), so the postwar window runs later. 252/252 + 336/336 vs backzone.
+  def test_ca3_nipigon_no_peacetime_dst
+    shanks = TzHistory::Zone.tzinfo("CA_3")
+    assert_equal(-18000, offset_of(shanks, "1930-07-15")) # EST -5:00 (default Toronto = EDT -4:00)
+    tb = { lat: 49.02, lon: -88.27 } # Nipigon
+    zid = ->(d) { TzHistory.zone_id(lat: tb[:lat], lon: tb[:lon], date: Date.parse(d)) }
+    assert_equal("Shanks/CA_3", zid.call("1930-07-15")) # pre-war window: corrected
+    assert_equal("Shanks/CA_3", zid.call("1955-07-15")) # postwar window: corrected
+    assert_equal("Shanks/CA_3", zid.call("1971-07-15")) # still corrected (window runs to 1974, unlike Thunder Bay)
+    assert_nil(zid.call("1905-06-15")) # pre-1919 (both EST, no divergence) -> defer
+    assert_nil(zid.call("1943-07-15")) # 1940-45 war -> defer
+    assert_nil(zid.call("1980-07-15")) # converged post-1974 -> defer
+  end
+
+  # Rainy River: CENTRAL, no peacetime DST -- but its default is America/Winnipeg (also
+  # Central), which observed DST in 1916/1937 and continuously 1946-1973, so this is a
+  # DST-rule divergence. Shanks TT#3 (the Atikokan table) and backzone America/Rainy_River
+  # agree completely INCLUDING the held CDT of 1940-45 (uncontested), so CA_4 reproduces
+  # backzone in full over [1895, 1974). 960/960 vs backzone.
+  def test_ca4_rainy_river_central
+    shanks = TzHistory::Zone.tzinfo("CA_4")
+    assert_equal(-21600, offset_of(shanks, "1930-01-15")) # CST -6:00
+    assert_equal(-21600, offset_of(shanks, "1937-07-15")) # CST -6:00 (default Winnipeg = CDT -5:00)
+    assert_equal(-18000, offset_of(shanks, "1941-01-15")) # held CDT -5:00 (Winnipeg still CST -6:00 -> Rainy River AHEAD)
+    assert_equal(-21600, offset_of(shanks, "1955-07-15")) # CST -6:00 (default Winnipeg = CDT -5:00)
+    rr = { lat: 48.72, lon: -94.48 } # Rainy River town
+    zid = ->(d) { TzHistory.zone_id(lat: rr[:lat], lon: rr[:lon], date: Date.parse(d)) }
+    assert_equal("Shanks/CA_4", zid.call("1955-07-15")) # corrected
+    assert_nil(zid.call("1890-06-15")) # pre-1895 town LMT -> defer (Phase 2)
+    assert_nil(zid.call("1980-07-15")) # converged post-1974 -> defer
+  end
 end
