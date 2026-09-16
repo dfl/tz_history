@@ -1,0 +1,9 @@
+# Shanks International Atlas TIME TABLE, China -- Kunlun/Kashgar (far-west Xinjiang) Time zone: +5:30 (1928-1940) then +5:00 (1940-1980); vs default link to Asia/Urumqi (+6:00).
+# Atlas printed p.81 (PDF p.105), table #7.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Asia/Kashgar (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/CN_2 5:03:56  -    LMT  1928 Jan 1
+                 5:30     -    +0530 1940 Jan  1  0:00
+                 5:00     -    +05  1980 May  1  0:00
+                 8:00     -    CST

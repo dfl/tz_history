@@ -708,8 +708,50 @@ class ZoneTest < Minitest::Test
     assert_equal("Shanks/CN_1", zid.call(38.49, 106.23, "1950-06-15")) # Yinchuan (Ningxia): corrected
     assert_nil(zid.call(31.23, 121.47, "1950-06-15")) # Shanghai: the +8:00 default -> defer
     assert_nil(zid.call(37.87, 112.55, "1950-06-15")) # Taiyuan (Shanxi=23, +8): defer, not Shaanxi
-    assert_nil(zid.call(36.06, 103.83, "1950-06-15")) # Lanzhou (Gansu): split division -> Phase 2
     assert_nil(zid.call(30.66, 104.07, "1925-06-15")) # pre-1928 town LMT -> defer (Phase 2)
     assert_nil(zid.call(30.66, 104.07, "1981-06-15")) # post-1980 converged to +8:00 -> defer
+  end
+
+  # CN_1 extension (Phase 2, from the full-gazetteer OCR): the +7 slice of the three provinces
+  # Shanks splits by a meridian (Gansu/Qinghai/Inner Mongolia) plus Hainan whole -- all ship the
+  # same Shanks/CN_1 zic (backzone Asia/Chongqing). Carved via a longitude clip of each province.
+  def test_cn1_plus7_extension
+    zid = ->(lat, lon, d) { TzHistory.zone_id(lat: lat, lon: lon, date: Date.parse(d)) }
+    # eastern/central +7 slices now corrected
+    assert_equal("Shanks/CN_1", zid.call(36.06, 103.83, "1950-06-15")) # Lanzhou (E Gansu)
+    assert_equal("Shanks/CN_1", zid.call(36.62, 101.77, "1950-06-15")) # Xining (E Qinghai)
+    assert_equal("Shanks/CN_1", zid.call(40.84, 111.75, "1950-06-15")) # Hohhot (central Inner Mongolia)
+    assert_equal("Shanks/CN_1", zid.call(40.66, 109.84, "1950-06-15")) # Baotou (Inner Mongolia)
+    assert_equal("Shanks/CN_1", zid.call(20.04, 110.32, "1950-06-15")) # Haikou (Hainan)
+    # the deferred slices (+6 west / +8:30 east / +8) still fall through to the default
+    assert_nil(zid.call(40.14, 94.66, "1950-06-15")) # Dunhuang (far-NW Gansu, +6): deferred
+    assert_nil(zid.call(36.42, 94.90, "1950-06-15")) # Golmud (W Qinghai, +6): deferred
+    assert_nil(zid.call(49.21, 119.70, "1950-06-15")) # Hailar/Hulunbuir (E Inner Mongolia, +8:30): deferred
+    assert_nil(zid.call(23.13, 113.26, "1950-06-15")) # Guangzhou (Guangdong, +8): defer
+  end
+
+  # China Phase 3 -- the Kunlun/Kashgar zone: Shanks Time Table #7 (82E30 = +5:30 from 1928,
+  # dropping to +5:00 in 1940), which IANA models as backzone Asia/Kashgar. Its default is a bare
+  # Link to Asia/Urumqi (+6:00, constant with no DST), so far-west Xinjiang is 30 min fast in the
+  # default across 1928-1940 and a full hour fast across 1940-1980. CN_2 reproduces backzone
+  # Asia/Kashgar (504/504 vs backzone, mid-months 1928-1969). Xinjiang is split by ~82 E: the west
+  # (Kashgar/Yining/Aksu/Hotan) is CN_2, the east (Urumqi/Korla/Turpan) is the +6:00 default.
+  def test_cn2_kashgar_kunlun
+    shanks = TzHistory::Zone.tzinfo("CN_2")
+    assert_equal(19800, offset_of(shanks, "1935-07-15")) # +5:30 (Urumqi default = +6:00): 30 min slower
+    assert_equal(18000, offset_of(shanks, "1950-07-15")) # +5:00 from 1 Jan 1940: a full hour slower
+    assert_equal(28800, offset_of(shanks, "1981-07-15")) # +8:00 from 1 May 1980 (out of scope)
+    zid = ->(lat, lon, d) { TzHistory.zone_id(lat: lat, lon: lon, date: Date.parse(d)) }
+    assert_equal("Shanks/CN_2", zid.call(39.47, 75.99, "1950-06-15")) # Kashgar: corrected
+    assert_equal("Shanks/CN_2", zid.call(43.91, 81.32, "1950-06-15")) # Yining/Ili: corrected
+    assert_equal("Shanks/CN_2", zid.call(41.17, 80.26, "1950-06-15")) # Aksu: corrected
+    assert_equal("Shanks/CN_2", zid.call(37.11, 79.93, "1950-06-15")) # Hotan: corrected
+    assert_equal("Shanks/CN_2", zid.call(39.47, 75.99, "1935-06-15")) # Kashgar 1935: still +5:30 window
+    # eastern Xinjiang is +6:00 = the Asia/Urumqi default -> defer (no carve)
+    assert_nil(zid.call(43.83, 87.62, "1950-06-15")) # Urumqi (+6): defer
+    assert_nil(zid.call(41.76, 86.15, "1950-06-15")) # Korla (+6): defer
+    assert_nil(zid.call(42.95, 89.18, "1950-06-15")) # Turpan (+6): defer
+    assert_nil(zid.call(39.47, 75.99, "1927-06-15")) # pre-1928 town LMT -> defer (Phase 2)
+    assert_nil(zid.call(39.47, 75.99, "1981-06-15")) # post-1980 -> defer
   end
 end
