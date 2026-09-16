@@ -1027,8 +1027,19 @@ class TzHistoryTest < Minitest::Test
   end
 
   def test_cincinnati_is_central_until_1927
-    # SW Ohio / Cincinnati kept Central time until 1927 (pre-existing metro override, feat[110]).
+    # SW Ohio / Cincinnati (OH#88) kept Central time WITH daylight until 1927; still
+    # America/Chicago after the Butler/Hamilton town-split fix (DEFERRED #23).
     assert_equal "America/Chicago", TzHistory.for(lat: 39.1031, lon: -84.5120, date: "1925-07-15").identifier
+  end
+
+  def test_rural_butler_hamilton_is_cst_no_dst_before_1927
+    # DEFERRED #23 fix: rural OH#34 towns in Butler/Hamilton kept Central STANDARD time (no
+    # daylight) pre-1927, so summer 1920-1926 is CST (-6), NOT America/Chicago's CDT (-5).
+    # Addyston (Hamilton Co., OH#34) -- was 1 h fast (America/Chicago) before the split fix.
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 39.1367, lon: -84.7092, date: "1923-07-15").identifier
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 39.1367, lon: -84.7092, date: "1925-07-15").identifier
+    # After the 1927 Central->Eastern switch it falls to the Ohio nest -> EST no-DST (-5).
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 39.1367, lon: -84.7092, date: "1930-07-15").identifier
   end
 
   def test_ohio_war_years_defer_to_iana
