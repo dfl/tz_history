@@ -1026,16 +1026,19 @@ class TzHistoryTest < Minitest::Test
   end
 
   def test_eastern_ohio_is_est_no_dst_until_1967
-    # Lancaster (Fairfield, OH#27): EST no-DST 1919->1967 while IANA applies EDT every summer.
-    assert_equal "Etc/GMT+5", TzHistory.for(lat: 39.7137, lon: -82.5993, date: "1930-07-15").identifier
-    assert_equal "Etc/GMT+5", TzHistory.for(lat: 39.7137, lon: -82.5993, date: "1966-07-15").identifier
-    assert_nil TzHistory.for(lat: 39.7137, lon: -82.5993, date: "1968-07-15") # post US#1 -> IANA
+    # Rural Fairfield Co. (Whites, OH#27): EST no-DST 1919->1967 while IANA applies EDT every
+    # summer. (The Vision re-OCR put the CITY of Lancaster on its own table OH#96 -- a distinct
+    # city table that defers -- so this uses a rural OH#27 town, the table's actual intent.)
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 39.7047, lon: -82.5911, date: "1930-07-15").identifier
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 39.7047, lon: -82.5911, date: "1966-07-15").identifier
+    assert_nil TzHistory.for(lat: 39.7047, lon: -82.5911, date: "1968-07-15") # post US#1 -> IANA
   end
 
   def test_northeast_ohio_adopts_dst_1956_then_defers
-    # Ravenna (Portage, OH#67): EST no-DST until the 1956 US#5 adoption, then matches IANA.
-    assert_equal "Etc/GMT+5", TzHistory.for(lat: 41.1578, lon: -81.2412, date: "1950-07-15").identifier
-    assert_nil TzHistory.for(lat: 41.1578, lon: -81.2412, date: "1960-07-15")
+    # Rural Portage Co. (Proctor, OH#67): EST no-DST until the 1956 US#5 adoption, then matches
+    # IANA. (Ravenna city sits on OH#46 = the Akron/Cleveland-suburb DST table, which defers.)
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 41.1667, lon: -81.2667, date: "1950-07-15").identifier
+    assert_nil TzHistory.for(lat: 41.1667, lon: -81.2667, date: "1960-07-15")
   end
 
   def test_ohio_next_tier_east_tables_recovered
@@ -1043,6 +1046,14 @@ class TzHistoryTest < Minitest::Test
     # 1919 -> US# adoption). OH#20 held EST until 1963 (a late holdout): EST in 1960, defers 1965.
     assert_equal "Etc/GMT+5", TzHistory.for(lat: 39.6797, lon: -80.9117, date: "1960-07-15").identifier
     assert_nil TzHistory.for(lat: 39.6797, lon: -80.9117, date: "1965-07-15")
+  end
+
+  def test_ohio_western_county_seat_greenville_recovered
+    # Greenville (Darke Co., OH#110): the Apple-Vision re-OCR recovered this western
+    # county-seat table (tesseract had collapsed its 2-digit number to "1"). WEST-CST:
+    # Central (Etc/GMT+6) before the 1927-04-03 switch, then EST no-DST (DEFERRED #22).
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 40.1028, lon: -84.6331, date: "1925-07-15").identifier
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 40.1028, lon: -84.6331, date: "1935-07-15").identifier
   end
 
   def test_cleveland_metro_defers_to_iana
