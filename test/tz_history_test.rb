@@ -1042,7 +1042,8 @@ class TzHistoryTest < Minitest::Test
 
   def test_northeast_ohio_adopts_dst_1956_then_defers
     # Rural Portage Co. (Proctor, OH#67): EST no-DST until the 1956 US#5 adoption, then matches
-    # IANA. (Ravenna city sits on OH#46 = the Akron/Cleveland-suburb DST table, which defers.)
+    # IANA. (Crop-verification later showed OH#46 is itself an EAST-EST no-DST table until its
+    # 1948 US#5 adoption -- see test_ohio_tt_tail_recovered -- not the DST defer once assumed.)
     assert_equal "Etc/GMT+5", TzHistory.for(lat: 41.1667, lon: -81.2667, date: "1950-07-15").identifier
     assert_nil TzHistory.for(lat: 41.1667, lon: -81.2667, date: "1960-07-15")
   end
@@ -1052,6 +1053,28 @@ class TzHistoryTest < Minitest::Test
     # 1919 -> US# adoption). OH#20 held EST until 1963 (a late holdout): EST in 1960, defers 1965.
     assert_equal "Etc/GMT+5", TzHistory.for(lat: 39.6797, lon: -80.9117, date: "1960-07-15").identifier
     assert_nil TzHistory.for(lat: 39.6797, lon: -80.9117, date: "1965-07-15")
+  end
+
+  def test_ohio_tt_tail_recovered
+    # Crop-verified the tt 409-413 tail (DEFERRED #21/#24): more EAST-EST tables (EST no-DST from
+    # 1919 -> a US# adoption, NO peacetime EDT before it) and two more WEST-CST tables.
+    # EAST-EST -- EST (Etc/GMT+5) up to the adoption year, then defer to IANA:
+    #   OH#46 Barberton (Akron suburb) adopts US#5 1948: EST in 1947, defers 1949.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 41.0128, lon: -81.6053, date: "1947-07-15").identifier
+    assert_nil TzHistory.for(lat: 41.0128, lon: -81.6053, date: "1949-07-15")
+    #   OH#45 Bazetta adopts US#5 1946: EST 1930, defers 1947.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 41.3, lon: -80.7667, date: "1930-07-15").identifier
+    assert_nil TzHistory.for(lat: 41.3, lon: -80.7667, date: "1947-07-15")
+    #   OH#16 Arwick adopts US#5 1957: EST 1955, defers 1958.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 40.4, lon: -81.4167, date: "1955-07-15").identifier
+    assert_nil TzHistory.for(lat: 40.4, lon: -81.4167, date: "1958-07-15")
+    # WEST-CST -- Central (Etc/GMT+6) before the switch, EST no-DST after:
+    #   OH#93 Clay Center switches 1922-04-01: CST 1920, EST 1923.
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 41.5633, lon: -83.3619, date: "1920-07-15").identifier
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 41.5633, lon: -83.3619, date: "1923-07-15").identifier
+    #   OH#118 Wapakoneta-area switches 1927-04-03: CST 1925, EST 1930.
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 40.5678, lon: -84.1936, date: "1925-07-15").identifier
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 40.5678, lon: -84.1936, date: "1930-07-15").identifier
   end
 
   def test_ohio_western_county_seat_greenville_recovered
