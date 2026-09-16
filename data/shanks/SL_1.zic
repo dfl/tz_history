@@ -1,0 +1,32 @@
+# IANA backzone (almanac-sourced), Sierra Leone (Freetown) -- one hour BEHIND GMT (-1:00)
+# from 1 Jul 1913, with a 20-minute seasonal shift to -0:40 (Sep-Mar, 1932-1939), then GMT
+# from 6 Dec 1941; vs default link to Africa/Abidjan (GMT), which is a full hour fast across
+# the 1913-1941 standard periods (and 40 min fast in the -0:40 seasons).
+#
+# NOT Shanks-sourced: Shanks's International Atlas prints Sierra Leone with a 0:40 seasonal
+# save (Jun-Oct) and a GMT switch in 1957 -- both CONTRADICTED by IANA's almanac-sourced
+# rules (a 0:20 save, and the wartime GMT switch on 6 Dec 1941). Shanks is DEFERRED (the
+# sourced-primary-beats-Shanks discipline, as with Bahrain / Indochina); SL_1 reproduces
+# backzone Africa/Freetown exactly (696/696 vs backzone, mid-months 1912-1969).
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Africa/Freetown (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/SL_1 -0:53:00 -    LMT  1913 Jul 1
+                 -1:00    -    -01  1932 Dec  1  0:00
+                 -0:40    -    -0040 1933 Apr  1  0:00
+                 -1:00    -    -01  1933 Sep  1  0:00
+                 -0:40    -    -0040 1934 Apr  1  0:00
+                 -1:00    -    -01  1934 Sep  1  0:00
+                 -0:40    -    -0040 1935 Apr  1  0:00
+                 -1:00    -    -01  1935 Sep  1  0:00
+                 -0:40    -    -0040 1936 Apr  1  0:00
+                 -1:00    -    -01  1936 Sep  1  0:00
+                 -0:40    -    -0040 1937 Apr  1  0:00
+                 -1:00    -    -01  1937 Sep  1  0:00
+                 -0:40    -    -0040 1938 Apr  1  0:00
+                 -1:00    -    -01  1938 Sep  1  0:00
+                 -0:40    -    -0040 1939 Jun  1  0:00
+                 -1:00    -    -01  1939 Sep  1  0:00
+                 -0:40    -    -0040 1939 Sep  5  0:00
+                 -1:00    -    -01  1941 Dec  7  0:00
+                 0:00     -    GMT

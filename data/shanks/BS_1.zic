@@ -1,0 +1,12 @@
+# Shanks International Atlas TIME TABLE, Bahamas (Nassau) -- Eastern Time (EST -5:00) with NO peacetime daylight saving 1912-1963 (war DST 1942-45 only); vs default link to America/Toronto (EDT every summer).
+# Atlas printed p.22 (PDF p.46), table #1.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:America/Nassau (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/BS_1 -5:09:30 -    LMT  1912 Mar 2
+                 -5:00    -    EST  1942 May  2  0:00
+                 -5:00    1:00 EWT  1945 Jan  1  0:00
+                 -5:00    -    EST  1945 Feb  1  0:00
+                 -5:00    1:00 EWT  1945 Aug 14 19:00
+                 -5:00    1:00 EPT  1945 Oct 18  0:00
+                 -5:00    -    EST

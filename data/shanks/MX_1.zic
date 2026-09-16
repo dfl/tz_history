@@ -1,0 +1,20 @@
+# IANA backzone, Ensenada municipality (northern Baja California), Mexico -- Pacific/Mountain
+# flips 1922-1949 (PST 1922, MST 1927, PST 1930, MST 1942), then Pacific Standard no-DST from
+# 14 Jan 1949; vs default link to America/Tijuana, which took daylight saving that Ensenada
+# did not -- so the default is a full hour off in the divergent periods.
+#
+# Ensenada kept its own timekeeping distinct from Tijuana: it ran Pacific while Tijuana ran
+# Mountain in 1922-1924, stayed on Pacific Standard (no DST) while Tijuana observed PDT (1931,
+# and every summer from 1950), and ran Mountain 1942-1949 while Tijuana was on wartime Pacific.
+# MX_1 reproduces backzone America/Ensenada exactly over the pre-1970 window (576/576 vs
+# backzone, mid-months 1922-1969). Not Shanks-verified; the post-1970 Ensenada-vs-Tijuana
+# daylight-saving divergence is out of the pre-1970 scope and deferred.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:America/Ensenada (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/MX_1 -7:46:28 -    LMT  1922 Jan 1 0:13:32
+                 -8:00    -    PST  1927 Jun 10 23:00
+                 -7:00    -    MST  1930 Nov 16  0:00
+                 -8:00    -    PST  1942 Apr  1  0:00
+                 -7:00    -    MST  1949 Jan 14  0:00
+                 -8:00    -    PST

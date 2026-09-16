@@ -1,0 +1,21 @@
+# IANA backzone, Transcarpathia / Zakarpattia oblast (Uzhhorod, Mukachevo), Ukraine --
+# Central European Time (CET +1:00, with CEST summers 1940-1944) from 1890 until 29 Jun 1945,
+# then Moscow time (MSK +3:00); vs default link to Europe/Kyiv, which ran +2:00 (KMT/EET) then
+# +3:00 (MSK) -- so the default is 1 to 2 hours fast across 1890-1945.
+#
+# Transcarpathia was Austro-Hungarian, then Czechoslovak (1918-1938), then Hungarian
+# (1938-1944) -- all on Central European Time -- before it was annexed to the Soviet Union in
+# 1945 and put on Moscow time (converging with the rest of Ukraine). UA_1 reproduces backzone
+# Europe/Uzhgorod exactly (648/648 vs backzone, mid-months 1891-1944).
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Europe/Uzhgorod (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/UA_1 1:29:12  -    LMT  1890 Oct
+                 1:00     -    CET  1940 Apr  1  2:00
+                 1:00     1:00 CEST 1942 Nov  2  3:00
+                 1:00     -    CET  1943 Mar 29  2:00
+                 1:00     1:00 CEST 1943 Oct  4  3:00
+                 1:00     -    CET  1944 Apr  3  2:00
+                 1:00     1:00 CEST 1944 Oct 26  0:00
+                 1:00     -    CET  1945 Jun 29  0:00
+                 3:00     -    MSK

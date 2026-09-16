@@ -610,4 +610,80 @@ class ZoneTest < Minitest::Test
     assert_nil(zid.call(45.42, -75.70, "1923-07-15")) # Ottawa, Ontario: west of the rect -> defer
     assert_nil(zid.call(50.22, -66.38, "1923-07-15")) # Sept-Iles: east of the rect (near AST strip) -> defer
   end
+
+  # Bahamas / Nassau: Linked to America/Toronto today, base EST -5:00, but the Bahamas kept
+  # NO peacetime daylight saving 1912-1963 (war DST 1942-45 only) while Toronto took DST every
+  # summer, so the Toronto link is a full hour fast each peacetime summer. The Bahamas resumed
+  # its own DST in 1964 on Toronto's last-Sunday schedule, converging, so the window ends 1964.
+  # BS_1 reproduces backzone America/Nassau in full over [1912, 1964); 624/624 vs backzone.
+  def test_bs1_bahamas_no_peacetime_dst
+    shanks = TzHistory::Zone.tzinfo("BS_1")
+    assert_equal(-18000, offset_of(shanks, "1930-07-15")) # EST -5:00 (no peacetime DST; Toronto link = EDT -4:00)
+    assert_equal(-14400, offset_of(shanks, "1943-07-15")) # war time EWT -4:00
+    assert_equal(-18000, offset_of(shanks, "1955-07-15")) # EST -5:00 (Toronto link = EDT -4:00)
+    zid = ->(lat, lon, d) { TzHistory.zone_id(lat: lat, lon: lon, date: Date.parse(d)) }
+    assert_equal("Shanks/BS_1", zid.call(25.06, -77.35, "1930-07-15")) # Nassau: corrected
+    assert_equal("Shanks/BS_1", zid.call(25.06, -77.35, "1955-07-15")) # Nassau: corrected
+    assert_equal("Shanks/BS_1", zid.call(26.53, -78.70, "1955-07-15")) # Freeport / Grand Bahama: same country zone
+    assert_nil(zid.call(25.06, -77.35, "1900-06-15")) # pre-1912 LMT -> defer (Phase 2)
+    assert_nil(zid.call(25.06, -77.35, "1965-07-15")) # converged from 1964 -> defer to Toronto link
+  end
+
+  # Sierra Leone / Freetown: a BACKZONE-OVERRIDE (Bahrain shape), not Shanks. Freetown ran
+  # -1:00 (a full hour BEHIND GMT) 1913-1941 with a 20-minute seasonal shift to -0:40
+  # (Sep-Mar, 1932-1939), then GMT from 6 Dec 1941. IANA's default links Africa/Freetown to
+  # Africa/Abidjan (GMT), so the default is a full hour fast across the -1:00 era. Shanks (0:40
+  # save, 1957 GMT switch) is deferred, contradicted by the almanac-sourced backzone (0:20
+  # save, 1941 GMT). SL_1 reproduces backzone Africa/Freetown; 696/696 vs backzone.
+  def test_sl1_freetown_hour_behind_gmt
+    shanks = TzHistory::Zone.tzinfo("SL_1")
+    assert_equal(-3600, offset_of(shanks, "1920-06-15")) # -1:00 (default Abidjan = GMT, 1 h fast)
+    assert_equal(-2400, offset_of(shanks, "1935-01-15")) # -0:40 seasonal shift (Sep-Mar wobble)
+    assert_equal(-3600, offset_of(shanks, "1935-07-15")) # back to -1:00 in the Apr-Aug season
+    assert_equal(0,     offset_of(shanks, "1945-01-15")) # GMT from Dec 1941 (= Abidjan link)
+    zid = ->(lat, lon, d) { TzHistory.zone_id(lat: lat, lon: lon, date: Date.parse(d)) }
+    assert_equal("Shanks/SL_1", zid.call(8.48, -13.23, "1920-06-15")) # Freetown: corrected
+    assert_equal("Shanks/SL_1", zid.call(8.48, -13.23, "1935-01-15")) # Freetown: -0:40 season
+    assert_equal("Shanks/SL_1", zid.call(7.96, -11.74, "1920-06-15")) # Bo (inland): whole-country zone
+    assert_nil(zid.call(8.48, -13.23, "1900-06-15")) # pre-1913 Freetown Mean Time -> defer (Phase 2)
+    assert_nil(zid.call(8.48, -13.23, "1942-06-15")) # converged to GMT from Dec 1941 -> defer
+  end
+
+  # Transcarpathia / Zakarpattia oblast (Uzhhorod, Mukachevo): a sub-national admin_1 carve.
+  # This far-western oblast was Austro-Hungarian / Czechoslovak / Hungarian -- all on Central
+  # European Time (+1:00, CEST summers 1940-44) -- until annexed to the USSR and put on Moscow
+  # time on 29 Jun 1945. Today it Links to Europe/Kyiv (+2:00/+3:00), so the default is 1-2 h
+  # fast across 1890-1945. UA_1 reproduces backzone Europe/Uzhgorod; 648/648 vs backzone.
+  def test_ua1_transcarpathia_cet
+    shanks = TzHistory::Zone.tzinfo("UA_1")
+    assert_equal(3600,  offset_of(shanks, "1920-01-15")) # CET +1:00 (Kyiv link = +2:00 EET, 1 h fast)
+    assert_equal(3600,  offset_of(shanks, "1935-07-15")) # CET +1:00 (Kyiv link = +3:00 MSK, 2 h fast)
+    assert_equal(7200,  offset_of(shanks, "1943-07-15")) # CEST +2:00 wartime summer
+    zid = ->(lat, lon, d) { TzHistory.zone_id(lat: lat, lon: lon, date: Date.parse(d)) }
+    assert_equal("Shanks/UA_1", zid.call(48.62, 22.29, "1920-06-15")) # Uzhhorod: corrected
+    assert_equal("Shanks/UA_1", zid.call(48.44, 22.72, "1935-06-15")) # Mukachevo: same oblast
+    assert_nil(zid.call(48.62, 22.29, "1885-06-15")) # pre-1890 town LMT -> defer (Phase 2)
+    assert_nil(zid.call(48.62, 22.29, "1945-09-15")) # after the 29 Jun 1945 MSK switch (= Kyiv) -> defer
+    assert_nil(zid.call(50.45, 30.52, "1935-06-15")) # Kyiv: not in Transcarpathia -> defer
+    assert_nil(zid.call(49.84, 24.03, "1935-06-15")) # Lviv: different oblast -> defer
+  end
+
+  # Ensenada municipality (northern Baja California): a sub-state rect carve. IANA models the
+  # Ensenada area (backzone America/Ensenada) with a history distinct from Tijuana -- Pacific
+  # vs Tijuana's Mountain in 1922-24, Mountain 1942-49, Pacific Standard no-DST afterward --
+  # but Links it to America/Tijuana. MX_1 reproduces backzone Ensenada over [1922, 1970);
+  # 576/576 vs backzone. Rect sits south of Tijuana/Rosarito and above the Baja Sur border.
+  def test_mx1_ensenada_baja
+    shanks = TzHistory::Zone.tzinfo("MX_1")
+    assert_equal(-28800, offset_of(shanks, "1923-07-15")) # PST -8:00 (Tijuana link = MST -7:00)
+    assert_equal(-25200, offset_of(shanks, "1946-07-15")) # MST -7:00 (Tijuana link = PST -8:00)
+    assert_equal(-28800, offset_of(shanks, "1960-07-15")) # PST -8:00 no DST (Tijuana link = PDT -7:00)
+    zid = ->(lat, lon, d) { TzHistory.zone_id(lat: lat, lon: lon, date: Date.parse(d)) }
+    assert_equal("Shanks/MX_1", zid.call(31.87, -116.60, "1923-06-15")) # Ensenada: corrected
+    assert_equal("Shanks/MX_1", zid.call(31.87, -116.60, "1960-07-15")) # Ensenada: no-DST summer
+    assert_nil(zid.call(31.87, -116.60, "1915-06-15")) # pre-1922 town LMT -> defer (Phase 2)
+    assert_nil(zid.call(31.87, -116.60, "1975-07-15")) # post-1970 DST divergence -> deferred
+    assert_nil(zid.call(32.53, -117.02, "1923-06-15")) # Tijuana: north of the rect -> defer (the link target)
+    assert_nil(zid.call(32.65, -115.47, "1946-06-15")) # Mexicali: north of the rect -> defer
+  end
 end
