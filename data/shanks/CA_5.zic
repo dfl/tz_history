@@ -1,0 +1,65 @@
+# Shanks International Atlas TIME TABLE, Montreal / St. Lawrence Lowlands, Quebec -- Eastern Time (EST -5:00) with Quebec provincial daylight saving (the Montreal rules), which diverged from Ontario (Toronto) DST in 1917, 1919-1926 and 1949-1950; vs default link to America/Toronto.
+# Atlas printed p.45 (PDF p.69), table #0.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:America/Montreal (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/CA_5 -4:54:16 -    LMT  1884
+                 -5:00    -    EST  1917 Mar 25  2:00
+                 -5:00    1:00 EDT  1917 Apr 24  0:00
+                 -5:00    -    EST  1918 Apr 14  2:00
+                 -5:00    1:00 EDT  1918 Oct 27  2:00
+                 -5:00    -    EST  1919 Mar 31  2:30
+                 -5:00    1:00 EDT  1919 Oct 25  2:30
+                 -5:00    -    EST  1920 May  2  2:30
+                 -5:00    1:00 EDT  1920 Oct  3  2:30
+                 -5:00    -    EST  1921 May  1  2:00
+                 -5:00    1:00 EDT  1921 Oct  2  2:30
+                 -5:00    -    EST  1922 Apr 30  2:00
+                 -5:00    1:00 EDT  1922 Oct  1  2:30
+                 -5:00    -    EST  1924 May 17  2:00
+                 -5:00    1:00 EDT  1924 Sep 28  2:30
+                 -5:00    -    EST  1925 May  3  2:00
+                 -5:00    1:00 EDT  1925 Sep 27  2:30
+                 -5:00    -    EST  1926 May  2  2:00
+                 -5:00    1:00 EDT  1926 Sep 26  2:30
+                 -5:00    -    EST  1927 May  1  0:00
+                 -5:00    1:00 EDT  1927 Sep 25  0:00
+                 -5:00    -    EST  1928 Apr 29  0:00
+                 -5:00    1:00 EDT  1928 Sep 30  0:00
+                 -5:00    -    EST  1929 Apr 28  0:00
+                 -5:00    1:00 EDT  1929 Sep 29  0:00
+                 -5:00    -    EST  1930 Apr 27  0:00
+                 -5:00    1:00 EDT  1930 Sep 28  0:00
+                 -5:00    -    EST  1931 Apr 26  0:00
+                 -5:00    1:00 EDT  1931 Sep 27  0:00
+                 -5:00    -    EST  1932 May  1  0:00
+                 -5:00    1:00 EDT  1932 Sep 25  0:00
+                 -5:00    -    EST  1933 Apr 30  0:00
+                 -5:00    1:00 EDT  1933 Oct  1  0:00
+                 -5:00    -    EST  1934 Apr 29  0:00
+                 -5:00    1:00 EDT  1934 Sep 30  0:00
+                 -5:00    -    EST  1935 Apr 28  0:00
+                 -5:00    1:00 EDT  1935 Sep 29  0:00
+                 -5:00    -    EST  1936 Apr 26  0:00
+                 -5:00    1:00 EDT  1936 Sep 27  0:00
+                 -5:00    -    EST  1937 Apr 25  0:00
+                 -5:00    1:00 EDT  1937 Sep 26  0:00
+                 -5:00    -    EST  1938 Apr 24  0:00
+                 -5:00    1:00 EDT  1938 Sep 25  0:00
+                 -5:00    -    EST  1939 Apr 30  0:00
+                 -5:00    1:00 EDT  1939 Sep 24  0:00
+                 -5:00    -    EST  1940 Apr 28  0:00
+                 -5:00    1:00 EDT  1942 Feb  9  3:00
+                 -5:00    1:00 EWT  1945 Aug 14 19:00
+                 -5:00    1:00 EPT  1945 Sep 30  2:00
+                 -5:00    -    EST  1946 Apr 28  2:00
+                 -5:00    1:00 EDT  1946 Sep 29  2:00
+                 -5:00    -    EST  1947 Apr 27  2:00
+                 -5:00    1:00 EDT  1947 Sep 28  2:00
+                 -5:00    -    EST  1948 Apr 25  2:00
+                 -5:00    1:00 EDT  1948 Sep 26  2:00
+                 -5:00    -    EST  1949 Apr 24  2:00
+                 -5:00    1:00 EDT  1949 Oct 30  2:00
+                 -5:00    -    EST  1950 Apr 30  2:00
+                 -5:00    1:00 EDT  1950 Oct 29  2:00
+                 -5:00    -    EST

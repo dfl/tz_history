@@ -586,4 +586,28 @@ class ZoneTest < Minitest::Test
     assert_nil(zid.call("1890-06-15")) # pre-1895 town LMT -> defer (Phase 2)
     assert_nil(zid.call("1980-07-15")) # converged post-1974 -> defer
   end
+
+  # Montreal / St. Lawrence Lowlands: the populated Quebec corridor is Linked to
+  # America/Toronto today but kept Quebec's own provincial DST (the "Montreal" rules).
+  # Both are base EST -5:00, so the divergence is DST TIMING: 1917, 1919-1926 (starkly ALL
+  # of summer 1923, when Montreal had NO DST while Toronto did), and 1949-1950 (Montreal fell
+  # back in October, Toronto in November). CA_5 reproduces backzone America/Montreal in full
+  # over [1917, 1951); 408/408 vs backzone. Corridor rect excludes the eastern AST strip and
+  # the Outaouais/Gatineau (kept clear of Ottawa across the river).
+  def test_ca5_montreal_quebec_dst
+    shanks = TzHistory::Zone.tzinfo("CA_5")
+    assert_equal(-18000, offset_of(shanks, "1923-07-15")) # summer 1923: EST -5:00 (Montreal had NO DST; Toronto link = EDT -4:00)
+    assert_equal(-14400, offset_of(shanks, "1921-06-15")) # within Montreal's own DST (May 1-Oct 2 1921): EDT -4:00
+    assert_equal(-14400, offset_of(shanks, "1918-07-15")) # 1918 federal DST: EDT -4:00
+    assert_equal(-18000, offset_of(shanks, "1949-11-15")) # Montreal fell back Oct 30; Toronto still EDT into late Nov
+    mtl = { lat: 45.50, lon: -73.57 } # Montreal
+    zid = ->(lat, lon, d) { TzHistory.zone_id(lat: lat, lon: lon, date: Date.parse(d)) }
+    assert_equal("Shanks/CA_5", zid.call(mtl[:lat], mtl[:lon], "1923-07-15")) # corrected
+    assert_equal("Shanks/CA_5", zid.call(46.81, -71.21, "1923-07-15")) # Quebec City: same corridor
+    assert_equal("Shanks/CA_5", zid.call(48.45, -68.53, "1923-07-15")) # Rimouski: lower St. Lawrence, still EST (not AST)
+    assert_nil(zid.call(mtl[:lat], mtl[:lon], "1900-06-15")) # pre-1917 both EST -> defer to Toronto
+    assert_nil(zid.call(mtl[:lat], mtl[:lon], "1960-07-15")) # converged from 1951 -> defer
+    assert_nil(zid.call(45.42, -75.70, "1923-07-15")) # Ottawa, Ontario: west of the rect -> defer
+    assert_nil(zid.call(50.22, -66.38, "1923-07-15")) # Sept-Iles: east of the rect (near AST strip) -> defer
+  end
 end
