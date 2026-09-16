@@ -125,11 +125,12 @@ row can only under-correct. 3 regression tests (Boreas River NY#49, Fort Plain N
 The ~32 still-unclassified towns are on continuous-DST tables (NY#38/#162 base = NY#1 = IANA,
 correctly deferred) or a few tiny/low-conf tables (NY#54/#175/#205/#222).
 
-**⚠ NEW FLAG — NY#2 possible pre-existing over-correction (not fixed; needs dedicated crop-verify):**
-the re-read shows NY#2 ran continuous EDT every summer 1921-1941 (like NY#1), but the shipped
-KNOWN `TABLE_EST[2]=1922..1927` asserts EST for those summers. If the re-read is right, NY#2
-towns are over-corrected 1922-1927. Left untouched (KNOWN tables were out of this pass's scope);
-crop-verify NY#2's exact band (it sits below the tall NY#1 in tt352 col0) before changing it.
+**✅ NY#2 pre-existing over-correction FIXED (2026-09-16).** Crop-verified NY#2's exact band
+(tt352 col0, below the tall NY#1): it ran continuous EDT every summer from 1921 (4/24/1921,
+4/30/1922, 4/29/1923... all EDT) = continuous DST = IANA. The shipped `TABLE_EST[2]=1922..1927`
+was asserting EST for summers the table actually observed EDT. Removed NY#2 from TABLE_EST (now
+continuous-DST/no-residual like NY#1). Isolated: exactly 1 town-era entry changed (Haines Falls,
+the only indexed NY#2 town, now defers in 1922-1927). 1 regression test.
 Also the original build slightly under-corrected the postwar tails of NY#28-36 (they kept EST
 1948-1954, not just to ~1947) — safe under-corrections, optionally refreshable from tt_verified.json.
 

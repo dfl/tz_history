@@ -903,6 +903,12 @@ class TzHistoryTest < Minitest::Test
   # original nest left unclassified are now crop-verified (tt 352-359) and carry their own
   # EST schedules. Same engine/windows -- these towns previously deferred to IANA. ---
 
+  def test_ny_table2_continuous_dst_defers
+    # NY#2 (Haines Falls, Catskills): crop-verified as CONTINUOUS DST (EDT every summer from
+    # 1921 = IANA). A prior over-correction asserted EST 1922-1927; it now correctly defers.
+    assert_nil TzHistory.for(lat: 42.1958, lon: -74.0975, date: "1925-07-15")
+  end
+
   def test_ny_tail_table49_prewar_est_then_defers_at_1937_adoption
     # Boreas River (Essex Co., NY #49): EST via NY#4 until adopting DST in 1937.
     assert_equal "Etc/GMT+5", TzHistory.for(lat: 43.9414, lon: -73.9636, date: "1930-07-15").identifier
