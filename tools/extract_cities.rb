@@ -29,6 +29,13 @@
 require "json"
 require "open3"
 
+# OCR backend: Apple Vision (tools/vision_ocr.swift) when --vision is passed -- on-device
+# (so the copyrighted atlas never leaves the machine) and far higher recall on the faint
+# 1978 print than tesseract, which systematically misreads 2-digit table numbers as "1".
+# Default (no --vision) stays tesseract, unchanged. Mirrors ocr_tables.rb's HAVE_VISION guard.
+VISION = File.expand_path("vision_ocr.swift", __dir__)
+HAVE_VISION = system("which", "swift", out: File::NULL, err: File::NULL) && File.exist?(VISION)
+
 dirs = ARGV.reject { |a| a.start_with?("--") }
 abort "usage: extract_cities.rb <render_dir> [more_dirs...] [--out=] [--legend] [--max-table=N] [--counties=FIPS.json]" if dirs.empty?
 flags = ARGV.grep(/\A--/).to_h { |a| k, v = a.sub("--", "").split("=", 2); [k, v || true] }
@@ -116,7 +123,61 @@ end
 # whose table# exceeds N as a bleed misparse (0 = no cap, unchanged for other states).
 $max_table = (flags["max-table"] || 0).to_i
 
+# --vision routes OCR through Apple Vision instead of tesseract. Vision returns positioned
+# tokens ("text\tx\ty\tw\th", origin TOP-left) rather than joined lines, so we reconstruct
+# line-oriented text the parser expects: cluster observations into rows by similar y (row
+# gap ~ token height), sort each row left-to-right by x, join with spaces, rows top-to-bottom.
+$use_vision = flags.key?("vision")
+abort "--vision requested but swift/vision_ocr.swift unavailable" if $use_vision && !HAVE_VISION
+
+# BLEED clip (vision only): the colw>1 strip captures the neighbouring column's left edge, so
+# each row picks up a faint name-only fragment of the next column at the far right ("Altamor"
+# after Abanaka's LMT). Tesseract barely reads that sliver, but Vision reads it cleanly and the
+# fragment then prepends to the NEXT town's name (a spurious 2-word name that dodges dedup) or
+# shifts the table# look-back. A city column's rightmost REAL content is its coord/LMT tokens;
+# the bleed sits in the gutter beyond them. So clip per crop at the right edge of the rightmost
+# coord/LMT observation (+margin): bleed name-fragments carry no coord pattern and always land
+# further right, so this drops them without touching any real token.
+COORDISH = /\d:\d\d:\d\d|\d[wWnNsS]\d|\d[wWnNsS]['`’]/
+
+def ocr_vision(img)
+  obs = Open3.capture2("swift", VISION, img).first.each_line.filter_map do |l|
+    f = l.chomp.split("\t")
+    next if f.size < 5
+
+    { text: f[0].strip, x: f[1].to_i, y: f[2].to_i, w: f[3].to_i, h: f[4].to_i }
+  end
+  return "" if obs.empty?
+
+  coordish = obs.select { |o| o[:text] =~ COORDISH }
+  unless coordish.empty?
+    clip_x = coordish.map { |o| o[:x] + o[:w] }.max + 60
+    obs.reject! { |o| o[:x] >= clip_x } # drop neighbour-column bleed fragments in the gutter
+  end
+  return "" if obs.empty?
+
+  # Cluster into rows: sort by y, start a new row when the vertical gap exceeds half the
+  # local token height (rows are ~1 line apart; tokens within a row share a baseline).
+  obs.sort_by! { |o| o[:y] }
+  rows = []
+  cur = []
+  cur_y = nil
+  obs.each do |o|
+    tol = [o[:h] / 2, 8].max
+    if cur_y && (o[:y] - cur_y).abs > tol
+      rows << cur
+      cur = []
+    end
+    cur << o
+    cur_y = o[:y]
+  end
+  rows << cur unless cur.empty?
+  rows.map { |r| r.sort_by { |o| o[:x] }.map { |o| o[:text] }.join(" ") }.join("\n")
+end
+
 def ocr(img)
+  return ocr_vision(img) if $use_vision
+
   Open3.capture2({ "OMP_THREAD_LIMIT" => "1" }, "tesseract", img, "stdout", "--psm", "6",
                  err: File::NULL).first
 end
