@@ -1085,6 +1085,19 @@ class TzHistoryTest < Minitest::Test
     assert_equal "Etc/GMT+5", TzHistory.for(lat: 40.1028, lon: -84.6331, date: "1935-07-15").identifier
   end
 
+  def test_ohio_last_two_tables_recovered
+    # The final two unread OH tables, classified from a fine-band re-render of tt 412-413
+    # (each wraps a page/column: OH#95 col2->col3 on pg412, OH#116 pg412->pg413). Closes DEFERRED #21.
+    #   OH#95 Alta (Richland Co.): Eastern EST no-DST (switched from Central 1920-06-06) until it
+    #   adopts local DST 1952-04-27 -- EST 1935 & 1948, defers from summer 1952 (had EDT, = IANA).
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 40.7325, lon: -82.5697, date: "1948-07-15").identifier
+    assert_nil TzHistory.for(lat: 40.7325, lon: -82.5697, date: "1955-07-15")
+    #   OH#116 Cambridge (Guernsey Co.): EST no-DST from 1919 -> US#5 adoption 1958-04-27
+    #   (matches its New-Philadelphia-area neighbour OH#115) -- EST 1955, defers 1958.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 40.0333, lon: -81.5833, date: "1955-07-15").identifier
+    assert_nil TzHistory.for(lat: 40.0333, lon: -81.5833, date: "1958-07-15")
+  end
+
   def test_cleveland_metro_defers_to_iana
     # Big-city DST tables (Cleveland/OH#26) observed DST that IANA models -> defer, no override.
     assert_nil TzHistory.for(lat: 41.4993, lon: -81.6944, date: "1935-07-15")
