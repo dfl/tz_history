@@ -1,0 +1,8 @@
+# Shanks International Atlas TIME TABLE, China -- Long-shu (Chongqing) Time zone: +7:00 from 1 Jan 1928 to 1 May 1980; vs default link to Asia/Shanghai (+8:00), a full hour fast.
+# Atlas printed p.81 (PDF p.105), table #9.
+# A dated transition list re-expressed as a zic source (the reference tzdata
+# compiler input). Cross-check: IANA:Asia/Chongqing (backzone).
+# Rebuild the compiled TZif with:  rake shanks:build
+Zone Shanks/CN_1 7:06:20  -    LMT  1928 Jan 1
+                 7:00     -    +07  1980 May  1  0:00
+                 8:00     -    CST

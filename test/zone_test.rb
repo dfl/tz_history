@@ -686,4 +686,30 @@ class ZoneTest < Minitest::Test
     assert_nil(zid.call(32.53, -117.02, "1923-06-15")) # Tijuana: north of the rect -> defer (the link target)
     assert_nil(zid.call(32.65, -115.47, "1946-06-15")) # Mexicali: north of the rect -> defer
   end
+
+  # China -- the Long-shu (Chongqing) zone: Shanks Time Table #9 (105E00 = +7:00), which IANA
+  # models as Asia/Chongqing. Its default is a bare Link to Asia/Shanghai (+8:00), so the whole
+  # zone is a full hour fast across 1928-1980. CN_1 reproduces backzone Asia/Chongqing (960/960)
+  # over the six divisions that are uniformly Time Table #9 in the gazetteer (Sichuan/Chongqing,
+  # Yunnan, Guizhou, Guangxi, Shaanxi, Ningxia). The zone's split edges (Gansu, west Inner
+  # Mongolia, Qinghai, Hainan, Guangdong counties) and the other four zones are deferred.
+  def test_cn1_chongqing_longshu
+    shanks = TzHistory::Zone.tzinfo("CN_1")
+    assert_equal(25200, offset_of(shanks, "1935-07-15")) # +7:00 (Shanghai default = +8:00)
+    assert_equal(25200, offset_of(shanks, "1950-07-15")) # +7:00, no DST in this zone
+    assert_equal(28800, offset_of(shanks, "1981-07-15")) # +8:00 from 1 May 1980 (converged)
+    zid = ->(lat, lon, d) { TzHistory.zone_id(lat: lat, lon: lon, date: Date.parse(d)) }
+    assert_equal("Shanks/CN_1", zid.call(30.66, 104.07, "1950-06-15")) # Chengdu (Sichuan): corrected
+    assert_equal("Shanks/CN_1", zid.call(29.56, 106.55, "1950-06-15")) # Chongqing: corrected
+    assert_equal("Shanks/CN_1", zid.call(25.04, 102.72, "1950-06-15")) # Kunming (Yunnan): corrected
+    assert_equal("Shanks/CN_1", zid.call(26.65, 106.63, "1950-06-15")) # Guiyang (Guizhou): corrected
+    assert_equal("Shanks/CN_1", zid.call(22.82, 108.32, "1950-06-15")) # Nanning (Guangxi): corrected
+    assert_equal("Shanks/CN_1", zid.call(34.27, 108.94, "1950-06-15")) # Xi'an (Shaanxi): corrected
+    assert_equal("Shanks/CN_1", zid.call(38.49, 106.23, "1950-06-15")) # Yinchuan (Ningxia): corrected
+    assert_nil(zid.call(31.23, 121.47, "1950-06-15")) # Shanghai: the +8:00 default -> defer
+    assert_nil(zid.call(37.87, 112.55, "1950-06-15")) # Taiyuan (Shanxi=23, +8): defer, not Shaanxi
+    assert_nil(zid.call(36.06, 103.83, "1950-06-15")) # Lanzhou (Gansu): split division -> Phase 2
+    assert_nil(zid.call(30.66, 104.07, "1925-06-15")) # pre-1928 town LMT -> defer (Phase 2)
+    assert_nil(zid.call(30.66, 104.07, "1981-06-15")) # post-1980 converged to +8:00 -> defer
+  end
 end
