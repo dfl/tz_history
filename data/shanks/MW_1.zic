@@ -1,0 +1,14 @@
+# IANA backzone (almanac-sourced), Malawi (Blantyre / Zomba) -- Zomba Mean Time
+# +2:21:10 from 24 Jul 1911, refined to +2:21 in 1914, then CAT (+2:00) from 1 Jul 1925;
+# vs default link to Africa/Maputo (+2:10:18 LMT -> +2:00 already at 1909), which is ~21 min
+# slow across 1911-1925.
+#
+# NOT Shanks-page-sourced: reproduces IANA's own opt-in backzone Africa/Blantyre exactly
+# (the Sierra Leone / Bahrain discipline -- the sourced primary here is IANA's backzone).
+# Malawi is a bare Link to Maputo in the default build, so this ~21-min sustained divergence
+# lives only in backzone. Window [1911-07-24, 1925-07-01); converges with Maputo at CAT.
+# Rebuild the compiled TZif with:  rake shanks:build.  Cross-check: IANA:Africa/Blantyre.
+Zone Shanks/MW_1 2:20:00  -    LMT   1911 Jul 24
+                 2:21:10  -    ZMT   1914 Jun 30
+                 2:21     -    ZMT   1925 Jul  1
+                 2:00     -    CAT

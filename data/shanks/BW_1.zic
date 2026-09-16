@@ -1,0 +1,15 @@
+# IANA backzone (almanac-sourced), Botswana (Gaborone) -- SAST (+1:30) from 1885, CAT
+# (+2:00) from Mar 1903, a single wartime summer at CAST (+3:00) 19 Sep 1943..19 Mar 1944,
+# then CAT; vs default link to Africa/Maputo (+2:10:18 LMT -> +2:00 at 1909, no DST ever).
+# Botswana thus led/trailed the default by up to ~40 min across 1885-1909 and ran a full
+# hour AHEAD during the 1943-44 war summer that Maputo never observed.
+#
+# NOT Shanks-page-sourced: reproduces IANA's own backzone Africa/Gaborone exactly (the
+# Sierra Leone / Bahrain discipline). Window [1885-01-01, 1944-03-20); converges with
+# Maputo at CAT afterward.
+# Rebuild the compiled TZif with:  rake shanks:build.  Cross-check: IANA:Africa/Gaborone.
+Zone Shanks/BW_1 1:43:40  -    LMT   1885
+                 1:30     -    SAST  1903 Mar
+                 2:00     -    CAT   1943 Sep 19  2:00
+                 2:00     1:00 CAST  1944 Mar 19  2:00
+                 2:00     -    CAT

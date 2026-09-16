@@ -63,6 +63,20 @@ only) · `pending` (not yet worked). **Resolution** — `polygon` (country-wide)
 | Seychelles | 314 | 338 | 1 | override | polygon | `backzone` Indian/Mahe — **1200/1200** mid-months 1870–1969 | ✅ done (SC_1); +4:00; shipped IANA ordinance date 1 Jan 1907 (Shanks prints 1 Jun 1906 → deferred); default links to **Dubai** |
 | Kenya | 250 | 274 | — | iana-sufficient | — | `Africa/Nairobi` is a FULL real zone and the cluster's link ANCHOR | ✅ verified no-op |
 
+**Southern/Central Africa CAT cluster** (2026-09) — eight Link-demoted countries (6→`Africa/Maputo`, 2→`Africa/Johannesburg`). Six shipped as **backzone reproductions** (not Shanks-page-sourced — the Sierra Leone / Bahrain discipline); Rwanda & Burundi are near-no-ops (deferred). The Johannesburg-linked pair diverge because Joburg ran the SA war-DST rule (+3:00) in the summers of 1942-43 and 1943-44.
+
+| Country | Printed p. | PDF p. | Tables | Disposition | Resolution | IANA cross-check | Status |
+| Malawi | — | — | — (backzone repro) | override | polygon | `backzone` Africa/Blantyre — **216/216** mid-months 1910–1927 | ✅ done (MW_1); Zomba Mean Time +2:21 (1911–1925) → CAT; ~21 min fast vs default Maputo (+2:00 from 1909); window [1911-07-24, 1925-07-01) |
+| Botswana | — | — | — (backzone repro) | override | polygon | `backzone` Africa/Gaborone — **756/756** mid-months 1884–1946 | ✅ done (BW_1); SAST +1:30 (1885) → CAT +2:00 (1903) → one war summer CAST +3:00 (1943-44); default Maputo up to 40 min off pre-1909 + 1 h during the war summer; window [1885, 1944-03-20) |
+| Eswatini (Swaziland) | — | — | — (backzone repro) | override | polygon | `backzone` Africa/Mbabane — **672/672** mid-months 1891–1946 | ✅ done (SZ_1); SAST +2:00, NO war DST; ~34 min ahead of default Joburg pre-1903 + 1 h behind across BOTH war summers (1942-43, 1943-44); window [1892-02-08, 1944-03-20) |
+| Lesotho | — | — | — (backzone repro) | override | polygon | `backzone` Africa/Maseru — **672/672** mid-months 1891–1946 | ✅ done (LS_1); SAST +2:00 with only the SECOND war summer (1943-44); 1 h behind default Joburg across the FIRST war summer (1942-09-20 → 1943-03-21); window [1892-02-08, 1943-03-21) |
+| Zimbabwe | — | — | — (backzone repro) | override | polygon | `backzone` Africa/Harare — **120/120** mid-months 1902–1911 | ✅ done (ZW_1); CAT +2:00 from Mar 1903, ~10 min fast vs default Maputo (LMT until 1909); thin window [1903-03-01, 1909-01-01) |
+| Zambia | — | — | — (backzone repro) | override | polygon | `backzone` Africa/Lusaka — **120/120** mid-months 1902–1911 | ✅ done (ZM_1); CAT +2:00 from Mar 1903, ~10 min fast vs default Maputo (LMT until 1909); thin window [1903-03-01, 1909-01-01) |
+| Rwanda | — | — | — | deferred | — | `backzone` Africa/Kigali — LMT +2:00:16 ≈ +2:00 | ⏸ near-no-op; only ~10 min vs Maputo pre-1909, then ≈16 s → defer |
+| Burundi | — | — | — | deferred | — | `backzone` Africa/Bujumbura — LMT +1:57:28 → +2:00 (1890) | ⏸ near-no-op; only ~10-13 min vs Maputo pre-1909 → defer |
+| Mozambique | — | — | — | iana-sufficient | — | `Africa/Maputo` is a FULL real zone and the cluster's +2 link ANCHOR | ✅ verified no-op |
+| South Africa | — | — | — | iana-sufficient | — | `Africa/Johannesburg` is a FULL real zone and the war-DST link ANCHOR | ✅ verified no-op |
+
 **Phase-1 sub-hour European mean-time cluster** (worklist order): Iceland ✅ · Ireland
 ❌ no-op · Luxembourg ✅ · Norway ✅ · Sweden ✅ · Denmark ✅. Page map in
 `research/intl/atlas_pages.tsv`.

@@ -1,0 +1,15 @@
+# IANA backzone (almanac-sourced), Lesotho (Maseru) -- Maseru Mean Time (+1:50) until Mar
+# 1903, then SAST (+2:00), with a SINGLE wartime summer at +3:00 (19 Sep 1943..19 Mar 1944);
+# vs default link to Africa/Johannesburg, which ran the SA war-DST rule for TWO summers
+# (1942-43 and 1943-44). Lesotho did NOT observe the first war summer, so it stands 1 hour
+# BEHIND the default across 1942-09-20..1943-03-21; it also led the +1:30 default by ~20 min
+# before Mar 1903.
+#
+# NOT Shanks-page-sourced: reproduces IANA's own backzone Africa/Maseru exactly (the Sierra
+# Leone / Bahrain discipline). Window [1892-02-08, 1943-03-21); from the second war summer
+# on, Maseru matches Johannesburg.
+# Rebuild the compiled TZif with:  rake shanks:build.  Cross-check: IANA:Africa/Maseru.
+Zone Shanks/LS_1 1:50:00  -    LMT   1903 Mar
+                 2:00     -    SAST  1943 Sep 19  2:00
+                 2:00     1:00 SAST  1944 Mar 19  2:00
+                 2:00     -    SAST

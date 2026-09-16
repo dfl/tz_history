@@ -754,4 +754,67 @@ class ZoneTest < Minitest::Test
     assert_nil(zid.call(39.47, 75.99, "1927-06-15")) # pre-1928 town LMT -> defer (Phase 2)
     assert_nil(zid.call(39.47, 75.99, "1981-06-15")) # post-1980 -> defer
   end
+
+  # --- Southern/Central Africa CAT cluster (default-Linked to Maputo / Johannesburg) ----
+
+  # Malawi MW #1 (Blantyre / Zomba) -- Zomba Mean Time (+2:21) 1911-1925 then CAT. Default
+  # links Africa/Blantyre to Africa/Maputo (+2:00 from 1909), so it is ~21 min slow across
+  # 1911-1925. MW_1 == backzone Africa/Blantyre 216/216 mid-months 1910-1927.
+  def test_mw1_malawi_zomba
+    shanks = TzHistory::Zone.tzinfo("MW_1")
+    assert_equal(8470, offset_of(shanks, "1912-06-15")) # ZMT +2:21:10 (default Maputo = +2:00)
+    assert_equal(8460, offset_of(shanks, "1920-06-15")) # ZMT +2:21 (default Maputo = +2:00)
+    zid = ->(lat, lon, d) { TzHistory.zone_id(lat: lat, lon: lon, date: Date.parse(d)) }
+    assert_equal("Shanks/MW_1", zid.call(-15.79, 35.01, "1920-06-15")) # Blantyre: corrected
+    assert_nil(zid.call(-15.79, 35.01, "1930-06-15")) # both +2:00 after 1925 -> defer
+  end
+
+  # Eswatini SZ #1 (Mbabane) -- SAST (+2:00) with NO wartime DST. Default links to
+  # Africa/Johannesburg, which ran +3:00 in the summers of 1942-43 and 1943-44, so the
+  # default is a full hour fast across both war summers. SZ_1 == backzone Africa/Mbabane
+  # 672/672 mid-months 1891-1946.
+  def test_sz1_eswatini_mbabane
+    shanks = TzHistory::Zone.tzinfo("SZ_1")
+    assert_equal(7200, offset_of(shanks, "1943-01-15")) # +2:00 (default Joburg war DST = +3:00)
+    assert_equal(7200, offset_of(shanks, "1944-01-15")) # +2:00 (default Joburg war DST = +3:00)
+    zid = ->(lat, lon, d) { TzHistory.zone_id(lat: lat, lon: lon, date: Date.parse(d)) }
+    assert_equal("Shanks/SZ_1", zid.call(-26.32, 31.13, "1943-01-15")) # Mbabane: corrected
+  end
+
+  # Botswana BW #1 (Gaborone) -- SAST (+1:30) 1885, CAT (+2:00) 1903, a single war summer
+  # at CAST (+3:00) 1943-44. Default links to Africa/Maputo (LMT +2:10:18 until 1909, +2:00
+  # after, no DST). BW_1 == backzone Africa/Gaborone 756/756 mid-months 1884-1946.
+  def test_bw1_botswana_gaborone
+    shanks = TzHistory::Zone.tzinfo("BW_1")
+    assert_equal(5400,  offset_of(shanks, "1900-06-15")) # SAST +1:30 (default Maputo = LMT +2:10)
+    assert_equal(10800, offset_of(shanks, "1944-01-15")) # CAST +3:00 war summer (default Maputo = +2:00)
+    zid = ->(lat, lon, d) { TzHistory.zone_id(lat: lat, lon: lon, date: Date.parse(d)) }
+    assert_equal("Shanks/BW_1", zid.call(-24.65, 25.91, "1944-01-15")) # Gaborone: corrected
+  end
+
+  # Lesotho LS #1 (Maseru) -- SAST (+2:00) but only the SECOND war summer (1943-44). Default
+  # links to Africa/Johannesburg, which ran TWO war summers, so the default is a full hour
+  # fast across the first (1942-43) that Lesotho did not observe. LS_1 == backzone
+  # Africa/Maseru 672/672 mid-months 1891-1946.
+  def test_ls1_lesotho_maseru
+    shanks = TzHistory::Zone.tzinfo("LS_1")
+    assert_equal(7200,  offset_of(shanks, "1943-01-15")) # +2:00 first war summer (default Joburg = +3:00)
+    assert_equal(10800, offset_of(shanks, "1944-01-15")) # +3:00 second war summer (matches Joburg)
+    zid = ->(lat, lon, d) { TzHistory.zone_id(lat: lat, lon: lon, date: Date.parse(d)) }
+    assert_equal("Shanks/LS_1", zid.call(-29.31, 27.48, "1943-01-15")) # Maseru: corrected
+  end
+
+  # Zimbabwe ZW #1 (Harare) & Zambia ZM #1 (Lusaka) -- CAT (+2:00) from Mar 1903, six years
+  # before the default link to Africa/Maputo left LMT (+2:10:18) for +2:00 in 1909, so the
+  # default is ~10 min fast across 1903-1909. Thin sub-hour windows; == backzone 120/120.
+  def test_zw1_zimbabwe_zambia
+    zw = TzHistory::Zone.tzinfo("ZW_1")
+    zm = TzHistory::Zone.tzinfo("ZM_1")
+    assert_equal(7200, offset_of(zw, "1905-06-15")) # CAT +2:00 (default Maputo = LMT +2:10:18)
+    assert_equal(7200, offset_of(zm, "1905-06-15")) # CAT +2:00 (default Maputo = LMT +2:10:18)
+    zid = ->(lat, lon, d) { TzHistory.zone_id(lat: lat, lon: lon, date: Date.parse(d)) }
+    assert_equal("Shanks/ZW_1", zid.call(-17.83, 31.05, "1905-06-15")) # Harare: corrected
+    assert_equal("Shanks/ZM_1", zid.call(-15.42, 28.28, "1905-06-15")) # Lusaka: corrected
+    assert_nil(zid.call(-17.83, 31.05, "1915-06-15")) # both +2:00 after 1909 -> defer
+  end
 end

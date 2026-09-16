@@ -1,0 +1,13 @@
+# IANA backzone (almanac-sourced), Eswatini / Swaziland (Mbabane) -- Mbabane Mean Time
+# (+2:04:24) until Mar 1903, then SAST (+2:00) with NO wartime daylight saving; vs default
+# link to Africa/Johannesburg (LMT +1:52 -> +1:30 SAST 1892 -> +2:00 with the SA war-DST
+# rule +3:00 in the summers of 1942-43 and 1943-44). Eswatini kept +2:00 through both war
+# summers, so it stands 1 hour BEHIND the default across 1942-09-20..1943-03-21 and
+# 1943-09-19..1944-03-19; it also led the +1:30 default by ~34 min before Mar 1903.
+#
+# NOT Shanks-page-sourced: reproduces IANA's own backzone Africa/Mbabane exactly (the
+# Sierra Leone / Bahrain discipline). Window [1892-02-08, 1944-03-20); both are +2:00 with
+# no further divergence afterward.
+# Rebuild the compiled TZif with:  rake shanks:build.  Cross-check: IANA:Africa/Mbabane.
+Zone Shanks/SZ_1 2:04:24  -    LMT   1903 Mar
+                 2:00     -    SAST

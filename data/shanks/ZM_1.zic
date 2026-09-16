@@ -1,0 +1,11 @@
+# IANA backzone (almanac-sourced), Zambia (Lusaka) -- Lusaka Mean Time (+1:53:08) until Mar
+# 1903, then CAT (+2:00); vs default link to Africa/Maputo (+2:10:18 LMT -> +2:00 only at
+# 1909). Zambia standardized on +2:00 six years before the default left LMT, so it stands
+# ~10 min slow relative to the default across 1903-1909.
+#
+# NOT Shanks-page-sourced: reproduces IANA's own backzone Africa/Lusaka exactly (the Sierra
+# Leone / Bahrain discipline). Thin sub-hour window [1903-03-01, 1909-01-01); converges with
+# Maputo at CAT afterward.
+# Rebuild the compiled TZif with:  rake shanks:build.  Cross-check: IANA:Africa/Lusaka.
+Zone Shanks/ZM_1 1:53:08  -    LMT   1903 Mar
+                 2:00     -    CAT
