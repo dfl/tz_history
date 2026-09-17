@@ -1219,7 +1219,22 @@ class TzHistoryTest < Minitest::Test
   def test_oregon_edge_years_and_malheur_defer
     assert_nil TzHistory.for(lat: 45.5152, lon: -122.6784, date: "1948-07-15") # Portland had DST 1948
     assert_nil TzHistory.for(lat: 45.5152, lon: -122.6784, date: "1962-07-15") # DST resumed by 1962
-    assert_nil TzHistory.for(lat: 44.0266, lon: -116.9629, date: "1955-07-15") # Malheur = Mountain
+    assert_nil TzHistory.for(lat: 44.0266, lon: -116.9629, date: "1955-07-15") # Malheur = Mountain, MST
+  end
+
+  def test_malheur_observed_mdt_summers_1963_1965
+    # DEFERRED #28: Malheur County observed Mountain Daylight Time in the summers of 1963-1965,
+    # while IANA America/Boise was still MST no-DST (Boise adopted DST in 1967). Only those three
+    # summers need a correction; 1966 (no OR#1 DST row) and 1967+ (Boise has MDT) defer.
+    lat, lon = 43.982, -117.238 # Vale, Malheur
+    %w[1963-07-15 1964-07-15 1965-07-15].each do |d|
+      tz = TzHistory.for(lat:, lon:, date: d)
+      assert_equal "Etc/GMT+6", tz.identifier, "Malheur should be MDT on #{d}"
+      assert_equal(-6 * 3600, offset_of(tz, d))
+    end
+    assert_nil TzHistory.for(lat:, lon:, date: "1964-01-15") # winter MST -> Boise
+    assert_nil TzHistory.for(lat:, lon:, date: "1966-07-15") # no OR#1 DST row -> Boise MST
+    assert_nil TzHistory.for(lat:, lon:, date: "1968-07-15") # Boise now has MDT -> defer
   end
 
   # --- Pennsylvania rural-EST cohort nest (tt PDF 448-452, a 5-page span; tables PA#1-123) ---
