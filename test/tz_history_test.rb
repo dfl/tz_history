@@ -1306,9 +1306,9 @@ class TzHistoryTest < Minitest::Test
 
   # --- South Dakota verify-only two-zone (tt PDF 505; tables SD#1-4) ---
   # SD#1 (426t, 69%, east) = pure CST no-DST -> US#1 1967; SD#3 (181t, west) = pure MST no-DST
-  # (= IANA America/Denver for 1921-1964). Flat Etc/GMT+6 over the east confirmed; the far-west
-  # Mountain warn (feat[4]) correctly defers SD#3 to IANA. No bleed (unlike NE/ND). Slivers
-  # (SD#3 vs IANA-Denver spurious MDT 1920/1965/1966) -> DEFERRED.
+  # (= IANA America/Denver for 1921-1964). Flat Etc/GMT+6 over the east confirmed. The far-west
+  # Mountain counties now carry a flat MST override (DEFERRED #30, resolved) so IANA's spurious
+  # MDT in 1920/1965/1966 is corrected; the war years still defer (IANA = MWT).
   def test_south_dakota_east_is_fixed_cst
     tz = TzHistory.for(lat: 43.5446, lon: -96.7311, date: "1930-07-15") # Sioux Falls
     assert_equal "Etc/GMT+6", tz.identifier
@@ -1317,8 +1317,20 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 43.5446, lon: -96.7311, date: "1968-07-15") # post US#1 -> IANA
   end
 
-  def test_south_dakota_far_west_mountain_defers
-    assert_nil TzHistory.for(lat: 44.0805, lon: -103.2310, date: "1930-07-15") # Rapid City (SD#3) = Mountain -> IANA Denver
+  def test_south_dakota_far_west_mountain_is_mst_not_spurious_mdt
+    # DEFERRED #30: far-west SD (Shanks SD#3) was pure MST no-DST; IANA America/Denver applies
+    # spurious MDT in 1920/1965/1966. The flat MST override corrects those and is a no-op where
+    # IANA already gives MST (1921-1964); the war years defer to IANA (MWT).
+    lat, lon = 44.0805, -103.2310 # Rapid City (SD#3)
+    %w[1920-07-15 1930-07-15 1965-07-15 1966-07-15].each do |d|
+      tz = TzHistory.for(lat:, lon:, date: d)
+      assert_equal "Etc/GMT+7", tz.identifier, "far-west SD should be MST on #{d}"
+      assert_equal(-7 * 3600, offset_of(tz, d))
+    end
+    assert_nil TzHistory.for(lat:, lon:, date: "1943-07-15") # war -> defer to IANA MWT
+    assert_nil TzHistory.for(lat:, lon:, date: "1968-07-15") # post US#1 -> IANA
+    # Central SD unchanged (still CST) -- the override only covers the far-west Mountain geometry.
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 44.3683, lon: -100.3510, date: "1965-07-15").identifier # Pierre
   end
 
   # --- Tennessee two-zone, verify-confirmed (tt PDF 510-511; existing per-county treatment) ---
