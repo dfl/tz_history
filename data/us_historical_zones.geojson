@@ -3560,6 +3560,45 @@
       {
         "type": "Feature",
         "properties": {
+        "region": "Far-west Utah Pacific cluster (1919-1942, Shanks UT #2): the Nevada-border west-desert communities (Ibapah/Gandy/Garrison/Eskdale/Etna/Silsbee/Trout Creek) kept Pacific Standard Time (-8) like adjacent Nevada, while IANA models all Utah as Mountain (America/Denver).",
+        "kind": "override",
+        "zone": "Etc/GMT+8",
+        "shanks": null,
+        "from_date": "1919-10-26",
+        "until_date": "1942-02-09",
+        "note": "This far-west Utah (Nevada-border) location kept Pacific Standard Time, aligned with Nevada, while IANA models all of Utah as Mountain. Applied PST (-8) -- verify the birth record."
+        },
+        "geometry": {"type":"MultiPolygon","coordinates":[[[[-114.05,38.7],[-113.8,38.7],[-113.8,41.8],[-114.05,41.8],[-114.05,38.7]]]]}
+      },
+      {
+        "type": "Feature",
+        "properties": {
+        "region": "Far-west Utah Pacific cluster (1942-1945, Shanks UT #2): the Nevada-border west-desert communities (Ibapah/Gandy/Garrison/Eskdale/Etna/Silsbee/Trout Creek) kept Pacific War Time (-7) like adjacent Nevada, while IANA models all Utah as Mountain (America/Denver).",
+        "kind": "override",
+        "zone": "Etc/GMT+7",
+        "shanks": null,
+        "from_date": "1942-02-09",
+        "until_date": "1945-09-30",
+        "note": "This far-west Utah (Nevada-border) location kept Pacific time; during WWII it observed Pacific War Time (-7). IANA models Utah as Mountain (it would give Mountain War Time, -6, here). Applied PWT (-7) -- verify the birth record."
+        },
+        "geometry": {"type":"MultiPolygon","coordinates":[[[[-114.05,38.7],[-113.8,38.7],[-113.8,41.8],[-114.05,41.8],[-114.05,38.7]]]]}
+      },
+      {
+        "type": "Feature",
+        "properties": {
+        "region": "Far-west Utah Pacific cluster (1945-1966, Shanks UT #2): the Nevada-border west-desert communities (Ibapah/Gandy/Garrison/Eskdale/Etna/Silsbee/Trout Creek) kept Pacific Standard Time (-8) like adjacent Nevada, while IANA models all Utah as Mountain (America/Denver).",
+        "kind": "override",
+        "zone": "Etc/GMT+8",
+        "shanks": null,
+        "from_date": "1945-09-30",
+        "until_date": "1966-01-01",
+        "note": "This far-west Utah (Nevada-border) location kept Pacific Standard Time, aligned with Nevada, while IANA models all of Utah as Mountain. Applied PST (-8) -- verify the birth record."
+        },
+        "geometry": {"type":"MultiPolygon","coordinates":[[[[-114.05,38.7],[-113.8,38.7],[-113.8,41.8],[-114.05,41.8],[-114.05,38.7]]]]}
+      },
+      {
+        "type": "Feature",
+        "properties": {
         "region": "Utah standard time, no DST -- Shanks UT #1 (pre-war)",
         "kind": "override",
         "zone": "Etc/GMT+7",

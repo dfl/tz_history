@@ -1359,6 +1359,22 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 40.7608, lon: -111.8910, date: "1968-07-15") # post US#1 -> IANA
   end
 
+  def test_far_west_utah_nevada_border_was_pacific
+    # DEFERRED #31: the Nevada-border west-desert communities (Shanks UT #2) kept Pacific time
+    # while IANA models all Utah as Mountain. A thin border strip (lon -114.05..-113.80)
+    # containing exactly the 7 genuine far-west towns -> PST (-8); it split-fixes the war years
+    # (PWT -7) and defers the messy post-1966 PDT/MDT transition. Everything east stays MST.
+    lat, lon = 40.037, -113.984 # Ibapah
+    tz = TzHistory.for(lat:, lon:, date: "1930-07-15")
+    assert_equal "Etc/GMT+8", tz.identifier
+    assert_equal(-8 * 3600, offset_of(tz, "1930-07-15")) # PST, not IANA's Mountain
+    assert_equal(-7 * 3600, offset_of(TzHistory.for(lat:, lon:, date: "1943-07-15"), "1943-07-15")) # PWT
+    assert_equal(-8 * 3600, offset_of(TzHistory.for(lat:, lon:, date: "1965-07-15"), "1965-07-15")) # PST to 1966
+    assert_nil TzHistory.for(lat:, lon:, date: "1967-07-15") # post-1966 transition -> defer
+    # Just east of the strip stays Mountain (no contamination of central Utah).
+    assert_equal "Etc/GMT+7", TzHistory.for(lat: 39.35, lon: -112.58, date: "1930-07-15").identifier
+  end
+
   # --- Vermont rural EST no-DST (tt PDF 560-561; VT#1 dominant) ---
   # VT#1 (301 towns, 74%, statewide incl. Burlington/Montpelier) = pure EST no-DST -> US#2 1955,
   # while IANA America/New_York applies EDT every summer. The early-DST SE minority (Brattleboro
