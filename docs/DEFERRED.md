@@ -75,9 +75,14 @@ subset of towns/years · `bug` = a shipped feature is wrong and needs a fix ·
   1947-1955, NY-style safety gate on the explicit US#/EDT terminal). Before/after over 7434
   (town,date) cells: **1674 EST cells, every one within its table's verified no-DST span, 0
   over-corrections, 0 concrete-zone flips**; New Castle DST-table towns gain a verify-note
-  (offset unchanged = IANA). 3 tests. Sussex was already a correct flat pre-war EST override
-  (`until 1942-02-09`) and is left untouched — a further postwar-holdout refinement of Sussex
-  (DE#3/#4/#5/#6/#16 towns) is an optional follow-up.
+  (offset unchanged = IANA). Sussex was already a correct flat pre-war EST override
+  (`until 1942-02-09`); it was then **folded into the same statewide nest (2026-09-16)**,
+  recovering the Sussex postwar holdouts — most notably the **DE#16 plurality (51 towns) that
+  kept EST until 1955** (previously deferred, read 1 h fast every 1946-1954 summer). Pre-war
+  EST preserved exactly (0 cells lost); the one coordinate collision (Milford Plaza DE#3 /
+  Weitsman Acres DE#9, disagree on 1946) merges to the agreed pre-war EST and defers the
+  contested summer → 0 over-corrections. 5 DE tests; the 3 DE features collapse to one unified
+  statewide `split`.
 - **Colorado** — Denver-metro straddle counties (Adams/Douglas/Jefferson + Broomfield)
   shipped as `warn`, not corrected. minority / low (already flagged to users).
 - **Maine** — the 7-window cohort nest (2026-09) coalesces adoption boundaries to 6 years
@@ -193,8 +198,9 @@ The full-atlas index (`research/index/<ST>/`, git-ignored) + `tools/analyze_spli
   (DE#1) defers. Crop-verified tt PDF 84.
 - **DE Kent** — ✅ **DONE (2026-09-16):** same nest; the old town-by-town warn is replaced by
   per-table EST spans (incl. postwar holdouts DE#3/#4/#6/#8/#11/#16).
-- **DE Sussex** — flat pre-war EST override left as-is (correct). Optional: a postwar-holdout
-  refinement (extend DE#3/#4/#5/#6/#16 Sussex towns into 1947-1955) via the same nest.
+- **DE Sussex** — ✅ **DONE (2026-09-16):** folded into the same statewide nest; the postwar
+  holdouts (DE#3/#4/#5/#6/#16, incl. the 51-town DE#16 plurality to 1955) now recover their
+  1946-1955 EST. Pre-war EST preserved exactly.
 - **CO Jefferson / LA c38** — spatially separable BUT must first confirm the two tables
   differ in DST/offset (separability alone ≠ a meaningful split). Pending table-semantics.
 

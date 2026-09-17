@@ -131,8 +131,22 @@ class TzHistoryTest < Minitest::Test
     assert_equal(-5 * 3600, offset_of(tz, "1925-07-15")) # EST, not EDT
   end
 
-  def test_rural_sussex_delaware_after_war_defers_to_iana
-    assert_nil TzHistory.for(lat: 38.6901, lon: -75.3855, date: "1948-07-15")
+  def test_sussex_de16_plurality_is_a_postwar_est_holdout_until_1955
+    # Cave Colony (Sussex, Shanks DE#16 = the county plurality, 51 towns): kept EST through
+    # the pre-war years AND postwar until adopting US DST in 1955. The old flat Sussex
+    # override stopped at WWII, so these populous mid-century summers silently deferred.
+    tz = TzHistory.for(lat: 38.7639, lon: -75.2903, date: "1952-07-15")
+    assert_equal "Etc/GMT+5", tz.identifier
+    assert_equal(-5 * 3600, offset_of(tz, "1952-07-15"))
+    assert_nil TzHistory.for(lat: 38.7639, lon: -75.2903, date: "1955-07-15") # DST from 1955
+  end
+
+  def test_sussex_coordinate_collision_keeps_agreed_est_defers_the_contested_summer
+    # Milford Plaza (DE#3, EST to 1947) and Weitsman Acres (DE#9, EDT in 1946) OCR'd to the
+    # identical lon/lat. The nest keeps the span they agree on (pre-war EST) and defers the
+    # contested 1946 summer rather than arbitrarily asserting one table's verdict.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 38.9167, lon: -75.3667, date: "1930-07-15").identifier
+    assert_nil TzHistory.for(lat: 38.9167, lon: -75.3667, date: "1946-07-15")
   end
 
   # Kent + New Castle rural-EST cohort nest (DEFERRED "DE New Castle/Kent" backfills):
