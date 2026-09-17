@@ -66,8 +66,18 @@ subset of towns/years · `bug` = a shipped feature is wrong and needs a fix ·
 
 - **Connecticut** — CT table-3 cities in the override counties under-corrected for summer
   1920 only (majority vote). minority / very low.
-- **Delaware** — New Castle (Wilmington metro) ~29% rural no-DST towns accepted as a
-  minority under the IANA-ok classification. minority / low.
+- **Delaware** — ✅ **RESOLVED (2026-09-16).** Both New Castle (the ~29% rural no-DST
+  towns that silently deferred) and Kent (the old town-by-town `warn`) now ship a
+  crop-verified per-town `sched` cohort nest (`build_de.rb`) replacing the Kent warn and
+  adding New Castle coverage. Crop-verified all 16 DE tables (tt PDF 84 →
+  `research/index/DE/tt_verified.md`): DE#1 = continuous DST (defer); DE#10 adopts DST 1931,
+  DE#12 in 1938 (pre-war-only EST); DE#3/#4/#6/#8/#11/#16 = postwar holdouts (EST into
+  1947-1955, NY-style safety gate on the explicit US#/EDT terminal). Before/after over 7434
+  (town,date) cells: **1674 EST cells, every one within its table's verified no-DST span, 0
+  over-corrections, 0 concrete-zone flips**; New Castle DST-table towns gain a verify-note
+  (offset unchanged = IANA). 3 tests. Sussex was already a correct flat pre-war EST override
+  (`until 1942-02-09`) and is left untouched — a further postwar-holdout refinement of Sussex
+  (DE#3/#4/#5/#6/#16 towns) is an optional follow-up.
 - **Colorado** — Denver-metro straddle counties (Adams/Douglas/Jefferson + Broomfield)
   shipped as `warn`, not corrected. minority / low (already flagged to users).
 - **Maine** — the 7-window cohort nest (2026-09) coalesces adoption boundaries to 6 years
@@ -177,13 +187,14 @@ The full-atlas index (`research/index/<ST>/`, git-ignored) + `tools/analyze_spli
 (geographic-separability test) now make most of this a query, not a re-render. Findings:
 
 **Geographic-split backfills** (candidates that were `warn`/IANA-ok):
-- **DE New Castle** — separability **0.93 / 20 km** override(no-DST rural south) vs
-  defer(DST Wilmington). Currently shipped IANA-ok; a `split` would correctly give the
-  rural-south towns Etc/GMT+5. Real (if modest) fix. *Next: crop-verify pg 85–89, clean
-  the town names, emit via `map_counties --split-emit`, add a test.*
-- **DE Kent** — **0.84 / 13 km**, borderline geographic → a `split` resolves the warn.
-- **DE Sussex** — **not a split**: no defer group (uniformly no-DST) → already correct as a
-  flat override. Remove from split candidates.
+- **DE New Castle** — ✅ **DONE (2026-09-16):** shipped as a per-town `sched` cohort nest
+  (`build_de.rb`), not a flat split — the rural no-DST tables (DE#10→1931, DE#12→1938, +
+  small holdouts) get Etc/GMT+5 for exactly their pre-adoption summers; DST Wilmington
+  (DE#1) defers. Crop-verified tt PDF 84.
+- **DE Kent** — ✅ **DONE (2026-09-16):** same nest; the old town-by-town warn is replaced by
+  per-table EST spans (incl. postwar holdouts DE#3/#4/#6/#8/#11/#16).
+- **DE Sussex** — flat pre-war EST override left as-is (correct). Optional: a postwar-holdout
+  refinement (extend DE#3/#4/#5/#6/#16 Sussex towns into 1947-1955) via the same nest.
 - **CO Jefferson / LA c38** — spatially separable BUT must first confirm the two tables
   differ in DST/offset (separability alone ≠ a meaningful split). Pending table-semantics.
 

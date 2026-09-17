@@ -135,10 +135,31 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 38.6901, lon: -75.3855, date: "1948-07-15")
   end
 
-  def test_kent_delaware_is_a_town_by_town_warn_split
-    assert_nil TzHistory.for(lat: 39.1582, lon: -75.5244, date: "1925-07-15") # Dover
-    note = TzHistory.note(lat: 39.1582, lon: -75.5244, date: "1925-07-15")
-    assert_match(/town-by-town/i, note)
+  # Kent + New Castle rural-EST cohort nest (DEFERRED "DE New Castle/Kent" backfills):
+  # crop-verified per-table no-DST spans replace the old Kent warn and add New Castle
+  # coverage. The continuous-DST table DE#1 still defers; each rural table keeps EST
+  # until its own adoption year.
+
+  def test_kent_de6_rural_town_keeps_est_prewar_and_postwar_until_1953
+    # Chapeltown (Kent, Shanks DE#6): EST no-DST pre-war AND a postwar holdout to 1953.
+    tz = TzHistory.for(lat: 39.0997, lon: -75.6972, date: "1925-07-15")
+    assert_equal "Etc/GMT+5", tz.identifier
+    assert_equal(-5 * 3600, offset_of(tz, "1925-07-15"))
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 39.0997, lon: -75.6972, date: "1950-07-15").identifier
+    # After DE#6 adopts US-standard DST in 1953 it defers to IANA.
+    assert_nil TzHistory.for(lat: 39.0997, lon: -75.6972, date: "1954-07-15")
+  end
+
+  def test_new_castle_de10_rural_town_keeps_est_until_1931_adoption
+    # Bridge Farms (New Castle, Shanks DE#10): kept EST until DST adoption in 1931.
+    # Previously New Castle shipped NO override -> silently deferred (read 1 h fast).
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 39.7, lon: -75.7833, date: "1928-07-15").identifier
+    assert_nil TzHistory.for(lat: 39.7, lon: -75.7833, date: "1935-07-15") # DST from 1931
+  end
+
+  def test_dover_area_continuous_dst_table_de1_defers
+    # Camden (Kent, Shanks DE#1) = continuous DST = IANA -> defer, never a spurious EST.
+    assert_nil TzHistory.for(lat: 39.1133, lon: -75.5422, date: "1925-07-15")
   end
 
   # --- Atlanta local DST 1937-1940 (Shanks GA #21), an exclusion guard ---
