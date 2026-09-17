@@ -573,6 +573,27 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 40.1167, lon: -88.7500, date: "1956-07-15")
   end
 
+  # The IL #9 tail pass (2026-09) re-read every table (tt PDF 128-132, cols=3/5) and corrected
+  # the 2026-09 hand pass: IL#63 was recorded as adopting daylight in 1948, but the atlas shows
+  # it kept CST straight to 1956 (crop-verified). It was UNDER-corrected -- deferring to IANA CDT
+  # for 1948-1955 -- and is now restored to CST for that span (its 158 towns).
+  def test_downstate_illinois_il63_kept_cst_through_1955
+    tz = TzHistory.for(lat: 39.2833, lon: -88.6333, date: "1950-07-15")
+    assert_equal "Etc/GMT+6", tz.identifier
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 39.2833, lon: -88.6333, date: "1955-07-15").identifier
+    assert_nil TzHistory.for(lat: 39.2833, lon: -88.6333, date: "1956-07-15") # adopts IL#3 (CDT) 1956
+  end
+
+  # The tail pass also REMOVED over-correction on the ~90 tables that were defaulting to the
+  # IL#4 full-CST pattern but actually adopted daylight early. IL#29 (follows IL#5, then IL#3
+  # from 1947) kept CST only through summer 1946, then went onto daylight -- so a 1950 birth now
+  # defers to IANA (CDT) instead of being forced to CST.
+  def test_downstate_illinois_il29_defers_after_early_adoption
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 41.0667, lon: -89.05, date: "1940-07-15").identifier
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 41.0667, lon: -89.05, date: "1946-07-15").identifier
+    assert_nil TzHistory.for(lat: 41.0667, lon: -89.05, date: "1950-07-15")
+  end
+
   # --- Michigan: LP kept Central, switched to Eastern piecemeal; IANA applies Detroit's
   # 1915 Eastern switch to the whole peninsula. Crop-verified dominant tables carry the real
   # Central span; the contested tail defers with a verify warning (DEFERRED #14). ---
@@ -1188,6 +1209,19 @@ class TzHistoryTest < Minitest::Test
   # The pre-existing flat Etc/GMT+6 override (pre-war 1919-10-26..1942-02-09 + postwar
   # 1945-09-30..1967-04-30) is confirmed correct. Panhandle OK#4 (MST until 1921) + NE-corner
   # OK#2/#3 (late CDT) are minor residuals -> DEFERRED.md.
+  # --- Plaquemines Parish summer-1946 intra-parish split (DEFERRED #13, Shanks LA #2) ---
+  # The upper parish (Belle Chasse area, table 2) observed CDT in summer 1946 like New Orleans;
+  # the lower delta (table 1) kept CST no-DST. Clean latitude split (upper >= 29.71, lower <= 29.69).
+  def test_plaquemines_upper_parish_cdt_summer_1946
+    # Belle Chasse (upper): defers in summer 1946 -> IANA America/Chicago models the CDT season.
+    assert_nil TzHistory.for(lat: 29.853, lon: -89.990, date: "1946-07-15")
+    # Buras (lower delta): kept CST no-DST -> the statewide CST override holds.
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 29.352, lon: -89.524, date: "1946-07-15").identifier
+    # Outside the 1946 CDT season the whole parish is statewide CST again.
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 29.853, lon: -89.990, date: "1946-01-15").identifier
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 29.853, lon: -89.990, date: "1950-07-15").identifier
+  end
+
   def test_oklahoma_dominant_is_fixed_cst_no_dst
     # Oklahoma City: CST (-6) all summer while IANA America/Chicago applies CDT.
     tz = TzHistory.for(lat: 35.4676, lon: -97.5164, date: "1930-07-15")
@@ -1209,6 +1243,22 @@ class TzHistoryTest < Minitest::Test
     assert_equal(-7 * 3600, offset_of(tz, "1920-06-15")) # MST, not CST
     # After the 1921 switch it falls back to the statewide CST override.
     assert_equal "Etc/GMT+6", TzHistory.for(lat: 36.6153, lon: -102.3731, date: "1930-07-15").identifier
+  end
+
+  # --- Florida peninsula PRE-1919 Central time (DEFERRED #2, Shanks FL #5) ---
+  # The peninsula kept Central time until it switched to Eastern on 1919-01-01; IANA models it
+  # Eastern back to 1883, so pre-1919 peninsula births read 1 h fast. Three windows over the
+  # peninsula geometry: CST (-6), the 1918 WWI-daylight summer CWT (-5), CST (-6) to the switch.
+  def test_florida_peninsula_was_central_before_1919
+    lat, lon = 28.538, -81.379 # Orlando (interior peninsula)
+    assert_equal "Etc/GMT+6", TzHistory.for(lat:, lon:, date: "1910-06-15").identifier # CST
+    assert_equal(-6 * 3600, offset_of(TzHistory.for(lat:, lon:, date: "1910-06-15"), "1910-06-15"))
+    assert_equal "Etc/GMT+5", TzHistory.for(lat:, lon:, date: "1918-06-15").identifier # WWI daylight, CWT (-5)
+    assert_equal "Etc/GMT+6", TzHistory.for(lat:, lon:, date: "1918-12-15").identifier # back to CST
+    # 1919-01-01 the peninsula switched to Eastern; IANA America/New_York is then correct -> defer.
+    assert_nil TzHistory.for(lat:, lon:, date: "1919-06-15")
+    # From 1919-10-26 the shipped FL #5 peninsula override carries Eastern (EST, -5).
+    assert_equal "Etc/GMT+5", TzHistory.for(lat:, lon:, date: "1930-07-15").identifier
   end
 
   # --- Oregon Pacific no-DST 1953-1960 (tt PDF 439, tables OR#1-17) ---
