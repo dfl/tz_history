@@ -724,6 +724,22 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 39.6533, lon: -114.8017, date: "1966-01-15")
   end
 
+  def test_eastern_nevada_observed_mountain_war_time_1942_1945
+    # DEFERRED #18: the flat MST override spanned the war years, reading MST (-7) where these
+    # Mountain towns kept Mountain WAR Time (-6, continuous year-round 1942-02-09..1945-09-30).
+    # Nevada can't defer to IANA (it models NV as Pacific -> PWT -7, still 1 h off), so MWT is
+    # asserted explicitly. NV #4 town (Mountain 1930-1965).
+    lat, lon = 39.6533, -114.8017
+    tz = TzHistory.for(lat:, lon:, date: "1943-07-01")
+    assert_equal "Etc/GMT+6", tz.identifier
+    assert_equal(-6 * 3600, offset_of(tz, "1943-07-01")) # MWT, not MST
+    # MWT was continuous, so a winter war date is also -6.
+    assert_equal(-6 * 3600, offset_of(TzHistory.for(lat:, lon:, date: "1944-01-15"), "1944-01-15"))
+    # Bracketing years stay MST (-7).
+    assert_equal(-7 * 3600, offset_of(TzHistory.for(lat:, lon:, date: "1941-07-01"), "1941-07-01"))
+    assert_equal(-7 * 3600, offset_of(TzHistory.for(lat:, lon:, date: "1946-07-01"), "1946-07-01"))
+  end
+
   # --- New Hampshire: rural EST kept until 1937 (seaboard pattern, like Maine/CT/DE) ---
   # Crop-verified (PDF 328): no NH table observed DST before 1931; the rural NH #1 (67%)
   # kept EST until 1937, while urban tables adopted DST 1931-1936 and IANA America/New_York
