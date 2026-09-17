@@ -62,6 +62,29 @@ subset of towns/years · `bug` = a shipped feature is wrong and needs a fix ·
 
 | 35 | Arizona | **Far-west + southern Arizona Pacific tables (AZ#2/#3).** AZ#2 (25t) + AZ#3 (44t) = far-west Colorado-River strip (all indexed lon <= -113.3: Mohave/La Paz/Yuma) on Pacific time (PST -8) while IANA models AZ as America/Phoenix (Mountain -7). **NOW FLAGGED (not silent): a note-bearing warn over Mohave+La Paz+Yuma (build_az.rb) surfaces the possible Pacific time** so these births are not silently served as Mountain. No offset asserted -- Shanks flags AZ#3 as "estimated from incomplete information" and the town set has garbled county#s. Phoenix (Maricopa) is east, unaffected. | sliver (uncertain, flagged) | very low (sparse SW/far-west, estimated) | If a specific far-west/southern-AZ birth needs it: crop-verify the AZ#2/#3 town set + switch dates, then a town split -> Etc/GMT+8; but Shanks flags the data as incomplete. |
 
+## Far-west Mountain exclusion guards — IANA's spurious 1920/1965/1966 MDT (systemic)
+
+Several states ship a **note-less exclusion guard** over their far-west Mountain counties that
+defers them to IANA **America/Denver** — which applies **spurious summer MDT in 1920, 1965 and
+1966** (Denver had no DST 1921-1964). Where the guarded counties were genuinely **pure MST
+no-DST**, those three summers read 1 h fast. The fix is the NM/UT/SD pattern: replace the guard
+with two flat MST (Etc/GMT+7) overrides (pre-war + postwar, same geometry, war years defer to
+IANA = MWT). Disposition per state:
+
+- **South Dakota (#30)** — ✅ DONE (`build_sd_farwest.rb`). SD#3 far-west, stably Mountain.
+- **Nebraska** — ✅ **DONE (2026-09-16)** (`build_ne_farwest.rb`). The far-west panhandle
+  (Kimball/Scotts Bluff/Banner, Shanks NE#2) is stably Mountain, pure MST no-DST — the NE
+  two-zone split already asserts MST for NE#2 elsewhere, so this just extends it to the guarded
+  corner. Same 3-summer fix; war years defer. 1 test.
+- **North Dakota** — ⚠ **DEFERRED.** Its guard covers "historically-Mountain counties," but ND's
+  Mountain/Central line shifted east over the century (several counties switched Mountain→Central
+  mid-century — hence IANA's `America/North_Dakota/*` zones). A flat MST 1919-1967 override could
+  over-assert Mountain for counties that switched. Needs per-county switch-date verification.
+- **Kansas** — ⚠ **DEFERRED.** Far-west KS is flagged "uncertain Mountain vs observed Central"
+  (Shanks itself is unsure of the zone), so asserting MST is not safe without crop-verification.
+- **Texas (El Paso/Hudspeth)** — ⚠ **DEFERRED.** El Paso is a city that plausibly observed local
+  DST in some of 1920/1965/1966; not clearly pure MST no-DST. Needs table verification.
+
 ## Also parked (from earlier states, lower detail)
 
 - **Connecticut** — CT table-3 cities in the override counties under-corrected for summer

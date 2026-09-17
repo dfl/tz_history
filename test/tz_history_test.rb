@@ -1024,9 +1024,17 @@ class TzHistoryTest < Minitest::Test
     assert_equal "Etc/GMT+7", TzHistory.for(lat: 42.1833, lon: -99.75, date: "1955-07-15").identifier
   end
 
-  def test_ne_far_west_defers_to_iana_denver
-    # Bushnell (NE#2 panhandle): IANA America/Denver was itself MST no-DST here -> defer.
-    assert_nil TzHistory.for(lat: 41.2322, lon: -103.8914, date: "1935-07-15")
+  def test_ne_far_west_panhandle_is_mst_not_spurious_mdt
+    # DEFERRED #30-family: the far-west NE panhandle (Shanks NE#2) was pure MST no-DST, but shipped
+    # as a note-less guard deferring to IANA America/Denver, which applies spurious MDT in
+    # 1920/1965/1966. Flat MST override corrects those (no-op where IANA already gives MST); war
+    # years defer (IANA = MWT).
+    lat, lon = 41.2322, -103.8914 # Bushnell
+    %w[1920-07-15 1935-07-15 1965-07-15 1966-07-15].each do |d|
+      assert_equal "Etc/GMT+7", TzHistory.for(lat:, lon:, date: d).identifier, "NE panhandle should be MST on #{d}"
+    end
+    assert_nil TzHistory.for(lat:, lon:, date: "1943-07-15") # war -> IANA MWT
+    assert_nil TzHistory.for(lat:, lon:, date: "1968-07-15") # post US#1 -> IANA
   end
 
   # --- North Carolina: VERIFY-ONLY (tt PDF 387) ---
