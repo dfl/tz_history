@@ -1157,6 +1157,34 @@ class TzHistoryTest < Minitest::Test
     assert_equal "Etc/GMT+5", TzHistory.for(lat: 40.5678, lon: -84.1936, date: "1930-07-15").identifier
   end
 
+  def test_second_read_audit_fixes_2026_09_17
+    # Independent second-read audit of the fine-grained cohort-nest states (NY/PA/OH) vs the
+    # shipped classification. Crop-verified corrections of the few cells where the build served
+    # (or would serve) a WRONG offset -- all others were safe under-corrections.
+    #
+    # OH#27 (391 towns, the marquee find): was mis-classified EAST-EST (EST from 1919); the crop
+    # shows it REVERTS to CST at 10/26/1919 and switches to EST only 1924-03-30. So 1920-1923 were
+    # Central (Etc/GMT+6), not Eastern (+5). Africa, Delaware Co.
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 40.1822, lon: -82.9572, date: "1922-07-15").identifier
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 40.1822, lon: -82.9572, date: "1930-07-15").identifier
+    # OH#98 (2t): same base-zone fix -- CST until the 1924-03-30 switch. Marion.
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 40.5886, lon: -83.1286, date: "1922-07-15").identifier
+    # PA#33 (48t, Altoona/Blair): postwar was peacetime EDT EVERY summer 1946-1960 (US#2 1961),
+    # NOT EST -- the build over-asserted EST 1946-1955. Now defers (IANA daylight). EST pre-war holds.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 40.5186, lon: -78.395, date: "1930-07-15").identifier
+    assert_nil TzHistory.for(lat: 40.5186, lon: -78.395, date: "1950-07-15")
+    # PA#80 (98t): adopts US#2 in 1932 (crop), not the late-1940s the hand pass recorded.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 40.7786, lon: -75.7114, date: "1925-07-15").identifier
+    assert_nil TzHistory.for(lat: 40.7786, lon: -75.7114, date: "1935-07-15")
+    # PA#90 (93t): adopts US#2 in 1928 (crop), not 1948.
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 39.8742, lon: -75.4486, date: "1925-07-15").identifier
+    assert_nil TzHistory.for(lat: 39.8742, lon: -75.4486, date: "1935-07-15")
+    # NY#27 (9t): the compact table's 9/29/1946 EST fall-back implies a spring-1946 EDT, so summer
+    # 1946 was daylight -- the build over-asserted EST. Now defers; 1947-1954 EST still holds.
+    assert_nil TzHistory.for(lat: 44.5167, lon: -73.6, date: "1946-07-15")
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 44.5167, lon: -73.6, date: "1950-07-15").identifier
+  end
+
   def test_ohio_western_county_seat_greenville_recovered
     # Greenville (Darke Co., OH#110): the Apple-Vision re-OCR recovered this western
     # county-seat table (tesseract had collapsed its 2-digit number to "1"). WEST-CST:

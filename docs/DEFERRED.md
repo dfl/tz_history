@@ -62,6 +62,36 @@ subset of towns/years · `bug` = a shipped feature is wrong and needs a fix ·
 
 | 35 | Arizona | **Far-west + southern Arizona Pacific tables (AZ#2/#3).** AZ#2 (25t) + AZ#3 (44t) = far-west Colorado-River strip (all indexed lon <= -113.3: Mohave/La Paz/Yuma) on Pacific time (PST -8) while IANA models AZ as America/Phoenix (Mountain -7). **NOW FLAGGED (not silent): a note-bearing warn over Mohave+La Paz+Yuma (build_az.rb) surfaces the possible Pacific time** so these births are not silently served as Mountain. No offset asserted -- Shanks flags AZ#3 as "estimated from incomplete information" and the town set has garbled county#s. Phoenix (Maricopa) is east, unaffected. | sliver (uncertain, flagged) | very low (sparse SW/far-west, estimated) | **FINAL DISPOSITION (2026-09-16): keep the note-bearing warn — do NOT assert.** Shanks explicitly flags AZ#3 as "estimated from incomplete information" and the indexed town set has garbled county#s, so asserting Etc/GMT+8 would ship uncertain data. The warn already surfaces the possible Pacific time (not silently served as Mountain) — that IS the correct disposition for data the source itself flags as incomplete. Revisit only if a specific far-west birth needs it AND the town set/switch dates can be crop-verified. |
 
+## Second-read audit of the cohort-nest states (NY/PA/OH) — ✅ DONE (2026-09-17)
+
+Independent per-page subagent transcription of the tt renders (OH 409-413, PA 448-452, NY via the
+already-independent `tt_verified.json`), mechanically interpreted and diffed vs the shipped
+classification (`build_ny/pa/oh.rb`). Persisted reads: `research/index/{OH,PA}/tt_audit_read_2026-09-17.json`;
+full findings `research/index/AUDIT_2026-09-17_findings.md`. Result matches the IL precedent: the vast
+majority of divergences were **safe under-corrections** (build defers where the town kept EST → serves
+IANA's EDT, never a wrong offset): NY 262 / PA 1111 / OH 2118 table-year cells. A **small set of genuine
+over-corrections** (build served, or would serve, a WRONG offset) was crop-verified and **FIXED**
+(`test_second_read_audit_fixes_2026_09_17`, before/after resolution diff = only the intended cells moved):
+
+- **OH#27 (391 towns — marquee):** mis-classified EAST-EST (EST from 1919); crop shows it reverts to CST
+  10/26/1919 and switches to EST only 1924-03-30 → 1920-1923 were **Central (+6)**, not Eastern (+5).
+  Reclassified to `WEST_SWITCH 1924-03-30`.
+- **OH#98 (2t):** same base-zone fix (CST until 1924-03-30) → `WEST_SWITCH`.
+- **OH#22 (1t) / OH#115 (1t):** adoption year off-by-one (US#5 1955 not 1956; 1957 not 1958) → over-asserted
+  the extra summer. `EAST_ADOPT` corrected.
+- **PA#33 (48t):** postwar was peacetime EDT every summer 1946-1960 (US#2 1961), not EST → dropped 1946-1955.
+- **PA#80 (98t) / PA#90 (93t):** hand pass recorded a late-1940s adoption; crop shows **US#2 1932 / 1928** →
+  EST only 1920-1931 / 1920-1927.
+- **PA#53 (8t):** EDT from 1948, not 1950 → dropped 1948-1949. **PA#38/#87 (0 index towns):** data corrected, no-op.
+- **NY#27 (9t):** compact table's 9/29/1946 EST fall-back implies a spring-1946 EDT → dropped over-asserted 1946.
+
+**Residual slivers left (below the accuracy bar, ≤2 towns each):**
+- **OH#35 (1t):** a WEST-CST table (switch 1927-04-03) that then adopted DST in 1955; the WEST model runs it
+  EST-no-DST to 1967, so it over-asserts EST for 1955-1966 (1 town). No clean way to cap a WEST table's EST
+  end without new machinery; left as-is (keeps the correct 1920-1954 CST/EST for its 1 town).
+- **OH#98 (2t):** after the WEST reclassification it still has one peacetime EDT summer (1964) that the
+  EST-to-1967 WEST model over-asserts (2 towns, 1 summer).
+
 ## Far-west Mountain exclusion guards — IANA's spurious 1920/1965/1966 MDT (systemic)
 
 Several states ship a **note-less exclusion guard** over their far-west Mountain counties that
