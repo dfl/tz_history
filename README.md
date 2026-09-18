@@ -146,6 +146,14 @@ has no runtime dependency on `zic`. After editing a `.zic` source:
 rake shanks:build
 ```
 
+### Relationship to IANA / tzcode
+
+This gem is a pre-1970 *correction layer* over IANA, not a replacement. The
+synthetic zones are compiled with `zic` and validated with `zdump` from the
+[`tzcode`](https://github.com/valodzka/tzcode) distribution (the reference
+implementation behind the IANA [tz database](https://www.iana.org/time-zones));
+at runtime the committed TZif blobs are read through `tzinfo` like any IANA zone.
+
 ## Provenance & scope
 
 Time-zone transition dates are **facts**, not creative expression, and facts are
