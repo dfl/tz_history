@@ -612,6 +612,52 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 45.9847, lon: -84.8206, date: "1963-07-15") # Eastern postwar = IANA
   end
 
+  # --- Michigan WWII "return to Central time" (2026-09 second pass, DEFERRED #14 extension):
+  # the atlas intro says most LP tables reverted to Central War Time (CWT, -5) for part or all
+  # of WWII, but IANA America/Detroit is flat Eastern War Time (EWT, -4) the whole war -- a 1h
+  # divergence the original build_mi.rb didn't model. Also extends the pre-war Central span to
+  # ~19 more crop-verified clean (no pre-war DST) tables beyond MI#1/#25. ---
+
+  def test_michigan_mi1_town_gets_wwii_central_war_time_correction
+    # MI#1's Acme (Grand Traverse Co.) already switched to EST in 1931 (matches IANA), so
+    # 1942-02-09..1943-02-15 defers (both EWT -4); then reverts to CWT (-5) 1943-02-15..
+    # 1945-09-30, diverging from IANA's flat EWT; back to deferring (EST) after the war.
+    tz = TzHistory.for(lat: 44.7719, lon: -85.5014, date: "1925-07-15")
+    assert_equal "Etc/GMT+6", tz.identifier
+    assert_nil TzHistory.for(lat: 44.7719, lon: -85.5014, date: "1943-01-01") # still EWT == IANA
+    war = TzHistory.for(lat: 44.7719, lon: -85.5014, date: "1943-07-15")
+    assert_equal "Etc/GMT+5", war.identifier
+    assert_equal(-5 * 3600, offset_of(war, "1943-07-15"))
+    assert_nil TzHistory.for(lat: 44.7719, lon: -85.5014, date: "1945-10-15") # EST == IANA again
+  end
+
+  def test_michigan_mi25_town_wwii_central_war_time_is_continuous
+    # MI#25 never switched pre-war, so it ran CWT the ENTIRE war (2/09/1942..9/30/1945), not
+    # just the 1943-02-15 tail -- a bigger divergence window than the already-Eastern tables.
+    tz = TzHistory.for(lat: 45.9847, lon: -84.8206, date: "1942-06-01")
+    assert_equal "Etc/GMT+5", tz.identifier
+    assert_equal "Etc/GMT+5", TzHistory.for(lat: 45.9847, lon: -84.8206, date: "1945-07-15").identifier
+    assert_nil TzHistory.for(lat: 45.9847, lon: -84.8206, date: "1945-11-01") # EST postwar == IANA
+  end
+
+  def test_michigan_new_cohort_table_mi57_pre_war_and_war_spans
+    # MI#57 (Montcalm-area, 101 towns): crop-verified CST -> EST switch 1932-04-04, then the
+    # same EWT(1942)->CWT(1943)->EST(1945) war pattern as MI#1.
+    lat, lon = 43.1667, -85.3667 # Oakfield, MI#57
+    assert_equal "Etc/GMT+6", TzHistory.for(lat:, lon:, date: "1930-07-15").identifier
+    assert_nil TzHistory.for(lat:, lon:, date: "1932-07-15") # Eastern from 1932, matches IANA
+    assert_equal "Etc/GMT+5", TzHistory.for(lat:, lon:, date: "1943-07-15").identifier
+    assert_nil TzHistory.for(lat:, lon:, date: "1946-07-15")
+  end
+
+  def test_michigan_upper_peninsula_tables_are_excluded_from_the_lp_split
+    # MI#86 (Alpha, Iron Co., lat ~46.04) is genuinely Upper Peninsula, outside the LP split
+    # geometry -- verified 0/37 of its towns fall inside the polygon. It must never resolve
+    # to an LP schedule; it always defers to IANA.
+    assert_nil TzHistory.for(lat: 46.0439, lon: -88.3769, date: "1925-07-15")
+    assert_nil TzHistory.for(lat: 46.0439, lon: -88.3769, date: "1943-07-15")
+  end
+
   # --- Indiana: pre-1970 Central/Eastern + DST chaos, flagged not corrected ---
   # Shanks calls Indiana "very complex ... contradictory ... not documented"; IANA's
   # eight America/Indiana/* sub-zones are best-guesses. We flag (warn) and defer rather
@@ -709,6 +755,23 @@ class TzHistoryTest < Minitest::Test
   def test_montana_dst_metro_town_defers_to_iana
     # Finlen (Butte/Silver Bow area, MT #10) observed postwar MDT -> defers to IANA.
     assert_nil TzHistory.for(lat: 46.0383, lon: -112.7903, date: "1950-07-15")
+  end
+
+  # Crop-verified (PDF 314): the metro DST tables MT #2 and MT #10 (a Butte / Silver Bow
+  # cluster) were themselves pure MST with NO daylight saving pre-war -- their first
+  # peacetime DST is 5/15/1946. So pre-war they behaved like MT #1/#9, and deferring
+  # under-corrected them: IANA America/Denver applies MDT in the only two pre-war summers
+  # it has any DST (1920 and 1921). The pre-war split now tags them MST; postwar they still
+  # defer (they ran MDT from 1946, matching IANA).
+  def test_montana_metro_towns_are_mst_prewar_then_defer_postwar
+    [[46.0383, -112.7903], [46.0031, -112.6669], [45.9372, -112.9908]].each do |lat, lon| # Finlen/Silver Bow
+      %w[1920-07-15 1921-05-01].each do |d| # the two pre-war summers IANA applies MDT
+        tz = TzHistory.for(lat: lat, lon: lon, date: d)
+        assert_equal "Etc/GMT+7", tz.identifier, "MT metro at #{lat},#{lon} should be MST on #{d}"
+        assert_equal(-7 * 3600, offset_of(tz, d))
+      end
+      assert_nil TzHistory.for(lat: lat, lon: lon, date: "1950-07-15") # postwar MDT -> defers
+    end
   end
 
   def test_montana_from_1967_uniform_act_defers_to_iana
@@ -1306,6 +1369,28 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.for(lat: 45.5152, lon: -122.6784, date: "1948-07-15") # Portland had DST 1948
     assert_nil TzHistory.for(lat: 45.5152, lon: -122.6784, date: "1962-07-15") # DST resumed by 1962
     assert_nil TzHistory.for(lat: 44.0266, lon: -116.9629, date: "1955-07-15") # Malheur = Mountain, MST
+  end
+
+  def test_oregon_rural_edge_summers_1952_1961_1962_are_pst
+    # DEFERRED #27: crop-verified (tt PDF 439) OR#2 (758 towns) ran PST continuously
+    # 1951-09-30..1963-04-28 -- no DST in the summers of 1952, 1961, 1962, which the flat
+    # 1953-1960 window omits and IANA fills with PDT. The 12 counties composed only of the
+    # all-PST tables OR#2/#15/#16 get Etc/GMT+8 for those summers (build_or_edge.rb); mixed
+    # Willamette/Portland counties keep deferring (DST tables interspersed).
+    gp = [42.4392, -123.3272] # Grants Pass, Josephine (OR#2)
+    %w[1952-07-15 1961-07-15 1962-07-15 1957-07-15].each do |d|
+      tz = TzHistory.for(lat: gp[0], lon: gp[1], date: d)
+      assert_equal "Etc/GMT+8", tz.identifier, "Grants Pass should be PST on #{d}"
+      assert_equal(-8 * 3600, offset_of(tz, d))
+    end
+    # Summers OR#2 itself had PDT (before/after the continuous PST span) -> defer to IANA.
+    assert_nil TzHistory.for(lat: gp[0], lon: gp[1], date: "1951-07-15")
+    assert_nil TzHistory.for(lat: gp[0], lon: gp[1], date: "1963-07-15")
+    # Pendleton (Umatilla, OR#16 -- DST only 1948-51 then PST) is covered in the edge summers.
+    assert_equal "Etc/GMT+8", TzHistory.for(lat: 45.6721, lon: -118.7886, date: "1962-07-15").identifier
+    # Mixed counties (DST tables interspersed) keep deferring in the edge summers, by design.
+    assert_nil TzHistory.for(lat: 45.5152, lon: -122.6784, date: "1962-07-15") # Portland (OR#12)
+    assert_nil TzHistory.for(lat: 44.0521, lon: -123.0868, date: "1962-07-15") # Eugene (Lane, mixed)
   end
 
   def test_malheur_observed_mdt_summers_1963_1965

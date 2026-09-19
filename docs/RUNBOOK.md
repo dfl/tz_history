@@ -23,7 +23,10 @@ Start with **Alabama** (top of the ledger). Work **alphabetically; do them all.*
 - **Atlas PDF (local, uncommitted, copyrighted — facts only):**
   `~/work/scrapers/Archive.org-Downloader/The_American_atlas__U.S._longitudes_&_latitudes,_time_changes_and_time_zones.pdf`
   Pass as `ENV["ATLAS_PDF"]`.
-- **Tools:** `zic` at `/usr/sbin/zic`; `pdftoppm`, `tesseract`, `convert`/`magick` (homebrew).
+- **Tools:** `zic` at `/usr/sbin/zic`; `pdftoppm`, `convert`/`magick` (homebrew); `tools/vision_ocr.swift`
+  (`swift tools/vision_ocr.swift <image.png>`, Apple's on-device Vision framework — the OCR
+  backend, see below). `tesseract` is a last-resort fallback ONLY if `swift`/Vision is
+  unavailable on the machine — do not reach for it by habit.
 - **County polygons:** plotly public dataset
   `https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json`.
 - **Scratch:** use a temp dir; never write atlas crops into the repo.
@@ -43,8 +46,19 @@ Start with **Alabama** (top of the ledger). Work **alphabetically; do them all.*
 
 ## Non-negotiable gotchas
 
+- **OCR backend is Apple Vision (`tools/vision_ocr.swift`), never `tesseract`.** This applies
+  to EVERYTHING — the bulk indexing pass (`ocr_tables.rb`/`extract_cities.rb` already default
+  to it) AND any ad-hoc "does this page contain town X" search you run by hand while
+  crop-verifying. `tesseract` has materially worse recall on this atlas's faint 1978 print —
+  it can silently miss a name entirely, making you falsely conclude a town isn't on a page.
+  `swift tools/vision_ocr.swift <image.png>` prints `<text>\t<x>\t<y>\t<w>\t<h>` (pixel
+  coords, top-left origin) per recognized line — pipe through `grep` to locate, then use the
+  coordinates to crop straight to the hit instead of guessing/trial-and-error zooming.
 - **Visual-verify every table** (a subagent reads the rendered crop and corrects
-  OCR). Blind OCR = a silent 1-hour error, the exact bug we exist to fix.
+  OCR). Blind OCR = a silent 1-hour error, the exact bug we exist to fix. This step is
+  independent of whichever OCR backend produced the coarse draft — you are the check on
+  OCR, so read the rendered image yourself; running more OCR here (Apple's or otherwise)
+  is not a substitute for actually looking at it.
 - **Offset, not abbreviation,** is what matters (Shanks CWT == IANA CDT == −05 DST).
 - **Never `JSON.pretty_generate` the whole geojson** — it explodes coordinates
   (see `git log` for the KY near-miss). Keep geometry one compact line per feature;
