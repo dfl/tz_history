@@ -643,7 +643,8 @@ class TzHistoryTest < Minitest::Test
   def test_michigan_new_cohort_table_mi57_pre_war_and_war_spans
     # MI#57 (Montcalm-area, 101 towns): crop-verified CST -> EST switch 1932-04-04, then the
     # same EWT(1942)->CWT(1943)->EST(1945) war pattern as MI#1.
-    lat, lon = 43.1667, -85.3667 # Oakfield, MI#57
+    lat = 43.1667
+    lon = -85.3667 # Oakfield, MI#57
     assert_equal "Etc/GMT+6", TzHistory.for(lat:, lon:, date: "1930-07-15").identifier
     assert_nil TzHistory.for(lat:, lon:, date: "1932-07-15") # Eastern from 1932, matches IANA
     assert_equal "Etc/GMT+5", TzHistory.for(lat:, lon:, date: "1943-07-15").identifier
@@ -813,7 +814,8 @@ class TzHistoryTest < Minitest::Test
     # Mountain towns kept Mountain WAR Time (-6, continuous year-round 1942-02-09..1945-09-30).
     # Nevada can't defer to IANA (it models NV as Pacific -> PWT -7, still 1 h off), so MWT is
     # asserted explicitly. NV #4 town (Mountain 1930-1965).
-    lat, lon = 39.6533, -114.8017
+    lat = 39.6533
+    lon = -114.8017
     tz = TzHistory.for(lat:, lon:, date: "1943-07-01")
     assert_equal "Etc/GMT+6", tz.identifier
     assert_equal(-6 * 3600, offset_of(tz, "1943-07-01")) # MWT, not MST
@@ -1113,7 +1115,8 @@ class TzHistoryTest < Minitest::Test
     # as a note-less guard deferring to IANA America/Denver, which applies spurious MDT in
     # 1920/1965/1966. Flat MST override corrects those (no-op where IANA already gives MST); war
     # years defer (IANA = MWT).
-    lat, lon = 41.2322, -103.8914 # Bushnell
+    lat = 41.2322
+    lon = -103.8914 # Bushnell
     %w[1920-07-15 1935-07-15 1965-07-15 1966-07-15].each do |d|
       assert_equal "Etc/GMT+7", TzHistory.for(lat:, lon:, date: d).identifier, "NE panhandle should be MST on #{d}"
     end
@@ -1341,7 +1344,8 @@ class TzHistoryTest < Minitest::Test
   # Eastern back to 1883, so pre-1919 peninsula births read 1 h fast. Three windows over the
   # peninsula geometry: CST (-6), the 1918 WWI-daylight summer CWT (-5), CST (-6) to the switch.
   def test_florida_peninsula_was_central_before_1919
-    lat, lon = 28.538, -81.379 # Orlando (interior peninsula)
+    lat = 28.538
+    lon = -81.379 # Orlando (interior peninsula)
     assert_equal "Etc/GMT+6", TzHistory.for(lat:, lon:, date: "1910-06-15").identifier # CST
     assert_equal(-6 * 3600, offset_of(TzHistory.for(lat:, lon:, date: "1910-06-15"), "1910-06-15"))
     assert_equal "Etc/GMT+5", TzHistory.for(lat:, lon:, date: "1918-06-15").identifier # WWI daylight, CWT (-5)
@@ -1397,7 +1401,8 @@ class TzHistoryTest < Minitest::Test
     # DEFERRED #28: Malheur County observed Mountain Daylight Time in the summers of 1963-1965,
     # while IANA America/Boise was still MST no-DST (Boise adopted DST in 1967). Only those three
     # summers need a correction; 1966 (no OR#1 DST row) and 1967+ (Boise has MDT) defer.
-    lat, lon = 43.982, -117.238 # Vale, Malheur
+    lat = 43.982
+    lon = -117.238 # Vale, Malheur
     %w[1963-07-15 1964-07-15 1965-07-15].each do |d|
       tz = TzHistory.for(lat:, lon:, date: d)
       assert_equal "Etc/GMT+6", tz.identifier, "Malheur should be MDT on #{d}"
@@ -1492,7 +1497,8 @@ class TzHistoryTest < Minitest::Test
     # DEFERRED #30: far-west SD (Shanks SD#3) was pure MST no-DST; IANA America/Denver applies
     # spurious MDT in 1920/1965/1966. The flat MST override corrects those and is a no-op where
     # IANA already gives MST (1921-1964); the war years defer to IANA (MWT).
-    lat, lon = 44.0805, -103.2310 # Rapid City (SD#3)
+    lat = 44.0805
+    lon = -103.2310 # Rapid City (SD#3)
     %w[1920-07-15 1930-07-15 1965-07-15 1966-07-15].each do |d|
       tz = TzHistory.for(lat:, lon:, date: d)
       assert_equal "Etc/GMT+7", tz.identifier, "far-west SD should be MST on #{d}"
@@ -1562,7 +1568,8 @@ class TzHistoryTest < Minitest::Test
     # while IANA models all Utah as Mountain. A thin border strip (lon -114.05..-113.80)
     # containing exactly the 7 genuine far-west towns -> PST (-8); it split-fixes the war years
     # (PWT -7) and defers the messy post-1966 PDT/MDT transition. Everything east stays MST.
-    lat, lon = 40.037, -113.984 # Ibapah
+    lat = 40.037
+    lon = -113.984 # Ibapah
     tz = TzHistory.for(lat:, lon:, date: "1930-07-15")
     assert_equal "Etc/GMT+8", tz.identifier
     assert_equal(-8 * 3600, offset_of(tz, "1930-07-15")) # PST, not IANA's Mountain
@@ -1877,7 +1884,7 @@ class TzHistoryTest < Minitest::Test
     { "Curacao" => WILLEMSTAD, "Aruba" => ORANJESTAD }.each do |name, pt|
       tz = TzHistory.for(**pt, date: "1943-07-15")
       assert_equal "Shanks/CW_1", tz&.identifier, "#{name} should resolve to CW_1"
-      assert_equal(-16200, tz.period_for_local(Time.utc(1943, 7, 15, 12)).observed_utc_offset,
+      assert_equal(-16_200, tz.period_for_local(Time.utc(1943, 7, 15, 12)).observed_utc_offset,
                    "#{name} should be -4:30, not Puerto Rico's Atlantic War Time")
     end
   end
@@ -1943,7 +1950,7 @@ class TzHistoryTest < Minitest::Test
   def test_tanzania_resolves_eat_then_quarter_to
     tz = TzHistory.for(**DAR, date: "1940-06-15")
     assert_equal "Shanks/TZ_1", tz&.identifier
-    assert_equal(10800, tz.period_for_local(Time.utc(1940, 6, 15, 12)).observed_utc_offset,
+    assert_equal(10_800, tz.period_for_local(Time.utc(1940, 6, 15, 12)).observed_utc_offset,
                  "Tanzania should be EAT (+3:00), not Nairobi's +2:30")
     tz2 = TzHistory.for(**DAR, date: "1950-06-15")
     assert_equal(9900, tz2.period_for_local(Time.utc(1950, 6, 15, 12)).observed_utc_offset,
@@ -2059,16 +2066,16 @@ class TzHistoryTest < Minitest::Test
     # Dominica in the 1943 war year: AST -4:00 via Shanks, not the Puerto Rico link's -3:00.
     tz = TzHistory.for(**ROSEAU, date: "1943-06-15")
     assert_equal "Shanks/DM_1", tz&.identifier
-    assert_equal(-14400, tz.period_for_local(Time.utc(1943, 6, 15, 12)).observed_utc_offset,
+    assert_equal(-14_400, tz.period_for_local(Time.utc(1943, 6, 15, 12)).observed_utc_offset,
                  "Dominica should be AST -4:00 in 1943, not Puerto Rico's -3:00 war time")
     # Trinidad likewise.
     tt = TzHistory.for(**PORT_OF_SPAIN, date: "1943-06-15")
     assert_equal "Shanks/TT_1", tt&.identifier
-    assert_equal(-14400, tt.period_for_local(Time.utc(1943, 6, 15, 12)).observed_utc_offset)
+    assert_equal(-14_400, tt.period_for_local(Time.utc(1943, 6, 15, 12)).observed_utc_offset)
     # Guadeloupe geometry is carved out of the France polygon by bbox.
     gp = TzHistory.for(**POINTE_A_PITRE, date: "1943-06-15")
     assert_equal "Shanks/GP_1", gp&.identifier
-    assert_equal(-14400, gp.period_for_local(Time.utc(1943, 6, 15, 12)).observed_utc_offset)
+    assert_equal(-14_400, gp.period_for_local(Time.utc(1943, 6, 15, 12)).observed_utc_offset)
     # Deferrals: pre-standardization LMT and the post-1970 modern era both hand off to IANA.
     assert_nil TzHistory.for(**ROSEAU, date: "1905-06-15")
     assert_nil TzHistory.for(**ROSEAU, date: "1980-06-15")
@@ -2081,7 +2088,7 @@ class TzHistoryTest < Minitest::Test
   def test_antigua_resolves_eastern_standard_then_defers
     tz = TzHistory.for(**ST_JOHNS, date: "1943-06-15")
     assert_equal "Shanks/AG_1", tz&.identifier
-    assert_equal(-18000, tz.period_for_local(Time.utc(1943, 6, 15, 12)).observed_utc_offset,
+    assert_equal(-18_000, tz.period_for_local(Time.utc(1943, 6, 15, 12)).observed_utc_offset,
                  "Antigua should be EST -5:00 in 1943, two hours off Puerto Rico's -3:00 war time")
     assert_nil TzHistory.for(**ST_JOHNS, date: "1960-06-15") # after 1 Jan 1951 -> AST = IANA default
   end
@@ -2102,7 +2109,7 @@ class TzHistoryTest < Minitest::Test
     assert_equal "Shanks/ET_1", tz&.identifier
     assert_equal(9320, tz.period_for_local(Time.utc(1900, 6, 15, 12)).observed_utc_offset,
                  "Ethiopia should be ADMT +2:35:20, not Nairobi's +2:30")
-    assert_nil TzHistory.for(**ADDIS, date: "1960-06-15")  # both EAT after 1942 -> IANA default
+    assert_nil TzHistory.for(**ADDIS, date: "1960-06-15") # both EAT after 1942 -> IANA default
     note = TzHistory.note(**ADDIS, date: "1930-06-15")
     assert_match(/International Atlas/i, note)
     assert_match(/Nairobi/i, note)
@@ -2117,14 +2124,14 @@ class TzHistoryTest < Minitest::Test
   def test_madagascar_resolves_1954_summer_dst
     tz = TzHistory.for(**ANTANANARIVO, date: "1954-04-15")
     assert_equal "Shanks/MG_1", tz&.identifier
-    assert_equal(14400, tz.period_for_local(Time.utc(1954, 4, 15, 12)).observed_utc_offset,
+    assert_equal(14_400, tz.period_for_local(Time.utc(1954, 4, 15, 12)).observed_utc_offset,
                  "Madagascar observed a summer DST (+4:00) in 1954; Nairobi default has none")
   end
 
   def test_indian_ocean_plus4_islands_vs_dubai_link
     re = TzHistory.for(**SAINT_DENIS, date: "1915-06-15")
     assert_equal "Shanks/RE_1", re&.identifier
-    assert_equal(14400, re.period_for_local(Time.utc(1915, 6, 15, 12)).observed_utc_offset,
+    assert_equal(14_400, re.period_for_local(Time.utc(1915, 6, 15, 12)).observed_utc_offset,
                  "Réunion should be +4:00, not Dubai's LMT +3:41 (pre-1920)")
     sc = TzHistory.for(**VICTORIA_SC, date: "1912-06-15")
     assert_equal "Shanks/SC_1", sc&.identifier
@@ -2142,10 +2149,10 @@ class TzHistoryTest < Minitest::Test
   def test_brunei_resolves_plus8_vs_kuching_link
     tz = TzHistory.for(**BANDAR_SERI_BEGAWAN, date: "1938-06-15")
     assert_equal "Shanks/BN_1", tz&.identifier
-    assert_equal(28800, tz.period_for_local(Time.utc(1938, 6, 15, 12)).observed_utc_offset,
+    assert_equal(28_800, tz.period_for_local(Time.utc(1938, 6, 15, 12)).observed_utc_offset,
                  "Brunei should be a clean +8:00, not Kuching's +8:20 summer DST (1935-1941)")
     tz2 = TzHistory.for(**BANDAR_SERI_BEGAWAN, date: "1930-06-15")
-    assert_equal(27000, tz2.period_for_local(Time.utc(1930, 6, 15, 12)).observed_utc_offset) # +7:30
+    assert_equal(27_000, tz2.period_for_local(Time.utc(1930, 6, 15, 12)).observed_utc_offset) # +7:30
     assert_nil TzHistory.for(**BANDAR_SERI_BEGAWAN, date: "1925-06-15") # pre-1926 town LMT -> deferred
     assert_nil TzHistory.for(**BANDAR_SERI_BEGAWAN, date: "1950-06-15") # both +8 after 1945 -> IANA default
   end
@@ -2153,7 +2160,7 @@ class TzHistoryTest < Minitest::Test
   def test_kuwait_resolves_al_kuwayt_mean_time_then_defers
     tz = TzHistory.for(**KUWAIT_CITY, date: "1940-06-15")
     assert_equal "Shanks/KW_1", tz&.identifier
-    assert_equal(11516, tz.period_for_local(Time.utc(1940, 6, 15, 12)).observed_utc_offset,
+    assert_equal(11_516, tz.period_for_local(Time.utc(1940, 6, 15, 12)).observed_utc_offset,
                  "Kuwait should be Al-Kuwayt MT +3:11:56, not Riyadh's +3:06:52 link")
     assert_nil TzHistory.for(**KUWAIT_CITY, date: "1955-06-15") # both +3:00 after 1950 -> IANA default
     note = TzHistory.note(**KUWAIT_CITY, date: "1940-06-15")
@@ -2166,7 +2173,7 @@ class TzHistoryTest < Minitest::Test
   def test_yemen_resolves_aden_mean_time_then_defers
     tz = TzHistory.for(**ADEN, date: "1930-06-15")
     assert_equal "Shanks/YE_1", tz&.identifier
-    assert_equal(10794, tz.period_for_local(Time.utc(1930, 6, 15, 12)).observed_utc_offset,
+    assert_equal(10_794, tz.period_for_local(Time.utc(1930, 6, 15, 12)).observed_utc_offset,
                  "Yemen should be Aden MT +2:59:54, not Riyadh's +3:06:52 link")
     assert_nil TzHistory.for(**ADEN, date: "1955-06-15") # both +3:00 after 1950 -> IANA default
     note = TzHistory.note(**ADEN, date: "1930-06-15")

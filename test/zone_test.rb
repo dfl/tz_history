@@ -196,10 +196,10 @@ class ZoneTest < Minitest::Test
   # island LMT, which is out of window).
   def test_cw1_netherlands_antilles_abc_standard
     shanks = TzHistory::Zone.tzinfo("CW_1")
-    assert_equal(-16200, offset_of(shanks, "1930-06-15")) # -4:30 standard (67W30)
-    assert_equal(-16200, offset_of(shanks, "1943-06-15")) # still -4:30 (default PR = -3:00 AWT)
-    assert_equal(-16200, offset_of(shanks, "1964-12-15")) # -4:30 through end of 1964
-    assert_equal(-14400, offset_of(shanks, "1965-06-15")) # -4:00 (AST) from 1 Jan 1965
+    assert_equal(-16_200, offset_of(shanks, "1930-06-15")) # -4:30 standard (67W30)
+    assert_equal(-16_200, offset_of(shanks, "1943-06-15")) # still -4:30 (default PR = -3:00 AWT)
+    assert_equal(-16_200, offset_of(shanks, "1964-12-15")) # -4:30 through end of 1964
+    assert_equal(-14_400, offset_of(shanks, "1965-06-15")) # -4:00 (AST) from 1 Jan 1965
   end
 
   # Equatorial Guinea GQ #1 (whole country) -- GMT from 1912, WAT (+1:00) from 15 Dec 1963.
@@ -229,9 +229,9 @@ class ZoneTest < Minitest::Test
   # 15 min fast across 1948-1961. TZ_1 == backzone Africa/Dar_es_Salaam 468/468 mid-months.
   def test_tz1_tanzania_dar_es_salaam
     shanks = TzHistory::Zone.tzinfo("TZ_1")
-    assert_equal(10800, offset_of(shanks, "1940-06-15")) # EAT +3:00 (default Nairobi = +2:30)
-    assert_equal(9900,  offset_of(shanks, "1950-06-15")) # +2:45 (default Nairobi = +3:00)
-    assert_equal(10800, offset_of(shanks, "1962-06-15")) # EAT +3:00 from 1961
+    assert_equal(10_800, offset_of(shanks, "1940-06-15")) # EAT +3:00 (default Nairobi = +2:30)
+    assert_equal(9900, offset_of(shanks, "1950-06-15")) # +2:45 (default Nairobi = +3:00)
+    assert_equal(10_800, offset_of(shanks, "1962-06-15")) # EAT +3:00 from 1961
   end
 
   # --- West-Africa whole-hour cluster (all default-Linked to Africa/Abidjan = GMT) ------
@@ -348,22 +348,22 @@ class ZoneTest < Minitest::Test
   # war-year offset (-4:00, not the default's -3:00), plus the capital LMT before window.
   def test_caribbean_ast_cluster
     {
-      "AI_1" => -15136, # Anguilla, The Valley -4:12:16
-      "DM_1" => -14736, # Dominica, Roseau -4:05:36
-      "GD_1" => -14820, # Grenada, St George's -4:07:00
-      "GP_1" => -14768, # Guadeloupe, Pointe-a-Pitre -4:06:08
-      "MS_1" => -14932, # Montserrat, Plymouth -4:08:52
-      "KN_1" => -15052, # St Kitts, Basseterre -4:10:52
-      "LC_1" => -14640, # St Lucia, Castries -4:04:00
-      "VC_1" => -14696, # St Vincent, Kingstown -4:04:56
-      "TT_1" => -14764, # Trinidad, Port of Spain -4:06:04
-      "VI_1" => -15584, # US Virgin, Charlotte Amalie -4:19:44
-      "VG_1" => -15508, # British Virgin, Road Town -4:18:28
+      "AI_1" => -15_136, # Anguilla, The Valley -4:12:16
+      "DM_1" => -14_736, # Dominica, Roseau -4:05:36
+      "GD_1" => -14_820, # Grenada, St George's -4:07:00
+      "GP_1" => -14_768, # Guadeloupe, Pointe-a-Pitre -4:06:08
+      "MS_1" => -14_932, # Montserrat, Plymouth -4:08:52
+      "KN_1" => -15_052, # St Kitts, Basseterre -4:10:52
+      "LC_1" => -14_640, # St Lucia, Castries -4:04:00
+      "VC_1" => -14_696, # St Vincent, Kingstown -4:04:56
+      "TT_1" => -14_764, # Trinidad, Port of Spain -4:06:04
+      "VI_1" => -15_584, # US Virgin, Charlotte Amalie -4:19:44
+      "VG_1" => -15_508 # British Virgin, Road Town -4:18:28
     }.each do |table, lmt|
       shanks = TzHistory::Zone.tzinfo(table)
-      assert_equal(-14400, offset_of(shanks, "1943-06-15"), "#{table} war-year AST -4:00 (default PR = -3:00)")
-      assert_equal(-14400, offset_of(shanks, "1925-06-15"), "#{table} AST -4:00")
-      assert_equal(lmt,    offset_of(shanks, "1905-06-15"), "#{table} pre-standardization capital LMT")
+      assert_equal(-14_400, offset_of(shanks, "1943-06-15"), "#{table} war-year AST -4:00 (default PR = -3:00)")
+      assert_equal(-14_400, offset_of(shanks, "1925-06-15"), "#{table} AST -4:00")
+      assert_equal(lmt, offset_of(shanks, "1905-06-15"), "#{table} pre-standardization capital LMT")
     end
   end
 
@@ -373,9 +373,9 @@ class ZoneTest < Minitest::Test
   # backzone America/Antigua 960/960 mid-months.
   def test_ag1_antigua_est_era
     shanks = TzHistory::Zone.tzinfo("AG_1")
-    assert_equal(-18000, offset_of(shanks, "1925-06-15")) # EST -5:00 (default PR = -4:00)
-    assert_equal(-18000, offset_of(shanks, "1943-06-15")) # still EST -5:00 (default PR = -3:00 AWT)
-    assert_equal(-14400, offset_of(shanks, "1960-06-15")) # AST -4:00 from 1 Jan 1951
+    assert_equal(-18_000, offset_of(shanks, "1925-06-15")) # EST -5:00 (default PR = -4:00)
+    assert_equal(-18_000, offset_of(shanks, "1943-06-15")) # still EST -5:00 (default PR = -3:00 AWT)
+    assert_equal(-14_400, offset_of(shanks, "1960-06-15")) # AST -4:00 from 1 Jan 1951
   end
 
   # --- East-Africa / Indian-Ocean EAT cluster (SUB-HOUR divergence) --------------------
@@ -385,26 +385,26 @@ class ZoneTest < Minitest::Test
   # so it is up to 30 min off across 1928-1942. ET_1 == backzone Africa/Addis_Ababa 1200/1200.
   def test_et1_ethiopia_addis_admt
     shanks = TzHistory::Zone.tzinfo("ET_1")
-    assert_equal(9320,  offset_of(shanks, "1900-06-15")) # ADMT +2:35:20 (default Nairobi = +2:30)
-    assert_equal(10800, offset_of(shanks, "1938-06-15")) # EAT +3:00 from 5 May 1936
+    assert_equal(9320, offset_of(shanks, "1900-06-15")) # ADMT +2:35:20 (default Nairobi = +2:30)
+    assert_equal(10_800, offset_of(shanks, "1938-06-15")) # EAT +3:00 from 5 May 1936
   end
 
   # Eritrea ER #1 (Asmara) -- AMT (+2:35:32) then ADMT (+2:35:20) from 1890, EAT from 1936.
   # ER_1 == backzone Africa/Asmara 1200/1200 mid-months 1870-1969.
   def test_er1_eritrea_asmara
     shanks = TzHistory::Zone.tzinfo("ER_1")
-    assert_equal(9332,  offset_of(shanks, "1885-06-15")) # AMT +2:35:32
-    assert_equal(9320,  offset_of(shanks, "1910-06-15")) # ADMT +2:35:20 from 1890
-    assert_equal(10800, offset_of(shanks, "1940-06-15")) # EAT +3:00 from 1936
+    assert_equal(9332, offset_of(shanks, "1885-06-15")) # AMT +2:35:32
+    assert_equal(9320, offset_of(shanks, "1910-06-15")) # ADMT +2:35:20 from 1890
+    assert_equal(10_800, offset_of(shanks, "1940-06-15")) # EAT +3:00 from 1936
   end
 
   # Somalia SO #1 (Mogadishu) -- EAT (+3:00) from 1893, +2:30 (1931-1957), then EAT. Default
   # links to Africa/Nairobi. SO_1 == backzone Africa/Mogadishu 1200/1200 mid-months.
   def test_so1_somalia_mogadishu
     shanks = TzHistory::Zone.tzinfo("SO_1")
-    assert_equal(10800, offset_of(shanks, "1920-06-15")) # EAT +3:00 (early, from 1893)
-    assert_equal(9000,  offset_of(shanks, "1940-06-15")) # +2:30 1931-1957 (default Nairobi = +3:00)
-    assert_equal(10800, offset_of(shanks, "1960-06-15")) # EAT +3:00 from 1957
+    assert_equal(10_800, offset_of(shanks, "1920-06-15")) # EAT +3:00 (early, from 1893)
+    assert_equal(9000, offset_of(shanks, "1940-06-15")) # +2:30 1931-1957 (default Nairobi = +3:00)
+    assert_equal(10_800, offset_of(shanks, "1960-06-15")) # EAT +3:00 from 1957
   end
 
   # Uganda UG #1 (Kampala) -- EAT (1928), +2:30 (1930), +2:45 (1948), EAT (1957). Default
@@ -419,31 +419,31 @@ class ZoneTest < Minitest::Test
   # (+2:30/+2:45 through 1942). DJ_1 == backzone Africa/Djibouti 1200/1200 mid-months.
   def test_dj1_djibouti
     shanks = TzHistory::Zone.tzinfo("DJ_1")
-    assert_equal(10800, offset_of(shanks, "1920-06-15")) # EAT +3:00 (default Nairobi = +2:30)
+    assert_equal(10_800, offset_of(shanks, "1920-06-15")) # EAT +3:00 (default Nairobi = +2:30)
   end
 
   # Madagascar MG #1 -- EAT (+3:00) from 1911 with a single summer DST (+4:00) 27 Feb -
   # 30 May 1954. Default links to Africa/Nairobi (no DST). MG_1 == backzone Indian/Antananarivo.
   def test_mg1_madagascar_1954_dst
     shanks = TzHistory::Zone.tzinfo("MG_1")
-    assert_equal(10800, offset_of(shanks, "1930-06-15")) # EAT +3:00
-    assert_equal(14400, offset_of(shanks, "1954-04-15")) # summer DST +4:00 (default Nairobi = +3:00)
-    assert_equal(10800, offset_of(shanks, "1954-08-15")) # back to EAT +3:00
+    assert_equal(10_800, offset_of(shanks, "1930-06-15")) # EAT +3:00
+    assert_equal(14_400, offset_of(shanks, "1954-04-15")) # summer DST +4:00 (default Nairobi = +3:00)
+    assert_equal(10_800, offset_of(shanks, "1954-08-15")) # back to EAT +3:00
   end
 
   # Comoros KM #1 (Moroni) & Mayotte YT #1 (Mamoudzou) -- EAT (+3:00) from 1 Jul 1911; same
   # archipelago history, distinct capital LMT. Both == their backzone twin 1200/1200.
   def test_km1_yt1_comoros_mayotte
-    assert_equal(10800, offset_of(TzHistory::Zone.tzinfo("KM_1"), "1930-06-15")) # EAT +3:00
-    assert_equal(10800, offset_of(TzHistory::Zone.tzinfo("YT_1"), "1930-06-15")) # EAT +3:00
+    assert_equal(10_800, offset_of(TzHistory::Zone.tzinfo("KM_1"), "1930-06-15")) # EAT +3:00
+    assert_equal(10_800, offset_of(TzHistory::Zone.tzinfo("YT_1"), "1930-06-15")) # EAT +3:00
   end
 
   # Réunion RE #1 & Seychelles SC #1 -- +4:00 from 1911/1907; default links to Asia/Dubai,
   # which kept LMT (+3:41) until 1920, so the default is ~19 min slow before then. Each ==
   # its backzone twin (Indian/Reunion, Indian/Mahe) 1200/1200 mid-months.
   def test_re1_sc1_indian_ocean_plus4
-    assert_equal(14400, offset_of(TzHistory::Zone.tzinfo("RE_1"), "1915-06-15")) # +4:00 (default Dubai = +3:41)
-    assert_equal(14400, offset_of(TzHistory::Zone.tzinfo("SC_1"), "1912-06-15")) # +4:00 (default Dubai = +3:41)
+    assert_equal(14_400, offset_of(TzHistory::Zone.tzinfo("RE_1"), "1915-06-15")) # +4:00 (default Dubai = +3:41)
+    assert_equal(14_400, offset_of(TzHistory::Zone.tzinfo("SC_1"), "1912-06-15")) # +4:00 (default Dubai = +3:41)
   end
 
   # --- Asia single-zone cluster (whole-hour + sub-hour) -------------------------------
@@ -453,16 +453,16 @@ class ZoneTest < Minitest::Test
   # BN_1 == backzone Asia/Brunei 960/960 mid-months 1890-1969.
   def test_bn1_brunei
     shanks = TzHistory::Zone.tzinfo("BN_1")
-    assert_equal(27000, offset_of(shanks, "1930-06-15")) # +7:30
-    assert_equal(28800, offset_of(shanks, "1938-06-15")) # +8:00 (default Kuching = +8:20 summer DST)
+    assert_equal(27_000, offset_of(shanks, "1930-06-15")) # +7:30
+    assert_equal(28_800, offset_of(shanks, "1938-06-15")) # +8:00 (default Kuching = +8:20 summer DST)
   end
 
   # Kuwait KW #1 -- Al-Kuwayt Mean Time (+3:11:56) until 1950, then +3:00. Default links
   # Kuwait -> Asia/Riyadh (LMT +3:06:52 until 1947). KW_1 == backzone Asia/Kuwait 960/960.
   def test_kw1_kuwait
     shanks = TzHistory::Zone.tzinfo("KW_1")
-    assert_equal(11516, offset_of(shanks, "1940-06-15")) # +3:11:56 (default Riyadh = +3:06:52)
-    assert_equal(10800, offset_of(shanks, "1960-06-15")) # +3:00 from 1950
+    assert_equal(11_516, offset_of(shanks, "1940-06-15")) # +3:11:56 (default Riyadh = +3:06:52)
+    assert_equal(10_800, offset_of(shanks, "1960-06-15")) # +3:00 from 1950
   end
 
   # Oman OM #1 -- Masqat Mean Time (+3:54:24) until 1920, then +4:00. Default links Oman ->
@@ -470,8 +470,8 @@ class ZoneTest < Minitest::Test
   # LMT era. OM_1 == backzone Asia/Muscat 960/960 mid-months 1890-1969.
   def test_om1_oman
     shanks = TzHistory::Zone.tzinfo("OM_1")
-    assert_equal(14064, offset_of(shanks, "1910-06-15")) # +3:54:24 (default Dubai = +3:41:12)
-    assert_equal(14400, offset_of(shanks, "1925-06-15")) # +4:00 from 1920
+    assert_equal(14_064, offset_of(shanks, "1910-06-15")) # +3:54:24 (default Dubai = +3:41:12)
+    assert_equal(14_400, offset_of(shanks, "1925-06-15")) # +4:00 from 1920
   end
 
   # Bahrain BH #1 -- IANA-backzone (archival, NOT Shanks): Al-Manamah MT (+3:22:20) until
@@ -481,9 +481,9 @@ class ZoneTest < Minitest::Test
   # contradicts it). BH_1 == backzone Asia/Bahrain 960/960 mid-months 1890-1969.
   def test_bh1_bahrain
     shanks = TzHistory::Zone.tzinfo("BH_1")
-    assert_equal(12140, offset_of(shanks, "1930-06-15")) # +3:22:20 LMT (default Qatar = +4:00, 37 min fast)
-    assert_equal(12600, offset_of(shanks, "1942-06-15")) # +3:30 from 1941-07-20
-    assert_equal(14400, offset_of(shanks, "1960-06-15")) # +4:00 from 1944
+    assert_equal(12_140, offset_of(shanks, "1930-06-15")) # +3:22:20 LMT (default Qatar = +4:00, 37 min fast)
+    assert_equal(12_600, offset_of(shanks, "1942-06-15")) # +3:30 from 1941-07-20
+    assert_equal(14_400, offset_of(shanks, "1960-06-15")) # +4:00 from 1944
   end
 
   # Yemen YE #1 -- Aden Mean Time (+2:59:54) until 1950, then +3:00. Default links Yemen ->
@@ -492,8 +492,8 @@ class ZoneTest < Minitest::Test
   # YE_1 == backzone Asia/Aden 960/960 mid-months 1890-1969.
   def test_ye1_yemen
     shanks = TzHistory::Zone.tzinfo("YE_1")
-    assert_equal(10794, offset_of(shanks, "1930-06-15")) # +2:59:54 (default Riyadh = +3:06:52)
-    assert_equal(10800, offset_of(shanks, "1960-06-15")) # +3:00 from 1950
+    assert_equal(10_794, offset_of(shanks, "1930-06-15")) # +2:59:54 (default Riyadh = +3:06:52)
+    assert_equal(10_800, offset_of(shanks, "1960-06-15")) # +3:00 from 1950
   end
 
   # --- Zaire / DR Congo: the first two-zone country (west/east province split) ---------
@@ -524,10 +524,10 @@ class ZoneTest < Minitest::Test
   # backzone America/Atikokan 960/960 mid-months 1890-1969.
   def test_ca1_atikokan_central
     shanks = TzHistory::Zone.tzinfo("CA_1")
-    assert_equal(-21600, offset_of(shanks, "1910-06-15")) # CST -6:00 (default Panama = -5:00, 1 h fast)
-    assert_equal(-21600, offset_of(shanks, "1930-01-15")) # CST -6:00 winter (no DST 1919-1939)
-    assert_equal(-18000, offset_of(shanks, "1918-07-15")) # lone 1918 DST summer: CDT -5:00 (= Panama)
-    assert_equal(-18000, offset_of(shanks, "1950-06-15")) # permanent EST -5:00 from 1945 (converged)
+    assert_equal(-21_600, offset_of(shanks, "1910-06-15")) # CST -6:00 (default Panama = -5:00, 1 h fast)
+    assert_equal(-21_600, offset_of(shanks, "1930-01-15")) # CST -6:00 winter (no DST 1919-1939)
+    assert_equal(-18_000, offset_of(shanks, "1918-07-15")) # lone 1918 DST summer: CDT -5:00 (= Panama)
+    assert_equal(-18_000, offset_of(shanks, "1950-06-15")) # permanent EST -5:00 from 1945 (converged)
   end
 
   # Thunder Bay (Fort William / Port Arthur): CONTESTED zone shipped as a NO-PEACETIME-DST
@@ -538,8 +538,8 @@ class ZoneTest < Minitest::Test
   # 252/252 + 288/288 vs backzone America/Thunder_Bay across the two windows.
   def test_ca2_thunder_bay_no_peacetime_dst
     shanks = TzHistory::Zone.tzinfo("CA_2")
-    assert_equal(-18000, offset_of(shanks, "1930-07-15")) # EST -5:00 (default Toronto = EDT -4:00)
-    assert_equal(-18000, offset_of(shanks, "1955-07-15")) # EST -5:00 (default Toronto = EDT -4:00)
+    assert_equal(-18_000, offset_of(shanks, "1930-07-15")) # EST -5:00 (default Toronto = EDT -4:00)
+    assert_equal(-18_000, offset_of(shanks, "1955-07-15")) # EST -5:00 (default Toronto = EDT -4:00)
     # Geographic windowing: correct the peacetime summers, defer every contested era.
     tb = { lat: 48.38, lon: -89.25 } # Thunder Bay (Port Arthur)
     zid = ->(d) { TzHistory.zone_id(lat: tb[:lat], lon: tb[:lon], date: Date.parse(d)) }
@@ -558,7 +558,7 @@ class ZoneTest < Minitest::Test
   # like Thunder Bay), so the postwar window runs later. 252/252 + 336/336 vs backzone.
   def test_ca3_nipigon_no_peacetime_dst
     shanks = TzHistory::Zone.tzinfo("CA_3")
-    assert_equal(-18000, offset_of(shanks, "1930-07-15")) # EST -5:00 (default Toronto = EDT -4:00)
+    assert_equal(-18_000, offset_of(shanks, "1930-07-15")) # EST -5:00 (default Toronto = EDT -4:00)
     tb = { lat: 49.02, lon: -88.27 } # Nipigon
     zid = ->(d) { TzHistory.zone_id(lat: tb[:lat], lon: tb[:lon], date: Date.parse(d)) }
     assert_equal("Shanks/CA_3", zid.call("1930-07-15")) # pre-war window: corrected
@@ -576,10 +576,10 @@ class ZoneTest < Minitest::Test
   # backzone in full over [1895, 1974). 960/960 vs backzone.
   def test_ca4_rainy_river_central
     shanks = TzHistory::Zone.tzinfo("CA_4")
-    assert_equal(-21600, offset_of(shanks, "1930-01-15")) # CST -6:00
-    assert_equal(-21600, offset_of(shanks, "1937-07-15")) # CST -6:00 (default Winnipeg = CDT -5:00)
-    assert_equal(-18000, offset_of(shanks, "1941-01-15")) # held CDT -5:00 (Winnipeg still CST -6:00 -> Rainy River AHEAD)
-    assert_equal(-21600, offset_of(shanks, "1955-07-15")) # CST -6:00 (default Winnipeg = CDT -5:00)
+    assert_equal(-21_600, offset_of(shanks, "1930-01-15")) # CST -6:00
+    assert_equal(-21_600, offset_of(shanks, "1937-07-15")) # CST -6:00 (default Winnipeg = CDT -5:00)
+    assert_equal(-18_000, offset_of(shanks, "1941-01-15")) # held CDT -5:00 (Winnipeg still CST -6:00 -> Rainy River AHEAD)
+    assert_equal(-21_600, offset_of(shanks, "1955-07-15")) # CST -6:00 (default Winnipeg = CDT -5:00)
     rr = { lat: 48.72, lon: -94.48 } # Rainy River town
     zid = ->(d) { TzHistory.zone_id(lat: rr[:lat], lon: rr[:lon], date: Date.parse(d)) }
     assert_equal("Shanks/CA_4", zid.call("1955-07-15")) # corrected
@@ -596,10 +596,10 @@ class ZoneTest < Minitest::Test
   # the Outaouais/Gatineau (kept clear of Ottawa across the river).
   def test_ca5_montreal_quebec_dst
     shanks = TzHistory::Zone.tzinfo("CA_5")
-    assert_equal(-18000, offset_of(shanks, "1923-07-15")) # summer 1923: EST -5:00 (Montreal had NO DST; Toronto link = EDT -4:00)
-    assert_equal(-14400, offset_of(shanks, "1921-06-15")) # within Montreal's own DST (May 1-Oct 2 1921): EDT -4:00
-    assert_equal(-14400, offset_of(shanks, "1918-07-15")) # 1918 federal DST: EDT -4:00
-    assert_equal(-18000, offset_of(shanks, "1949-11-15")) # Montreal fell back Oct 30; Toronto still EDT into late Nov
+    assert_equal(-18_000, offset_of(shanks, "1923-07-15")) # summer 1923: EST -5:00 (Montreal had NO DST; Toronto link = EDT -4:00)
+    assert_equal(-14_400, offset_of(shanks, "1921-06-15")) # within Montreal's own DST (May 1-Oct 2 1921): EDT -4:00
+    assert_equal(-14_400, offset_of(shanks, "1918-07-15")) # 1918 federal DST: EDT -4:00
+    assert_equal(-18_000, offset_of(shanks, "1949-11-15")) # Montreal fell back Oct 30; Toronto still EDT into late Nov
     mtl = { lat: 45.50, lon: -73.57 } # Montreal
     zid = ->(lat, lon, d) { TzHistory.zone_id(lat: lat, lon: lon, date: Date.parse(d)) }
     assert_equal("Shanks/CA_5", zid.call(mtl[:lat], mtl[:lon], "1923-07-15")) # corrected
@@ -618,9 +618,9 @@ class ZoneTest < Minitest::Test
   # BS_1 reproduces backzone America/Nassau in full over [1912, 1964); 624/624 vs backzone.
   def test_bs1_bahamas_no_peacetime_dst
     shanks = TzHistory::Zone.tzinfo("BS_1")
-    assert_equal(-18000, offset_of(shanks, "1930-07-15")) # EST -5:00 (no peacetime DST; Toronto link = EDT -4:00)
-    assert_equal(-14400, offset_of(shanks, "1943-07-15")) # war time EWT -4:00
-    assert_equal(-18000, offset_of(shanks, "1955-07-15")) # EST -5:00 (Toronto link = EDT -4:00)
+    assert_equal(-18_000, offset_of(shanks, "1930-07-15")) # EST -5:00 (no peacetime DST; Toronto link = EDT -4:00)
+    assert_equal(-14_400, offset_of(shanks, "1943-07-15")) # war time EWT -4:00
+    assert_equal(-18_000, offset_of(shanks, "1955-07-15")) # EST -5:00 (Toronto link = EDT -4:00)
     zid = ->(lat, lon, d) { TzHistory.zone_id(lat: lat, lon: lon, date: Date.parse(d)) }
     assert_equal("Shanks/BS_1", zid.call(25.06, -77.35, "1930-07-15")) # Nassau: corrected
     assert_equal("Shanks/BS_1", zid.call(25.06, -77.35, "1955-07-15")) # Nassau: corrected
@@ -656,9 +656,9 @@ class ZoneTest < Minitest::Test
   # fast across 1890-1945. UA_1 reproduces backzone Europe/Uzhgorod; 648/648 vs backzone.
   def test_ua1_transcarpathia_cet
     shanks = TzHistory::Zone.tzinfo("UA_1")
-    assert_equal(3600,  offset_of(shanks, "1920-01-15")) # CET +1:00 (Kyiv link = +2:00 EET, 1 h fast)
-    assert_equal(3600,  offset_of(shanks, "1935-07-15")) # CET +1:00 (Kyiv link = +3:00 MSK, 2 h fast)
-    assert_equal(7200,  offset_of(shanks, "1943-07-15")) # CEST +2:00 wartime summer
+    assert_equal(3600, offset_of(shanks, "1920-01-15")) # CET +1:00 (Kyiv link = +2:00 EET, 1 h fast)
+    assert_equal(3600, offset_of(shanks, "1935-07-15")) # CET +1:00 (Kyiv link = +3:00 MSK, 2 h fast)
+    assert_equal(7200, offset_of(shanks, "1943-07-15")) # CEST +2:00 wartime summer
     zid = ->(lat, lon, d) { TzHistory.zone_id(lat: lat, lon: lon, date: Date.parse(d)) }
     assert_equal("Shanks/UA_1", zid.call(48.62, 22.29, "1920-06-15")) # Uzhhorod: corrected
     assert_equal("Shanks/UA_1", zid.call(48.44, 22.72, "1935-06-15")) # Mukachevo: same oblast
@@ -675,9 +675,9 @@ class ZoneTest < Minitest::Test
   # 576/576 vs backzone. Rect sits south of Tijuana/Rosarito and above the Baja Sur border.
   def test_mx1_ensenada_baja
     shanks = TzHistory::Zone.tzinfo("MX_1")
-    assert_equal(-28800, offset_of(shanks, "1923-07-15")) # PST -8:00 (Tijuana link = MST -7:00)
-    assert_equal(-25200, offset_of(shanks, "1946-07-15")) # MST -7:00 (Tijuana link = PST -8:00)
-    assert_equal(-28800, offset_of(shanks, "1960-07-15")) # PST -8:00 no DST (Tijuana link = PDT -7:00)
+    assert_equal(-28_800, offset_of(shanks, "1923-07-15")) # PST -8:00 (Tijuana link = MST -7:00)
+    assert_equal(-25_200, offset_of(shanks, "1946-07-15")) # MST -7:00 (Tijuana link = PST -8:00)
+    assert_equal(-28_800, offset_of(shanks, "1960-07-15")) # PST -8:00 no DST (Tijuana link = PDT -7:00)
     zid = ->(lat, lon, d) { TzHistory.zone_id(lat: lat, lon: lon, date: Date.parse(d)) }
     assert_equal("Shanks/MX_1", zid.call(31.87, -116.60, "1923-06-15")) # Ensenada: corrected
     assert_equal("Shanks/MX_1", zid.call(31.87, -116.60, "1960-07-15")) # Ensenada: no-DST summer
@@ -695,9 +695,9 @@ class ZoneTest < Minitest::Test
   # Mongolia, Qinghai, Hainan, Guangdong counties) and the other four zones are deferred.
   def test_cn1_chongqing_longshu
     shanks = TzHistory::Zone.tzinfo("CN_1")
-    assert_equal(25200, offset_of(shanks, "1935-07-15")) # +7:00 (Shanghai default = +8:00)
-    assert_equal(25200, offset_of(shanks, "1950-07-15")) # +7:00, no DST in this zone
-    assert_equal(28800, offset_of(shanks, "1981-07-15")) # +8:00 from 1 May 1980 (converged)
+    assert_equal(25_200, offset_of(shanks, "1935-07-15")) # +7:00 (Shanghai default = +8:00)
+    assert_equal(25_200, offset_of(shanks, "1950-07-15")) # +7:00, no DST in this zone
+    assert_equal(28_800, offset_of(shanks, "1981-07-15")) # +8:00 from 1 May 1980 (converged)
     zid = ->(lat, lon, d) { TzHistory.zone_id(lat: lat, lon: lon, date: Date.parse(d)) }
     assert_equal("Shanks/CN_1", zid.call(30.66, 104.07, "1950-06-15")) # Chengdu (Sichuan): corrected
     assert_equal("Shanks/CN_1", zid.call(29.56, 106.55, "1950-06-15")) # Chongqing: corrected
@@ -738,9 +738,9 @@ class ZoneTest < Minitest::Test
   # (Kashgar/Yining/Aksu/Hotan) is CN_2, the east (Urumqi/Korla/Turpan) is the +6:00 default.
   def test_cn2_kashgar_kunlun
     shanks = TzHistory::Zone.tzinfo("CN_2")
-    assert_equal(19800, offset_of(shanks, "1935-07-15")) # +5:30 (Urumqi default = +6:00): 30 min slower
-    assert_equal(18000, offset_of(shanks, "1950-07-15")) # +5:00 from 1 Jan 1940: a full hour slower
-    assert_equal(28800, offset_of(shanks, "1981-07-15")) # +8:00 from 1 May 1980 (out of scope)
+    assert_equal(19_800, offset_of(shanks, "1935-07-15")) # +5:30 (Urumqi default = +6:00): 30 min slower
+    assert_equal(18_000, offset_of(shanks, "1950-07-15")) # +5:00 from 1 Jan 1940: a full hour slower
+    assert_equal(28_800, offset_of(shanks, "1981-07-15")) # +8:00 from 1 May 1980 (out of scope)
     zid = ->(lat, lon, d) { TzHistory.zone_id(lat: lat, lon: lon, date: Date.parse(d)) }
     assert_equal("Shanks/CN_2", zid.call(39.47, 75.99, "1950-06-15")) # Kashgar: corrected
     assert_equal("Shanks/CN_2", zid.call(43.91, 81.32, "1950-06-15")) # Yining/Ili: corrected
@@ -786,8 +786,8 @@ class ZoneTest < Minitest::Test
   # after, no DST). BW_1 == backzone Africa/Gaborone 756/756 mid-months 1884-1946.
   def test_bw1_botswana_gaborone
     shanks = TzHistory::Zone.tzinfo("BW_1")
-    assert_equal(5400,  offset_of(shanks, "1900-06-15")) # SAST +1:30 (default Maputo = LMT +2:10)
-    assert_equal(10800, offset_of(shanks, "1944-01-15")) # CAST +3:00 war summer (default Maputo = +2:00)
+    assert_equal(5400, offset_of(shanks, "1900-06-15")) # SAST +1:30 (default Maputo = LMT +2:10)
+    assert_equal(10_800, offset_of(shanks, "1944-01-15")) # CAST +3:00 war summer (default Maputo = +2:00)
     zid = ->(lat, lon, d) { TzHistory.zone_id(lat: lat, lon: lon, date: Date.parse(d)) }
     assert_equal("Shanks/BW_1", zid.call(-24.65, 25.91, "1944-01-15")) # Gaborone: corrected
   end
@@ -798,8 +798,8 @@ class ZoneTest < Minitest::Test
   # Africa/Maseru 672/672 mid-months 1891-1946.
   def test_ls1_lesotho_maseru
     shanks = TzHistory::Zone.tzinfo("LS_1")
-    assert_equal(7200,  offset_of(shanks, "1943-01-15")) # +2:00 first war summer (default Joburg = +3:00)
-    assert_equal(10800, offset_of(shanks, "1944-01-15")) # +3:00 second war summer (matches Joburg)
+    assert_equal(7200, offset_of(shanks, "1943-01-15")) # +2:00 first war summer (default Joburg = +3:00)
+    assert_equal(10_800, offset_of(shanks, "1944-01-15")) # +3:00 second war summer (matches Joburg)
     zid = ->(lat, lon, d) { TzHistory.zone_id(lat: lat, lon: lon, date: Date.parse(d)) }
     assert_equal("Shanks/LS_1", zid.call(-29.31, 27.48, "1943-01-15")) # Maseru: corrected
   end

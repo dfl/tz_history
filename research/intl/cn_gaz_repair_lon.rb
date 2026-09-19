@@ -58,7 +58,7 @@ out = lines.map do |l|
     new_tok = format("%d%s%02d", rdeg, lon[:hemi], rmin)
     repaired << { name: f[0], old: f[4], new: new_tok, lmt: f[5], line: lines.index(l) }
     f[4] = new_tok
-    next f.join("\t") + "\n"
+    next "#{f.join("\t")}\n"
   else
     ambiguous << { name: f[0], lon: f[4], lmt: f[5], rdeg: rdeg, rmin: rmin,
                    min_ok: min_ok, suffix_ok: suffix_ok }
@@ -72,13 +72,13 @@ File.write(path, out.join)
 puts "repaired #{repaired.size} lon tokens; #{ambiguous.size} left as AMBIGUOUS (guard failed)"
 puts "backup: #{path}.bak\n\n"
 puts "=== sample repairs (first 20) ==="
-puts format("  %-20s %-9s -> %-9s  (lmt %s)", "name", "old", "new", "")
+puts "  name                 old       -> new        (lmt )"
 repaired.first(20).each do |r|
   puts format("  %-20s %-9s -> %-9s  (lmt %s)", r[:name].to_s[0, 20], r[:old], r[:new], r[:lmt])
 end
 unless ambiguous.empty?
   puts "\n=== AMBIGUOUS (left untouched -- LMT and lon disagree in min, not a clean digit-drop) ==="
-  puts format("  %-20s %-9s %-9s  %-14s min_ok suffix_ok", "name", "lon", "lmt", "recomputed")
+  puts "  name                 lon       lmt        recomputed     min_ok suffix_ok"
   ambiguous.first(30).each do |a|
     puts format("  %-20s %-9s %-9s  %3dE%02d          %-6s %s",
                 a[:name].to_s[0, 20], a[:lon], a[:lmt], a[:rdeg], a[:rmin], a[:min_ok], a[:suffix_ok])

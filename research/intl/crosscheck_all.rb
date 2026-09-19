@@ -47,12 +47,20 @@ parser  = ds.const_get(:PosixTimeZoneParser).new(deduper)
 reader  = ds.const_get(:ZoneinfoReader).new(parser, deduper)
 def load(reader, path, id)
   zi = reader.read(path) or return nil
-  info = zi.is_a?(TZInfo::TimezoneOffset) ?
-    TZInfo::DataSources::ConstantOffsetDataTimezoneInfo.new(id, zi) :
-    TZInfo::DataSources::TransitionsDataTimezoneInfo.new(id, zi)
+  info = if zi.is_a?(TZInfo::TimezoneOffset)
+           TZInfo::DataSources::ConstantOffsetDataTimezoneInfo.new(id, zi)
+         else
+           TZInfo::DataSources::TransitionsDataTimezoneInfo.new(id, zi)
+         end
   TZInfo::DataTimezone.new(info)
 end
-OFF = ->(z, t) { z.period_for_utc(t).observed_utc_offset rescue nil }
+OFF = lambda { |z, t|
+  begin
+    z.period_for_utc(t).observed_utc_offset
+  rescue StandardError
+    nil
+  end
+}
 
 def ratio(reader, pack, sh, twin, y0, y1)
   bz = load(reader, File.join(pack, twin), twin) or return nil
@@ -94,17 +102,18 @@ shipped.each do |tbl|
     flagged << [tbl, "no candidate twin for CC=#{cc} in divergence list (#{y0}-#{y1})", nil]
     next
   end
-  scored = candidates.map { |tw| [tw, ratio(reader, pack, sh, tw, y0, y1)] }.reject { |_, r| r.nil? }
+  scored = candidates.map { |tw| [tw, ratio(reader, pack, sh, tw, y0, y1)] }.compact
   best = scored.max_by { |_, r| r[:match].to_f / r[:total] }
   if best.nil?
-    flagged << [tbl, "twins exist but no overlapping years (#{y0}-#{y1}): #{candidates.join(',')}", nil]
+    flagged << [tbl, "twins exist but no overlapping years (#{y0}-#{y1}): #{candidates.join(",")}", nil]
     next
   end
   tw, r = best
   if r[:match] == r[:total]
     clean << [tbl, tw, r]
   else
-    flagged << [tbl, "BEST twin #{tw}: #{r[:match]}/#{r[:total]} match, worst dz=#{r[:worst_s] / 60}m (#{y0}-#{y1})", scored]
+    flagged << [tbl, "BEST twin #{tw}: #{r[:match]}/#{r[:total]} match, worst dz=#{r[:worst_s] / 60}m (#{y0}-#{y1})",
+                scored]
   end
 end
 

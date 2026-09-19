@@ -192,16 +192,20 @@ module TzHistory
       # Squared point-to-segment distance, longitude scaled by coslat so degrees are
       # ~isometric in metres at this latitude.
       def seg_dist2(px, py, a, b, k)
-        ax = a[0] * k; ay = a[1]
-        bx = b[0] * k; by = b[1]
-        qx = px * k; qy = py
-        dx = bx - ax; dy = by - ay
+        ax = a[0] * k
+        ay = a[1]
+        bx = b[0] * k
+        by = b[1]
+        qx = px * k
+        qy = py
+        dx = bx - ax
+        dy = by - ay
         return ((qx - ax)**2) + ((qy - ay)**2) if dx.zero? && dy.zero?
 
         t = (((qx - ax) * dx) + ((qy - ay) * dy)) / ((dx * dx) + (dy * dy))
-        t = 0.0 if t < 0
+        t = 0.0 if t.negative?
         t = 1.0 if t > 1
-        ((qx - (ax + t * dx))**2) + ((qy - (ay + t * dy))**2)
+        ((qx - (ax + (t * dx)))**2) + ((qy - (ay + (t * dy)))**2)
       end
 
       # Ray-casting point-in-polygon on a ring of [lon, lat] pairs.

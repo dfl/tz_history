@@ -71,12 +71,18 @@ a_bad.sort_by! { |r| -r[:diff_sec] }
 puts "=" * 90
 puts "CHECK A  LMT vs longitude (expected = lon_deg * 240s)"
 puts "  checkable rows (have both lon+lmt): #{checkable.size}"
-puts "  DISAGREE > 2 min: #{a_bad.size}  (#{format('%.2f', 100.0 * a_bad.size / checkable.size)}%)"
+puts "  DISAGREE > 2 min: #{a_bad.size}  (#{format("%.2f", 100.0 * a_bad.size / checkable.size)}%)"
 puts "-" * 90
-buckets = a_bad.group_by { |r| r[:diff_sec] > 1800 ? ">30m" : r[:diff_sec] > 600 ? "10-30m" : "2-10m" }
+buckets = a_bad.group_by do |r|
+  if r[:diff_sec] > 1800
+    ">30m"
+  else
+    r[:diff_sec] > 600 ? "10-30m" : "2-10m"
+  end
+end
 %w[>30m 10-30m 2-10m].each { |b| puts format("  %-7s %d", b, (buckets[b] || []).size) }
 puts "\n  worst 25:"
-puts format("  %-20s %-4s %-3s %-7s %-9s %-9s %8s", "name", "div", "tt", "lat", "lon", "lmt", "off_by")
+puts "  name                 div  tt  lat     lon       lmt         off_by"
 a_bad.first(25).each do |r|
   off = r[:diff_sec]
   offs = off >= 3600 ? format("%dh%02dm", off / 3600, (off % 3600) / 60) : format("%dm%02ds", off / 60, off % 60)
@@ -87,11 +93,11 @@ end
 # ---- CHECK B: division-majority offset outliers --------------------------------------
 valid = rows.select { |r| DIVS.key?(r[:div]) && OFF.key?(r[:tt]) }
 by_div = valid.group_by { |r| r[:div] }
-puts "\n" + ("=" * 90)
+puts "\n#{"=" * 90}"
 puts "CHECK B  Division-majority OFFSET outliers"
 puts "  rows with valid div+tt: #{valid.size}"
 puts "-" * 90
-puts format("  %-4s %-16s %6s  %-26s %s", "div", "province", "n", "offset histogram", "outliers")
+puts "  div  province              n  offset histogram           outliers"
 b_outliers = []
 by_div.sort_by { |d, _| d }.each do |div, rs|
   hist = rs.each_with_object(Hash.new(0)) { |r, h| h[OFF[r[:tt]]] += 1 }
@@ -101,13 +107,13 @@ by_div.sort_by { |d, _| d }.each do |div, rs|
   # only surface outliers whose share is small enough to look like noise (< 8%).
   minority_share = outs.size.to_f / rs.size
   hstr = hist.sort_by { |_, n| -n }.map { |o, n| "#{o}:#{n}" }.join("  ")
-  flag = minority_share < 0.08 && !outs.empty? ? "#{outs.size} (#{format('%.1f', minority_share * 100)}%)" : ""
+  flag = minority_share < 0.08 && !outs.empty? ? "#{outs.size} (#{format("%.1f", minority_share * 100)}%)" : ""
   b_outliers.concat(outs.map { |r| r.merge(dom: dom) }) if minority_share < 0.08
   puts format("  %-4s %-16s %6d  %-26s %s", div, DIVS[div], rs.size, hstr, flag)
 end
 
 puts "\n  suspected misread rows (division-minority offset, share<8%):"
-puts format("  %-20s %-16s %-3s %-5s %-9s %-9s %s", "name", "province", "tt", "->off", "lon", "lmt", "dom")
+puts "  name                 province         tt  ->off lon       lmt       dom"
 b_outliers.sort_by { |r| [r[:div], r[:tt]] }.first(40).each do |r|
   puts format("  %-20s %-16s %-3s %-5s %-9s %-9s %s L%d",
               r[:name].to_s[0, 20], DIVS[r[:div]], r[:tt], OFF[r[:tt]], r[:lon], r[:lmt], r[:dom], r[:line])
@@ -115,9 +121,9 @@ end
 puts "  ... (#{b_outliers.size} total)" if b_outliers.size > 40
 
 # ---- overlap: rows failing BOTH checks are the highest-confidence OCR errors ----------
-a_lines = a_bad.map { |r| r[:line] }.to_set
+a_lines = a_bad.to_set { |r| r[:line] }
 both = b_outliers.select { |r| a_lines.include?(r[:line]) }
-puts "\n" + ("=" * 90)
+puts "\n#{"=" * 90}"
 puts "OVERLAP  rows failing BOTH A and B (highest-confidence OCR errors): #{both.size}"
 both.sort_by { |r| r[:line] }.each do |r|
   puts format("  %-20s %-16s tt=%s ->%s lon=%s lmt=%s  L%d",
