@@ -1726,7 +1726,7 @@ class TzHistoryTest < Minitest::Test
     winter = TzHistory.for(**AMS, date: "1900-01-15")
     assert_equal 1172, winter.period_for_local(Time.utc(1900, 1, 15, 12)).observed_utc_offset # +0:19:32
     rotterdam = TzHistory.for(lat: 51.9244, lon: 4.4777, date: "1938-07-15")
-    assert_equal 4800, rotterdam.period_for_local(Time.utc(1938, 7, 15, 12)).observed_utc_offset # +1:20 on the +0:20 base
+    assert_equal 4800, rotterdam.period_for_local(Time.utc(1938, 7, 15, 12)).observed_utc_offset # +1:20 on +0:20 base
   end
 
   def test_netherlands_defers_outside_window_and_borders

@@ -140,7 +140,7 @@ class ZoneTest < Minitest::Test
     assert_equal(-3600, offset_of(shanks, "1910-07-15")) # std -1:00, no summer time yet
     assert_equal(-3600, offset_of(shanks, "1925-07-15")) # std -1:00 (no DST 1922-1938)
     assert_equal(0,     offset_of(shanks, "1940-07-15")) # summer +00 (Shanks omitted 1940 DST; Almanak-sourced)
-    assert_equal(0,     offset_of(shanks, "1941-08-15")) # summer +00 (Shanks fell back 2/Jul; Almanak keeps it to autumn)
+    assert_equal(0,     offset_of(shanks, "1941-08-15")) # summer +00 (Shanks fell back 2/Jul; Almanak keeps to autumn)
     assert_equal(-3600, offset_of(shanks, "1965-01-15")) # winter std -1:00
     assert_equal(0,     offset_of(shanks, "1965-07-15")) # summer +00
     assert_equal(0,     offset_of(shanks, "1968-07-15")) # permanent GMT from 1968-04-07
@@ -578,7 +578,7 @@ class ZoneTest < Minitest::Test
     shanks = TzHistory::Zone.tzinfo("CA_4")
     assert_equal(-21_600, offset_of(shanks, "1930-01-15")) # CST -6:00
     assert_equal(-21_600, offset_of(shanks, "1937-07-15")) # CST -6:00 (default Winnipeg = CDT -5:00)
-    assert_equal(-18_000, offset_of(shanks, "1941-01-15")) # held CDT -5:00 (Winnipeg still CST -6:00 -> Rainy River AHEAD)
+    assert_equal(-18_000, offset_of(shanks, "1941-01-15")) # held CDT -5:00 (Winnipeg still CST; Rainy River AHEAD)
     assert_equal(-21_600, offset_of(shanks, "1955-07-15")) # CST -6:00 (default Winnipeg = CDT -5:00)
     rr = { lat: 48.72, lon: -94.48 } # Rainy River town
     zid = ->(d) { TzHistory.zone_id(lat: rr[:lat], lon: rr[:lon], date: Date.parse(d)) }
@@ -596,7 +596,7 @@ class ZoneTest < Minitest::Test
   # the Outaouais/Gatineau (kept clear of Ottawa across the river).
   def test_ca5_montreal_quebec_dst
     shanks = TzHistory::Zone.tzinfo("CA_5")
-    assert_equal(-18_000, offset_of(shanks, "1923-07-15")) # summer 1923: EST -5:00 (Montreal had NO DST; Toronto link = EDT -4:00)
+    assert_equal(-18_000, offset_of(shanks, "1923-07-15")) # summer 1923: EST -5:00 (Montreal no DST; Toronto EDT)
     assert_equal(-14_400, offset_of(shanks, "1921-06-15")) # within Montreal's own DST (May 1-Oct 2 1921): EDT -4:00
     assert_equal(-14_400, offset_of(shanks, "1918-07-15")) # 1918 federal DST: EDT -4:00
     assert_equal(-18_000, offset_of(shanks, "1949-11-15")) # Montreal fell back Oct 30; Toronto still EDT into late Nov
@@ -604,7 +604,7 @@ class ZoneTest < Minitest::Test
     zid = ->(lat, lon, d) { TzHistory.zone_id(lat: lat, lon: lon, date: Date.parse(d)) }
     assert_equal("Shanks/CA_5", zid.call(mtl[:lat], mtl[:lon], "1923-07-15")) # corrected
     assert_equal("Shanks/CA_5", zid.call(46.81, -71.21, "1923-07-15")) # Quebec City: same corridor
-    assert_equal("Shanks/CA_5", zid.call(48.45, -68.53, "1923-07-15")) # Rimouski: lower St. Lawrence, still EST (not AST)
+    assert_equal("Shanks/CA_5", zid.call(48.45, -68.53, "1923-07-15")) # Rimouski: lower St. Lawrence, EST (not AST)
     assert_nil(zid.call(mtl[:lat], mtl[:lon], "1900-06-15")) # pre-1917 both EST -> defer to Toronto
     assert_nil(zid.call(mtl[:lat], mtl[:lon], "1960-07-15")) # converged from 1951 -> defer
     assert_nil(zid.call(45.42, -75.70, "1923-07-15")) # Ottawa, Ontario: west of the rect -> defer

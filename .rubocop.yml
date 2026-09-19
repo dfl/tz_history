@@ -3,13 +3,15 @@ AllCops:
   NewCops: enable
   SuggestExtensions: false
 
-# Data files and generated blobs are not Ruby style concerns. tools/ are dev-only
-# extraction scripts (never packaged in the gem -- see docs/RUNBOOK.md), so their
-# throwaway format-string style isn't held to the library's bar.
+# Data files and generated blobs are not Ruby style concerns. tools/ and research/
+# are dev-only extraction/builder scripts (never packaged in the gem -- see the
+# gemspec and docs/RUNBOOK.md), so their throwaway format-string style isn't held
+# to the library's bar.
   Exclude:
     - "data/**/*"
     - "vendor/**/*"
     - "tools/**/*"
+    - "research/**/*"
 
 # The point-in-polygon and offset math read best as-is; don't force extraction.
 Metrics:
