@@ -84,41 +84,53 @@ patterns are:
 - **Flagged, not guessed** — contested or incompletely-documented regions return a
   `note` caveat while `for` defers to IANA.
 
-Known residual minorities and a few dedicated multi-zone projects still open
-(Illinois, Indiana, Michigan) are tracked in [`docs/DEFERRED.md`](docs/DEFERRED.md).
+Known residual minorities and a handful of contested tails (e.g. Michigan's
+eastern-LP towns, Indiana's undocumented boundary counties) are tracked in
+[`docs/DEFERRED.md`](docs/DEFERRED.md).
 
-### International (in progress)
+### International
 
-Extension to the Shanks *International Atlas* has begun. Internationally IANA is
-*not* silent — it models the whole world pre-1970 — but it distrusts its own
-pre-1970 data (much of it from the same astrology atlases) and has demoted a lot of
-it out of the default build: e.g. `Europe/Amsterdam` is merely a `Link` to
-`Europe/Brussels` (GMT/WET) before 1940, so a plain geographic lookup is wrong for
-every pre-1940 Dutch birth. The real Amsterdam Mean Time history survives only in
-IANA's opt-in `backzone`. The first country shipped is the **Netherlands**
-(`Shanks/NL_1` = Amsterdam Mean Time `+0:19:32`, then `+0:20` from 1937), verified
-offset-for-offset against IANA's backzone Amsterdam. Country polygons come from the
-public-domain Natural Earth dataset (`data/intl_historical_zones.geojson`).
+Internationally IANA is *not* silent — it models the whole world pre-1970 — but it
+distrusts a lot of its own pre-1970 data and demotes it out of the default build via
+`Link`, e.g. `Europe/Amsterdam` is just a link to `Europe/Brussels` (GMT/WET) before
+1940. `tz_history` ships a Shanks *International Atlas* correction for every country
+where that demotion actually mis-zones a birth by a material amount, checked
+offset-for-offset against IANA's own `backzone` data wherever it exists. Country
+polygons come from the public-domain Natural Earth dataset
+(`data/intl_historical_zones.geojson`); full detail and per-country cross-check
+numbers are in [`docs/INTL_COVERAGE.md`](docs/INTL_COVERAGE.md).
 
-Coverage has since grown to a European sub-hour cluster (Iceland, Luxembourg, Norway,
-Sweden, Denmark), the Netherlands Antilles, a West-African whole-hour cluster (Senegal,
-Guinea, Mauritania, Mali, Gambia, Niger, Benin, Equatorial Guinea, Tanzania), and the
-**Eastern Caribbean** — twelve territories (Anguilla, Antigua & Barbuda, Dominica,
-Grenada, Guadeloupe, Montserrat, St Kitts & Nevis, St Lucia, St Vincent, Trinidad &
-Tobago, and both Virgin Islands) that IANA links to `America/Puerto_Rico` and so
-mis-clocks by a full hour during 1942–45 Atlantic War Time. Two African clusters
-follow: a **Central-African** WAT group (Cameroon, Central African Republic, Congo-
-Brazzaville, Gabon, Angola) that IANA links to `Africa/Lagos` (30–47 min slow before
-Lagos reached WAT in 1919), and an **East-African / Indian-Ocean** group (Ethiopia,
-Eritrea, Somalia, Djibouti, Uganda, Madagascar, Comoros, Mayotte, Réunion, Seychelles)
-that IANA links to `Africa/Nairobi` — or `Asia/Dubai` for the +4 islands — and so
-mis-clocks by a sub-hour amount (Ethiopia's `+2:35:20` Adis Dera Mean Time, Madagascar's
-1954 summer daylight time, and the like). An **Asian** pair follows: **Brunei** (`+7:30`
-then `+8:00`, which IANA links to `Asia/Kuching` — off by up to an hour during that zone's
-1935–41 daylight time and the 1942–45 Japanese `+9`) and **Kuwait** (Al-Kuwayt Mean Time
-`+3:11:56` until 1950, which IANA links to `Asia/Riyadh` and so runs a few minutes slow).
-Each override is checked offset-for-offset against its IANA backzone twin; see
-`docs/INTL_COVERAGE.md`.
+60+ countries/territories ship a correction:
+
+- **Europe** — Netherlands, Iceland, Luxembourg, Norway, Sweden, Denmark, and
+  Ukraine's Transcarpathia (Uzhhorod/Mukachevo), all sub-hour or CET/link
+  mismatches against Berlin/Brussels-linked defaults.
+- **West Africa** (whole-hour, vs the Abidjan/Lagos GMT links) — Senegal, Guinea,
+  Mauritania, Mali, Gambia, Niger, Sierra Leone, Benin.
+- **Central Africa** (WAT, vs the Lagos link) — Cameroon, Central African
+  Republic, Congo-Brazzaville, Gabon, Angola, Equatorial Guinea, and DR Congo
+  (Zaire), split west/east by province since it straddles WAT/CAT.
+- **East Africa / Indian Ocean** (sub-hour, vs the Nairobi/Dubai links) —
+  Ethiopia, Eritrea, Somalia (+ Somaliland), Djibouti, Uganda, Madagascar,
+  Comoros, Mayotte, Réunion, Seychelles, Tanzania.
+- **Southern Africa** (vs the Maputo/Johannesburg CAT/SAST links) — Malawi,
+  Botswana, Eswatini, Lesotho, Zimbabwe, Zambia.
+- **Caribbean** (AST/EST, vs the Puerto Rico link's 1942–45 War Time and the
+  Bahamas' Toronto-style DST link) — Aruba, Curaçao, Anguilla, Antigua &
+  Barbuda, Dominica, Grenada, Guadeloupe, Montserrat, St Kitts & Nevis, St
+  Lucia, St Vincent, Trinidad & Tobago, both Virgin Islands, and the Bahamas.
+- **Middle East / Asia** — Brunei, Kuwait, Oman, Bahrain, Yemen, and China
+  (the Long-shu/Chongqing +7:00 zone across Sichuan/Gansu/Qinghai/Inner
+  Mongolia/Hainan, and the Kashgar/Kunlun +5:30→+5:00 zone in far-west
+  Xinjiang, both vs Beijing-time defaults).
+- **North America** — five Canadian localities straddling Ontario/Quebec DST
+  and zone-boundary quirks (Rainy River District, Thunder Bay, Nipigon,
+  Montreal), and Ensenada, Mexico (Pacific/Mountain flips 1922–1949).
+
+Countries checked and found already correct under IANA's default (no override
+needed) or explicitly deferred because Shanks conflicts with a better-sourced
+IANA primary are listed in `docs/INTL_COVERAGE.md`, along with the remaining
+open backlog.
 
 ## How it works
 
@@ -136,6 +148,11 @@ boundaries):
 
 Contested boundaries where the pre-1970 history is genuinely uncertain are
 **flagged, not guessed** (`note` returns a caveat; `for` returns `nil`).
+
+International overrides share the same lookup against a second FeatureCollection
+of country/province polygons (`data/intl_historical_zones.geojson`, Natural Earth
+boundaries) instead of US counties; everything else — flat vs. Shanks
+transition-list zones, `zic` compilation, the flag-don't-guess rule — is identical.
 
 ### Rebuilding the synthetic zones
 
