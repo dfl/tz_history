@@ -21,6 +21,19 @@ require "test_helper"
 class ZoneTest < Minitest::Test
   include TestHelpers
 
+  # Tests the Shanks TZif / county-polygon layer directly, so the ACS town layer is
+  # disabled here (see the note in tz_history_test.rb). Relevant near the US border,
+  # where the US-only town layer can otherwise snap a just-across-the-line coordinate
+  # (e.g. Rainy River, ON) to the nearest US town.
+  def setup
+    @acs_town_layer_was = TzHistory.acs_town_layer
+    TzHistory.acs_town_layer = false
+  end
+
+  def teardown
+    TzHistory.acs_town_layer = @acs_town_layer_was
+  end
+
   # Shanks table id => the IANA zone it must match, and the span they overlap.
   SHANKS_IANA_TWINS = {
     "KY_69" => { iana: "America/Kentucky/Louisville", from: 1884, to: 1969 }

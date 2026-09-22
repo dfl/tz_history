@@ -3,6 +3,35 @@
 All notable changes to `tz_history` are documented here. This project adheres to
 [Semantic Versioning](https://semver.org).
 
+## [Unreleased]
+
+### Added
+- **ACS town-point layer (`TzHistory::Acs`).** A nearest-town resolver over 157,054 US towns
+  independently derived from the Shanks American Atlas.
+  Where the county-polygon layer can only assign a county-majority zone, this resolves finer than
+  county — neighbouring towns ~20 km apart routinely carry different DST-observance histories
+  (downstate Illinois splits 72% of 25 km cells). Each town maps to one of 1,621 synthetic zones
+  whose full pre-1970 transition sequence is compiled to TZif by `zic`, so offsets resolve through
+  the same TZInfo machinery as every IANA zone.
+  - **`for`/`zone_id`/`note` now resolve through the town layer by default.** For an in-range
+    pre-1970 US birth, the nearest town's history wins wherever it diverges from the town's modern
+    IANA zone; where it agrees, `for` returns `nil` (defer to IANA), the same "no correction" contract
+    as before. The county-polygon layer becomes the fallback for births outside ACS town range
+    (offshore / non-US) and on/after 1970. Set `TzHistory.acs_town_layer = false` to restore the
+    polygon-only behavior.
+  - `TzHistory.acs(lat:, lon:, date:)` returns the nearest-town zone even when it agrees with IANA
+    (the raw atlas verdict); `TzHistory::Acs.resolve` also returns the town name, distance, IANA
+    baseline, and divergence verdict.
+  - Coverage now includes western states the older marker-based parse missed (Denver, Phoenix,
+    Seattle). Base zone is read per-record, removing the old longitude-approximated base meridian.
+    Each town also carries its modern IANA zone (from `tzao.plist`) as the divergence baseline.
+  - Supersedes several county-polygon approximations town-by-town: e.g. downstate Illinois is no
+    longer flattened to CST where Shanks records early-postwar DST (Peoria, continuous 1946-70), and
+    the Mountain no-DST states defer to IANA in the standard years they already match, correcting only
+    the 1920 / 1965-66 MDT summers.
+  - Provenance: facts only, independently derived; only the re-derived facts ship
+    (see docs/PROVENANCE.md).
+
 ## [0.2.1] - 2026-09-13
 
 Data-quality fix for the Ohio city index. No timezone offsets change — every birth

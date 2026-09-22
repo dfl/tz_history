@@ -52,8 +52,47 @@ TzHistory.for(lat: 35.9606, lon: -83.9207, date: "1990-01-15")   # => nil
 - `TzHistory.note(lat:, lon:, date:) => String | nil` — a human-readable prompt to
   verify the birth record (also returned for *contested* regions we flag but do
   **not** silently correct).
+- `TzHistory.acs(lat:, lon:, date:) => TZInfo::Timezone | nil` — the **town-level**
+  ACS answer (see below), or `nil` beyond ~40 km of any documented town or on/after
+  the 1970 IANA cutover.
 
 `date` is the wall-clock birth date (a `"YYYY-MM-DD"` string or a `Date`).
+
+### Town-level layer (ACS) — the default resolution path
+
+`for` resolves through the **ACS town-point layer first**. The county-polygon layer can
+only assign a **county-majority** zone, but US clocks resolved finer than county —
+neighbouring towns ~20 km apart routinely observed different daylight-saving history
+(downstate Illinois splits 72% of 25 km cells). The `TzHistory::Acs` layer snaps a birth
+coordinate to its nearest documented town among 157,054 US towns (independently derived
+from the Shanks American Atlas; facts only, see Provenance) and applies that town's exact
+pre-1970 transition history — winning wherever it diverges from IANA, and deferring to
+the polygon path only when no town is in range (offshore / non-US, or on/after 1970).
+
+```ruby
+# Grand Rapids MN kept CST all summer (no DST) where IANA America/Chicago says CDT:
+TzHistory.zone_id(lat: 47.2372, lon: -93.53, date: "1955-07-15") # => "ACS/A0570" (-06:00)
+
+# A few miles' difference in table: Chicago ran continuous DST = its modern IANA zone,
+# so there is no correction to make:
+TzHistory.for(lat: 41.85, lon: -87.65, date: "1955-07-15")       # => nil (defer to IANA)
+```
+
+`for` returns `nil` when the town **agrees** with its modern IANA zone (IANA is already
+right) — the same "no documented correction" contract as the polygon layer, resolved at
+the town level. `acs` is the lower-level accessor that returns the town's zone *even when
+it agrees* (the raw atlas verdict, by construction):
+
+```ruby
+TzHistory.acs(lat: 41.85, lon: -87.65, date: "1955-07-15") # => an ACS zone reading -05:00
+```
+
+To fall back to the county-polygon-only behavior (e.g. for pure-Shanks parity, or to
+compare the two layers):
+
+```ruby
+TzHistory.acs_town_layer = false # default true
+```
 
 ### In a Rails app
 

@@ -38,5 +38,26 @@ the atlas tables verbatim. The case is no license to copy expression.
 - **Ship facts + our own re-expression** — TZif compiled by `zic`, GeoJSON we author — not the
   source tables.
 
+## The ACS town-point layer (`data/acs/`)
+
+The `TzHistory::Acs` town layer ships two derived artifacts: `points.csv.gz` (a town name +
+latitude/longitude + a synthetic zone id) and `zoneinfo/ACS/*` (TZif zones compiled by `zic`).
+Both are **independently derived** from the Shanks *American Atlas* — a town's coordinates and
+its clock-change dates — not transcribed from any single copyrighted table.
+
+The same posture applies and is, if anything, cleaner here:
+
+- **Facts only.** A town's coordinates and its clock-change dates are facts (_Feist_); the zone
+  ids are our own arrangement, and the transition sequences are re-expressed as `zic` sources we
+  wrote and compiled. Only the re-derived facts ship.
+- **Corroborated.** The town histories were validated town-for-town for the golden cities
+  (Chicago, Grand Rapids MN, Knoxville TN, Phoenix AZ, Cheyenne WY) and are cross-checkable
+  against the Shanks OCR corpus.
+- **Scoped to pre-1970.** IANA is authoritative from 1970; the layer only substitutes before
+  that cutover, so it corrects exactly the sub-county DST-observance history IANA omits.
+
+The extraction/generation pipeline lives in the harmonic-explorer `research/acs_atlas/`
+workspace, not in this gem.
+
 None of this is legal advice; it documents the project's reasoning and risk posture. For any
 larger-scale redistribution decision, obtain a professional opinion.

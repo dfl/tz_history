@@ -24,6 +24,8 @@ Gem::Specification.new do |spec|
     "data/intl_historical_zones.geojson",
     "data/shanks/*.zic",
     "data/shanks/zoneinfo/**/*",
+    "data/acs/points.csv.gz",
+    "data/acs/zoneinfo/**/*",
     "README.md",
     "CHANGELOG.md",
     "docs/PROVENANCE.md",

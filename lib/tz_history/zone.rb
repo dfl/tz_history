@@ -19,7 +19,15 @@ module TzHistory
       # `table` is a Shanks table id like "KY_71". Returns a memoized
       # TZInfo::Timezone named "Shanks/KY_71", or nil if no such table.
       def tzinfo(table)
-        cache.fetch(table) { cache[table] = build(table) }
+        cache.fetch("Shanks/#{table}") { cache["Shanks/#{table}"] = build(ZONEINFO_DIR, "Shanks/#{table}") }
+      end
+
+      # Build (memoized) a TZInfo::Timezone for any synthetic zone we compile with
+      # zic, given the zoneinfo root and the "<Namespace>/<id>" identifier (the
+      # relative TZif path under that root). Used by the ACS town layer, which ships
+      # its own zoneinfo tree under data/acs/zoneinfo/ACS/. Returns nil if absent.
+      def from(zoneinfo_dir, identifier)
+        cache.fetch(identifier) { cache[identifier] = build(zoneinfo_dir, identifier) }
       end
 
       private
@@ -28,11 +36,10 @@ module TzHistory
         @cache ||= {}
       end
 
-      def build(table)
-        path = File.join(ZONEINFO_DIR, "Shanks", table)
+      def build(zoneinfo_dir, identifier)
+        path = File.join(zoneinfo_dir, identifier)
         return nil unless File.exist?(path)
 
-        identifier = "Shanks/#{table}"
         zoneinfo = reader.read(path)
         info = if zoneinfo.is_a?(TZInfo::TimezoneOffset)
                  data_sources.const_get(:ConstantOffsetDataTimezoneInfo).new(identifier, zoneinfo)
