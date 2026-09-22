@@ -9,6 +9,21 @@ require "test_helper"
 class TzHistoryTest < Minitest::Test
   include TestHelpers
 
+  # This file exercises the county-polygon / Shanks FALLBACK layer directly, so the ACS
+  # town-point layer is disabled here. As of the convergence step the town layer is the
+  # runtime DEFAULT (it wins wherever it diverges from IANA); the polygon layer remains
+  # the fallback for births outside ACS town range (offshore / non-US) and on/after the
+  # 1970 cutover, and these tests keep it honest. The town-layer primary path and the
+  # two layers' agreement are covered in test/acs_test.rb.
+  def setup
+    @acs_town_layer_was = TzHistory.acs_town_layer
+    TzHistory.acs_town_layer = false
+  end
+
+  def teardown
+    TzHistory.acs_town_layer = @acs_town_layer_was
+  end
+
   # --- flat-offset overrides (winter/standard exact; summer via substitute zone) ---
 
   def test_east_tennessee_pre_switch_is_fixed_cst
@@ -540,9 +555,18 @@ class TzHistoryTest < Minitest::Test
   end
 
   def test_downstate_illinois_postwar_summer_1950_is_fixed_cst
-    # Peoria: still CST after the war, before the 1959 state-law change.
-    tz = TzHistory.for(lat: 40.6936, lon: -89.5890, date: "1950-07-15")
+    # A downstate CST town (IL#63) still on CST after the war, before the 1959 law change.
+    tz = TzHistory.for(lat: 39.2833, lon: -88.6333, date: "1950-07-15")
     assert_equal "Etc/GMT+6", tz.identifier
+  end
+
+  # Peoria under-coverage carve-out: the Shanks American Atlas records Peoria on CONTINUOUS
+  # daylight saving 1940-1970 -- the same continuous CDT
+  # IANA America/Chicago carries -- so Peoria County is added to the Chicago-metro exclusion
+  # guard and defers rather than being over-corrected to downstate CST.
+  def test_peoria_defers_via_metro_carveout
+    assert_nil TzHistory.for(lat: 40.6936, lon: -89.5890, date: "1950-07-15")
+    assert_nil TzHistory.for(lat: 40.6936, lon: -89.5890, date: "1930-07-15")
   end
 
   def test_downstate_illinois_wartime_defers_to_iana
@@ -680,9 +704,13 @@ class TzHistoryTest < Minitest::Test
     assert_nil TzHistory.note(lat: 41.5934, lon: -87.3464, date: "1935-07-15")
   end
 
-  # --- Iowa: CST through 1953 where IANA/Chicago bakes in continuous DST ---
-  # Iowa is entirely Central and kept CST (no DST) until the mid-1950s adoption scatter
-  # (earliest Shanks postwar DST is IA #8, 1954). Pre-war + 1946-1953 are universal CST.
+  # --- Iowa: postwar CST cohort nest (Shanks American Atlas, build_ia.rb) ---
+  # Iowa is entirely Central and kept CST (no DST) into the mid-1960s. External corroboration
+  # from the Shanks American Atlas: the dominant W/central table (IA#2,
+  # incl. Des Moines/Sioux City/Ames) stayed CST through 1964 (adopts 1965), the E-interior
+  # IA#1 (incl. Cedar Rapids) through 1963 (adopts 1964), while the eastern
+  # Mississippi-River early adopters (IA#12, Scott/Quad-Cities) defer. IANA America/Chicago
+  # applies CDT every summer.
 
   def test_iowa_postwar_1950_is_fixed_cst_not_iana_cdt
     tz = TzHistory.for(lat: 41.5868, lon: -93.6250, date: "1950-07-15") # Des Moines
@@ -694,10 +722,23 @@ class TzHistoryTest < Minitest::Test
     assert_equal "Etc/GMT+6", TzHistory.for(lat: 41.5868, lon: -93.6250, date: "1953-07-15").identifier
   end
 
-  def test_iowa_from_1954_is_a_patchy_warn_not_an_override
-    # From 1954 observance is town-by-town, so we defer to IANA with a verify note.
-    assert_nil TzHistory.for(lat: 41.5868, lon: -93.6250, date: "1958-07-15")
-    assert_match(/patchy|diversity|verify/i, TzHistory.note(lat: 41.5868, lon: -93.6250, date: "1958-07-15"))
+  def test_iowa_wcentral_stayed_cst_through_1964
+    # Des Moines / Ames (IA#2): CST through 1964, adopts DST 1965.
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 41.5868, lon: -93.6250, date: "1958-07-15").identifier
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 41.5868, lon: -93.6250, date: "1963-07-15").identifier
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 42.0347, lon: -93.6199, date: "1964-07-15").identifier # Ames
+    assert_nil TzHistory.for(lat: 41.5868, lon: -93.6250, date: "1966-07-15") # adopted -> defer
+  end
+
+  def test_iowa_einterior_stayed_cst_through_1963
+    # Cedar Rapids (IA#1): CST through 1963, adopts DST 1964.
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 41.9779, lon: -91.6656, date: "1963-07-15").identifier
+    assert_nil TzHistory.for(lat: 41.9779, lon: -91.6656, date: "1964-07-15") # adopted -> defer
+  end
+
+  def test_iowa_eastern_river_early_adopters_defer
+    # Davenport (Scott Co., IA#12) adopted DST early -> defer to IANA America/Chicago.
+    assert_nil TzHistory.for(lat: 41.5236, lon: -90.5776, date: "1960-07-15")
   end
 
   def test_iowa_wartime_defers_to_iana
@@ -1664,9 +1705,11 @@ class TzHistoryTest < Minitest::Test
   end
 
   # --- Wisconsin verify-confirmed (tt PDF 617; two clean CST windows + fringe warns) ---
-  # WI#1 (dominant) = CST no-DST 1883-1956 -> CDT 1957. Early-1920s city DST experiments (warn
-  # 1919-1923) + staggered 1955-1957 adoption (warn 1955-1967); clean CST override 1923-1942 +
-  # 1945-1955. Matches harmonic-explorer midwest_dst_history.md.
+  # WI#1 (dominant, 99.6%) = CST no-DST 1883-1956 -> CDT 1957. Early-1920s city DST experiments
+  # (warn 1919-1923); clean CST override 1923-1942 + 1945-1957 (extended 2026-09 from 1955 after
+  # a Shanks American Atlas cross-check, build_wi_extend.rb); fringe warn now 1957-1967. The Milwaukee/Dane
+  # metro counties adopted daylight early (~1955) and defer via an exclusion guard for 1955-1957.
+  # Matches harmonic-explorer midwest_dst_history.md.
   def test_wisconsin_clean_windows_are_fixed_cst
     tz = TzHistory.for(lat: 43.0389, lon: -87.9065, date: "1930-07-15") # Milwaukee
     assert_equal "Etc/GMT+6", tz.identifier
@@ -1676,7 +1719,28 @@ class TzHistoryTest < Minitest::Test
 
   def test_wisconsin_fringe_periods_defer
     assert_nil TzHistory.for(lat: 43.0389, lon: -87.9065, date: "1921-07-15") # early-1920s DST experiments -> warn
-    assert_nil TzHistory.for(lat: 43.0389, lon: -87.9065, date: "1956-07-15") # staggered 1955-1957 -> warn
+    assert_nil TzHistory.for(lat: 43.0389, lon: -87.9065, date: "1958-07-15") # post-1957 adoption -> warn
+  end
+
+  # Shanks American Atlas: rural WI#1 kept CST through 1956 (adopts CDT 1957), so the 1955 and 1956
+  # summers are CST, not the IANA CDT the old override deferred to.
+  def test_wisconsin_rural_kept_cst_through_1956
+    [%w[1955-07-15], %w[1956-07-15]].each do |d,|
+      tz = TzHistory.for(lat: 44.9591, lon: -89.6301, date: d) # Wausau (rural WI#1)
+      assert_equal "Etc/GMT+6", tz.identifier, "rural WI should be CST on #{d}"
+      assert_equal(-6 * 3600, offset_of(tz, d))
+    end
+    assert_nil TzHistory.for(lat: 44.9591, lon: -89.6301, date: "1957-07-15") # adopts CDT 1957 -> defer
+  end
+
+  # Milwaukee (Milwaukee Co.) and Madison (Dane Co.) adopted daylight early -> defer 1955-1956
+  # via the metro exclusion guard, not the extended rural CST override.
+  def test_wisconsin_metro_counties_defer_from_1955
+    assert_nil TzHistory.for(lat: 43.0389, lon: -87.9065, date: "1955-07-15") # Milwaukee
+    assert_nil TzHistory.for(lat: 43.0389, lon: -87.9065, date: "1956-07-15")
+    assert_nil TzHistory.for(lat: 43.0731, lon: -89.4012, date: "1956-07-15") # Madison
+    # ...but still CST before their early adoption, unchanged.
+    assert_equal "Etc/GMT+6", TzHistory.for(lat: 43.0389, lon: -87.9065, date: "1954-07-15").identifier
   end
 
   # --- Wyoming flat MST (tt PDF 627, single table) ---
