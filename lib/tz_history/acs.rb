@@ -25,6 +25,11 @@ module TzHistory
     # modern zone can be historically wrong. We correct strictly before this instant.
     CUTOVER = "1970-01-01"
 
+    # ACS time-change tables begin at US railroad standard time (noon 1883-11-18) and
+    # carry no local-mean-time era, so zic extends each town's first standard offset
+    # back forever. On or before this date defer to IANA, which models LMT.
+    STANDARD_TIME = "1883-11-18"
+
     # Beyond this, the nearest ACS town is too far to speak for the birthplace (open
     # water, offshore, or outside the atlas's US coverage) -- defer to the polygon/IANA
     # path. The atlas is dense (157k towns) so any US mainland birth resolves well under this.
@@ -89,7 +94,7 @@ module TzHistory
         return nil unless lat && lon && date
 
         iso = date.is_a?(String) ? date : date.strftime("%Y-%m-%d")
-        return nil unless iso < CUTOVER
+        return nil unless iso < CUTOVER && iso > STANDARD_TIME
 
         n = nearest(lat.to_f, lon.to_f)
         return nil unless n

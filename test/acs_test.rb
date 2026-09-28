@@ -89,6 +89,15 @@ class AcsTest < Minitest::Test
     assert_nil TzHistory.acs(lat: 47.2372, lon: -93.53, date: "1985-07-15")
   end
 
+  def test_before_standard_time_defers_to_iana_lmt
+    # ACS tables start at railroad standard time (1883-11-18) and carry no LMT, so the
+    # town layer must not speak for earlier births. Buttonwood Agreement, Wall St 1792.
+    assert_nil TzHistory.acs(lat: 40.705833, lon: -74.008611, date: "1792-05-17")
+    assert_nil TzHistory.for(lat: 40.705833, lon: -74.008611, date: "1792-05-17")
+    assert_nil TzHistory.acs(lat: 40.705833, lon: -74.008611, date: "1883-11-18")
+    refute_nil TzHistory.acs(lat: 40.705833, lon: -74.008611, date: "1883-11-19")
+  end
+
   def test_far_from_any_town_defers
     # Mid-Atlantic ocean: no ACS town within MAX_KM -> nil.
     assert_nil TzHistory.acs(lat: 30.0, lon: -45.0, date: "1950-07-15")
