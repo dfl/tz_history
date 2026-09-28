@@ -5,6 +5,14 @@ All notable changes to `tz_history` are documented here. This project adheres to
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-28
+
+### Fixed
+- **ACS town layer no longer applies before US standard time (1883-11-18).** ACS tables carry no
+  local-mean-time era, so zic back-extended each town's first standard offset forever: a 1792 Wall
+  Street birth resolved to EST instead of New York LMT. On or before 1883-11-18 the town layer now
+  defers to IANA, which models LMT.
+
 ### Added
 - **ACS town-point layer (`TzHistory::Acs`).** A nearest-town resolver over 157,054 US towns
   independently derived from the Shanks American Atlas.
